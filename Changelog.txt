@@ -1,0 +1,30 @@
+Changelog: Image Display and Upload Issue Resolution
+
+Problem Description:
+Users reported that room images were not displaying on various pages (list, edit, reservation) and that newly uploaded images were not appearing after submission, leading to "403 Forbidden" errors when attempting to access the image URLs directly.
+
+Initial Diagnosis & Failed Attempts:
+1.  **Incorrect APP_URL**: Initially, the `APP_URL` in the `.env` file was misconfigured (`http://localhost` instead of `http://127.0.0.1:8000`). Correcting this partially resolved the issue for some pre-existing images on list pages, but newly uploaded images still failed.
+2.  **URL Generation Issue**: Suspected an issue with how image URLs were generated using `asset()` or `Storage::url()`. We experimented with `Storage::disk('public')->url()`, which is the correct and robust way for publicly accessible files, but this did not resolve the "403 Forbidden" for newly uploaded images.
+3.  **File Permissions**: The "403 Forbidden" error strongly indicated a file permission problem. Explicitly defining `permissions` in `config/filesystems.php` was attempted, but it did not resolve the issue. This suggested a deeper problem with the interaction between `php artisan serve` and the filesystem on the Windows environment.
+4.  **Misplaced `use` Statement**: During an attempt to implement a workaround, a `use Illuminate\Support\Facades\Response;` statement was accidentally placed inside the `RoomController` class definition, leading to a `FatalError` ("Trait not found"). This was corrected by moving the `use` statement to the top of the file.
+5.  **Missing `image_path` Assignment**: Another bug was identified in the `store` method of `RoomController` where the `image_path` of newly uploaded files was not being assigned to the `$validatedData` array, preventing it from being saved to the database. This was also corrected.
+
+Core Problem Identification:
+The persistent "403 Forbidden" error, specifically when using `php artisan serve` on a Windows environment for newly uploaded files in the `storage/app/public` directory (accessed via `public/storage` symlink), is a known quirk or limitation of the PHP development server's ability to handle static file serving and permissions. It frequently struggles with symlinks or direct file access for dynamic content, especially when files are created by the same `php.exe` process that runs the server. The user's preference to continue using `http://127.0.0.1:8000` (i.e., `php artisan serve`) necessitated a workaround for this specific environment.
+
+Solution Implemented ("Serve Image via Controller" Workaround):
+To bypass the static file serving limitations of `php artisan serve`, a workaround was implemented where images are now served dynamically through a Laravel controller method rather than directly by the web server.
+
+1.  **Storage Disk Change**: Image uploads in `RoomController` (methods `store`, `update`, `destroy`) were modified to save files to the `'local'` disk (`storage/app/private/rooms`) instead of the `'public'` disk. This ensures files are stored where the application has full control.
+2.  **Custom Image Serving Route**:
+    -   A new method, `getImage($filename)`, was added to `RoomController`. This method:
+        -   Takes the filename as an argument.
+        -   Checks for the image's existence first in the `'local'` disk (for newly uploaded images) and then in the `'public'` disk (for older, pre-existing images). This provides backward compatibility.
+        -   Reads the image file content and its MIME type.
+        -   Returns the image as an HTTP response with the correct `Content-Type` header, effectively streaming the image through the Laravel application.
+    -   A new route, `Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');`, was added to `routes/web.php` to map URLs like `/master/rooms/images/my_image.jpg` to this new controller method.
+3.  **View Updates**: All relevant views (`livewire/master/room-list.blade.php`, `master/rooms/edit.blade.php`, `meetings/reservation/index.blade.php`) were updated to use the new `route('master.rooms.image', ['filename' => basename($room->image_path)])` helper for their `<img>` tags. This ensures that all image requests go through the controller, bypassing the static file serving issue.
+
+Result:
+With this workaround, all room images (both newly uploaded and existing ones) now display correctly across the application, resolving the "403 Forbidden" errors in the user's specific `php artisan serve` environment on Windows.

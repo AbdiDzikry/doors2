@@ -1,0 +1,16 @@
+--- Checkpoint Summary ---
+
+**Tanggal:** 04 Desember 2025
+
+**Status Tugas Terakhir:** Menyelidiki inkonsistensi data untuk meeting ID 22.
+
+**Detail Situasi Saat Ini:**
+*   Halaman daftar meeting (`/meeting/meeting-lists`) menunjukkan data (topik, nama ruangan, dibooking oleh) untuk meeting ID 22.
+*   Namun, di halaman detail meeting (`/meeting/meeting-lists/22`), data tersebut tidak muncul, dan pengguna mengonfirmasi bahwa `topic`, `room_id`, dan `user_id` untuk meeting ID 22 di database adalah `null`.
+*   Telah dilakukan pembersihan array `$fillable` di model `Meeting` dan penambahan relasi `recurringMeeting`.
+*   Metode `MeetingListController@show` disederhanakan untuk hanya memuat `room` dan `user`.
+*   Tampilan `show.blade.php` dikembalikan menggunakan operator null-safe untuk mencegah crash.
+*   Ada kontradiksi: Jika data `null` di DB, halaman daftar seharusnya juga crash (karena tidak menggunakan operator null-safe).
+
+**Langkah Selanjutnya (untuk besok):**
+Menunggu *screenshot* halaman daftar meeting (menunjukkan meeting ID 22 dengan datanya) dan hasil *query* database langsung (`SELECT id, topic, room_id, user_id FROM meetings WHERE id = 22;`) dari pengguna untuk mengklarifikasi perbedaan ini.

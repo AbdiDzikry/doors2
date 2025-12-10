@@ -1,0 +1,34 @@
+kita akan ada sedikit perubahan dan penambahan. 
+
+saya ingin mengisi 
+data karyawan dan memasukkan data menggunakan API.
+tetapi data email dan phone itu tidak ada di API
+yang saya dapat. jadi sementara pada aplikasi 
+dibiarkan saja, biar user itu sendiri yang mengisi.
+
+tetapi jika ada dari API yg harus ditambahkan
+maka bisa ditambahkan
+
+saya sudah mendapatkan API yang dibuat oleh tim 
+saya yang lain, ini API nya
+
+Api url : https://msa-be.dharmagroup.co.id/api/data/company?company=dpm
+method: GET
+header: {"x-api-key": "sensor"}
+
+jika anda ingin melihat contoh column nya seperti ini.
+
+"EMPLOYEE_NO": "41125074",
+"EMPLOYEE_NAME": "Muhammad Naufal",
+"DIVISION": "Proc & Purch",
+"DEPARTMENT": "Purchasing",
+"ORGANIZATION_UNIT": "General Purchase & Investment",
+"JOB_FAMILY": "Staff"
+
+diatas ini contoh column dari API yang saya coba
+di postman. employee no itu NPK ya.
+
+kira kira apa rencana anda dalam memasukkan data
+ini kedalam aplikasi dan database? tolong jangan
+dieksekusi terlebih dahulu saya ingin melihat
+rencana anda 

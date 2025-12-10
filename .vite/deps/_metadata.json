@@ -1,0 +1,31 @@
+{
+  "hash": "7e1f02a3",
+  "configHash": "be0cf16e",
+  "lockfileHash": "22c66c02",
+  "browserHash": "e1c43470",
+  "optimized": {
+    "laravel-echo": {
+      "src": "../../node_modules/laravel-echo/dist/echo.js",
+      "file": "laravel-echo.js",
+      "fileHash": "121a3935",
+      "needsInterop": false
+    },
+    "pusher-js": {
+      "src": "../../node_modules/pusher-js/dist/web/pusher.js",
+      "file": "pusher-js.js",
+      "fileHash": "8652bf0b",
+      "needsInterop": true
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "41bc319f",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-HKJ2B2AA": {
+      "file": "chunk-HKJ2B2AA.js"
+    }
+  }
+}

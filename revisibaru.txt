@@ -1,0 +1,17 @@
+owh iya kita akan ada sedikit revisi, jadi anda sudah paham kan kalau saya membuat aplikasi
+peminjaman ruang meeting untuk suatu perusahaan, kita ada penyesuaian fitur dan juga penambahan fitur.
+
+sementara kita diskusi dulu terkait fitur penambahan.
+
+saya akan jelaskan flow nya: 
+jadi nanti aplikasi ini akan bisa diakses menggunakan tablet (kemungkinan akan menggunakan progressive web app),
+jadi tiap ruangan nanti akan ada tablet yang menampilkan jadwal meeting 
+yang terjadi pada ruangan tersebut. 
+dan juga akan ada fitur booking on the spot serta absensi yang dilakukan tiap participant meeting
+dan juga data absen serta meeting itu akan selalu dicatat karena akan digunakan untuk audit.
+ 
+ yang jadi pertanyaan nya adalah apakah fitur ini dapat diimplementasikan ke 
+ aplikasi sistem saya saat ini, dan juga apakah akan ada bentrok dengan aplikasi yang sudah kita buat
+ dan apa kesulitan dari anda dalam mengimplementasikan ini?
+
+ serta rencana apa yang akan ada lakukan untuk membuat fitur ini agar tercapai.

@@ -1,0 +1,32 @@
+{
+    "authHost": "http://localhost",
+    "authEndpoint": "/broadcasting/auth",
+    "clients": [],
+    "database": {
+        "redis": {},
+        "sqlite": {
+            "databasePath": "/database/laravel-echo-server.sqlite"
+        }
+    },
+    "devMode": true,
+    "host": null,
+    "port": "6001",
+    "protocol": "http",
+    "socketio": {},
+    "sslCertPath": null,
+    "sslKeyPath": null,
+    "sslStrict": false,
+    "workers": 1,
+    "apiOriginAllow": {
+        "allowCors": false,
+        "allowOrigin": "",
+        "allowMethods": "",
+        "allowHeaders": ""
+    },
+    "pusher": {
+        "id": "YOUR_PUSHER_APP_ID",
+        "key": "YOUR_PUSHER_APP_KEY",
+        "secret": "YOUR_PUSHER_APP_SECRET",
+        "appCluster": "YOUR_PUSHER_APP_CLUSTER"
+    }
+}

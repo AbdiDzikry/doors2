@@ -1,0 +1,8 @@
+{
+  "ui": {
+    "useFullWidth": true
+  },
+  "general": {
+    "enablePromptCompletion": true
+  }
+}

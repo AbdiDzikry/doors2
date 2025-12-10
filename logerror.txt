@@ -1,0 +1,2 @@
+apakah anda bisa hapus .git saya dan buat ulang dikarenakan saya
+ingin menghapus history kontributor orang lain di kode saya.
