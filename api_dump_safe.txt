@@ -1,0 +1,21 @@
+API Fetch Successful. Count: 1874
+First Record Keys:
+Array
+(
+    [0] => EMPLOYEE_NO
+    [1] => EMPLOYEE_NAME
+    [2] => DIVISION
+    [3] => DEPARTMENT
+    [4] => ORGANIZATION_UNIT
+    [5] => JOB_FAMILY
+)
+First Record Data:
+Array
+(
+    [EMPLOYEE_NO] => 11011083
+    [EMPLOYEE_NAME] => Samuel Koesno Habil
+    [DIVISION] => Corporate Busdev & Business Analytic
+    [DEPARTMENT] => NON
+    [ORGANIZATION_UNIT] => Corporate Busdev & Business Analytic
+    [JOB_FAMILY] => Advisor
+)

@@ -65,13 +65,47 @@
                         <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Search by name, email, NPK..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                     </div>
                     <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700">Filter by Role</label>
-                        <select name="role" id="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
-                            <option value="">All Roles</option>
-                            @foreach ($roles as $role)
-                                <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
-                            @endforeach
-                        </select>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Filter by Role</label>
+                        <div class="relative" x-data="{ 
+                            open: false, 
+                            selected: '{{ request('role') }}',
+                            get label() { return this.selected || 'All Roles' }
+                        }" @click.away="open = false">
+                            <input type="hidden" name="role" x-model="selected">
+                            <button type="button" @click="open = !open" 
+                                class="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                <span class="block truncate" x-text="label"></span>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                </span>
+                            </button>
+
+                            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                style="display: none;">
+                                
+                                <div @click="selected = ''; open = false"
+                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                     :class="{ 'text-green-900 bg-green-50': selected === '', 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected !== '' }">
+                                    <span class="block truncate font-medium" :class="{ 'font-semibold': selected === '', 'font-normal': selected !== '' }">All Roles</span>
+                                    <span x-show="selected === ''" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                        <i class="fas fa-check text-xs"></i>
+                                    </span>
+                                </div>
+
+                                @foreach ($roles as $role)
+                                    <div @click="selected = '{{ $role->name }}'; open = false"
+                                         class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                         :class="{ 'text-green-900 bg-green-50': selected === '{{ $role->name }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected !== '{{ $role->name }}' }">
+                                        <span class="block truncate font-medium" :class="{ 'font-semibold': selected === '{{ $role->name }}', 'font-normal': selected !== '{{ $role->name }}' }">{{ $role->name }}</span>
+                                        <span x-show="selected === '{{ $role->name }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                            <i class="fas fa-check text-xs"></i>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                     <div class="flex items-end">
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
@@ -90,13 +124,76 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPK</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Division</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'name', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Full Name</span>
+                                @if(request('sort_by', 'name') === 'name')
+                                    <i class="fas fa-sort-{{ request('sort_direction', 'asc') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'npk', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>NPK</span>
+                                @if(request('sort_by') === 'npk')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'division', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Division</span>
+                                @if(request('sort_by') === 'division')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'department', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Department</span>
+                                @if(request('sort_by') === 'department')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'position', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Position</span>
+                                @if(request('sort_by') === 'position')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'email', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Email</span>
+                                @if(request('sort_by') === 'email')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors duration-200">
+                            <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'phone', 'sort_direction' => request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}" class="flex items-center space-x-1 w-full h-full text-gray-700 font-bold">
+                                <span>Phone</span>
+                                @if(request('sort_by') === 'phone')
+                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-600"></i>
+                                @else
+                                    <i class="fas fa-sort text-gray-300 group-hover:text-gray-400 transition-colors"></i>
+                                @endif
+                            </a>
+                        </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>

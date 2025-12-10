@@ -12,6 +12,19 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Hide native date picker icon but keep functionality */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
     </style>
     @endpush
 
@@ -61,7 +74,7 @@
             <div x-show="activeTab === 'meeting-list'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 
                 <!-- Filter Section -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4">
                     <form action="{{ route('meeting.meeting-lists.index') }}" method="GET" x-data="{ 
                         filter: '{{ request('filter', 'day') }}',
                         updateFilter() {
@@ -74,44 +87,89 @@
                         <input type="hidden" name="tab" value="meeting-list">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                             <!-- Date Range -->
-                            <div class="md:col-span-5 grid grid-cols-2 gap-4" x-show="filter === 'custom'" x-cloak x-transition>
+                            <div class="md:col-span-5 grid grid-cols-2 gap-3" x-show="filter === 'custom'" x-cloak x-transition>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Start Date</label>
-                                    <div class="relative">
-                                        <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}" class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm bg-gray-50">
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Start Date</label>
+                                    <div class="relative group">
+                                        <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}" 
+                                            class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-10 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': '{{ request('start_date') }}'.length > 0 }">
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                            <i class="fas fa-calendar-alt text-xs"></i>
+                                        </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">End Date</label>
-                                    <div class="relative">
-                                        <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}" class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm bg-gray-50">
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">End Date</label>
+                                    <div class="relative group">
+                                        <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}" 
+                                            class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-10 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer"
+                                              :class="{ 'border-green-500 ring-1 ring-green-500': '{{ request('end_date') }}'.length > 0 }">
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                            <i class="fas fa-calendar-alt text-xs"></i>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Filter & Search -->
-                            <div class="md:col-span-4 grid grid-cols-2 gap-4">
+                            <div class="md:col-span-4 grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Period</label>
-                                    <select name="filter" x-model="filter" @change="updateFilter()" class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm bg-gray-50">
-                                        <option value="custom">Custom Range</option>
-                                        <option value="day">Today</option>
-                                        <option value="week">This Week</option>
-                                        <option value="month">This Month</option>
-                                    </select>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Period</label>
+                                    <div class="relative" x-data="{ 
+                                        open: false, 
+                                        options: {
+                                            'custom': 'Custom Range', 
+                                            'day': 'Today', 
+                                            'week': 'This Week', 
+                                            'month': 'This Month'
+                                        },
+                                        get activeLabel() { return this.options[this.filter] } 
+                                    }" @click.away="open = false">
+                                        <!-- Hidden Native Input for Form Submission -->
+                                        <input type="hidden" name="filter" x-model="filter">
+
+                                        <!-- Custom Trigger Button -->
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="activeLabel"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+
+                                        <!-- Custom Dropdown List -->
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-xs border border-green-500/30"
+                                            style="display: none;">
+                                            <template x-for="(label, value) in options" :key="value">
+                                                <div @click="filter = value; updateFilter(); open = false"
+                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                     :class="{ 'text-green-900 bg-green-50': filter === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': filter !== value }">
+                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': filter === value, 'font-normal': filter !== value }" x-text="label"></span>
+                                                    
+                                                    <!-- Checkmark for selected item -->
+                                                    <span x-show="filter === value" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Search</label>
-                                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Topic, Room..." class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm bg-gray-50">
+                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Search</label>
+                                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Topic, Room..." class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 text-xs py-1.5 bg-gray-50">
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="md:col-span-3 flex gap-2">
-                                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors">
+                                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 text-xs rounded-lg shadow-sm transition-colors">
                                     <i class="fas fa-filter mr-1"></i> Filter
                                 </button>
-                                <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
+                                <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}" class="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center justify-center">
                                     Reset
                                 </a>
                             </div>

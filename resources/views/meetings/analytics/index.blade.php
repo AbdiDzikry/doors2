@@ -18,21 +18,47 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8" x-data="{ filter: '{{ $filter }}' }">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8" x-data="{ 
+        filter: '{{ $filter }}', 
+        open: false, 
+        options: {
+            'day': 'Daily View', 
+            'week': 'Weekly View', 
+            'month': 'Monthly View', 
+            'year': 'Yearly View', 
+            'custom': 'Custom Range'
+        },
+        get activeLabel() { return this.options[this.filter] }
+    }">
         <form action="{{ route('meeting.analytics.index') }}" method="GET" class="flex flex-col md:flex-row items-end gap-5">
             <!-- Filter Type -->
             <div class="w-full md:w-auto">
                 <label for="filter" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Period View</label>
-                <div class="relative">
-                    <select name="filter" id="filter" x-model="filter" class="appearance-none w-full md:w-48 pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block transition-colors duration-200">
-                        <option value="day">Daily View</option>
-                        <option value="week">Weekly View</option>
-                        <option value="month">Monthly View</option>
-                        <option value="year">Yearly View</option>
-                        <option value="custom">Custom Range</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                        <i class="fas fa-chevron-down text-xs"></i>
+                <div class="relative" @click.away="open = false">
+                    <input type="hidden" name="filter" x-model="filter">
+                    
+                    <button type="button" @click="open = !open" 
+                        class="relative w-full md:w-48 bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-4 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm transition-all duration-200"
+                        :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                        <span class="block truncate" x-text="activeLabel"></span>
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                        </span>
+                    </button>
+
+                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute z-10 mt-1 w-full md:w-48 bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none text-sm border border-green-500/30"
+                        style="display: none;">
+                        <template x-for="(label, value) in options" :key="value">
+                            <div @click="filter = value; open = false;"
+                                 class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150"
+                                 :class="{ 'text-green-900 bg-green-50': filter == value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': filter != value }">
+                                <span class="block truncate font-medium" :class="{ 'font-semibold': filter == value, 'font-normal': filter != value }" x-text="label"></span>
+                                <span x-show="filter == value" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                    <i class="fas fa-check text-xs"></i>
+                                </span>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </div>

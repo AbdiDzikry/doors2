@@ -52,7 +52,7 @@ class RoomReservationController extends Controller
             }
         }
 
-        $rooms = $query->with(['meetings' => function ($q) use ($now) {
+        $rooms = $query->orderBy('name', 'asc')->with(['meetings' => function ($q) use ($now) {
             $q->where('start_time', '<=', $now)
               ->where('end_time', '>=', $now)
               ->where('status', '!=', 'cancelled');

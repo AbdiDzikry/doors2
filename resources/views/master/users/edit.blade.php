@@ -33,7 +33,7 @@
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                         <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('email') border-red-500 @enderror">
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

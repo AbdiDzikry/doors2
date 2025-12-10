@@ -33,6 +33,16 @@ class UserController extends Controller
             $query->role($request->input('role'));
         }
 
+        // Sorting logic
+        $sortField = $request->input('sort_by', 'name'); // Default sort by name
+        $sortDirection = $request->input('sort_direction', 'asc'); // Default sort direction asc
+
+        // Allow sorting on specific columns
+        $allowedSorts = ['name', 'npk', 'division', 'department', 'position', 'email', 'phone'];
+        if (in_array($sortField, $allowedSorts)) {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
         $users = $query->with('roles')->paginate(10);
 
         $roles = Role::all(); // For role filter dropdown
@@ -109,7 +119,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users,email,'.$user->id,
+            'email' => 'nullable|email|unique:users,email,'.$user->id,
             'password' => 'nullable|confirmed',
             'roles' => 'required|array',
             'npk' => 'nullable|string|max:255',

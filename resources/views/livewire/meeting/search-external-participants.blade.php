@@ -1,6 +1,6 @@
 <div class="p-4">
     <div class="flex justify-between items-center mb-4 gap-2">
-        <input type="text" wire:model.live="search" placeholder="Search external participants..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <input type="text" wire:model.live="search" placeholder="Search external participants..." class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
         <button type="button" wire:click="toggleCreateForm" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline whitespace-nowrap">
             {{ $showCreateForm ? 'Cancel' : 'Create New' }}
         </button>
@@ -13,24 +13,24 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700 text-xs font-bold mb-1" for="newName">Name <span class="text-red-500">*</span></label>
-                    <input type="text" wire:model="newName" id="newName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-green-500 @error('newName') border-red-500 @enderror">
+                    <input type="text" wire:model="newName" id="newName" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newName') border-red-500 @enderror">
                     @error('newName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                      <label class="block text-gray-700 text-xs font-bold mb-1" for="newCompany">Company <span class="text-red-500">*</span></label>
-                    <input type="text" wire:model="newCompany" id="newCompany" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-green-500 @error('newCompany') border-red-500 @enderror">
+                    <input type="text" wire:model="newCompany" id="newCompany" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newCompany') border-red-500 @enderror">
                     @error('newCompany') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700 text-xs font-bold mb-1" for="newEmail">Email <span class="text-red-500">*</span></label>
-                    <input type="email" wire:model="newEmail" id="newEmail" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-green-500 @error('newEmail') border-red-500 @enderror">
+                    <input type="email" wire:model="newEmail" id="newEmail" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newEmail') border-red-500 @enderror">
                     @error('newEmail') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                  <div>
                     <label class="block text-gray-700 text-xs font-bold mb-1" for="newPhone">Phone (Optional)</label>
-                    <input type="text" wire:model="newPhone" id="newPhone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-green-500 @error('newPhone') border-red-500 @enderror">
+                    <input type="text" wire:model="newPhone" id="newPhone" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newPhone') border-red-500 @enderror">
                     @error('newPhone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>

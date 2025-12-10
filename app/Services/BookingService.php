@@ -105,6 +105,7 @@ class BookingService
         $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders);
         $this->sendMeetingInvitation($meeting);
         \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+        \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
     }
 
     protected function handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders)
@@ -151,6 +152,7 @@ class BookingService
             $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders);
             $this->sendMeetingInvitation($meeting);
             \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+            \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
         }
     }
 

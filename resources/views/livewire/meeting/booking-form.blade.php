@@ -1,4 +1,21 @@
 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+    @push('styles')
+    <style>
+        /* Hide native date picker icon but keep functionality */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+    </style>
+    @endpush
     <div class="container mx-auto px-6 py-8">
 
         <form wire:submit.prevent="submitForm" method="POST">
@@ -55,20 +72,55 @@
                         
                         @if (!$selectedRoom)
                             <div class="mb-4">
-                                <label for="room_id" class="block text-sm font-medium text-gray-700">Room <span class="text-red-500">*</span></label>
-                                <select wire:model="room_id" id="room_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('room_id') border-red-500 @enderror">
-                                    <option value="">-- Select a Room --</option>
-                                    @foreach ($rooms as $room)
-                                        <option value="{{ $room->id }}">{{ $room->name }} (Capacity: {{ $room->capacity }})</option>
-                                    @endforeach
-                                </select>
+                                <label for="room_id" class="block text-sm font-medium text-gray-700 mb-1">Room <span class="text-red-500">*</span></label>
+                                <div class="relative" x-data="{ 
+                                    open: false, 
+                                    selected: @entangle('room_id'),
+                                    get label() { 
+                                        if (!this.selected) return '-- Select a Room --';
+                                        // We need a way to look up the name. Since we can't easily pass the full array to JS without bloating, 
+                                        // we'll rely on a hidden map or just update the UI text via Alpine when clicking an option.
+                                        // Better yet, let's just use the selected text content logic if possible, or a simpler approach:
+                                        // We will store the selected name in a separate Alpine var, initialized from PHP.
+                                        return this.selectedName;
+                                    },
+                                    selectedName: '{{ $rooms->firstWhere('id', $room_id)?->name ?? '-- Select a Room --' }}'
+                                }" @click.away="open = false">
+                                    <button type="button" @click="open = !open" 
+                                        class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                        :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                        <span class="block truncate" x-text="selectedName"></span>
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                        </span>
+                                    </button>
+
+                                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                        class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                        style="display: none;">
+                                        @foreach ($rooms as $room)
+                                            <div @click="selected = '{{ $room->id }}'; selectedName = '{{ addslashes($room->name) }}'; open = false; $wire.set('room_id', '{{ $room->id }}')"
+                                                 class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150 group"
+                                                 :class="{ 'bg-green-50': selected == '{{ $room->id }}', 'hover:bg-green-50': selected != '{{ $room->id }}' }">
+                                                <span class="block truncate font-medium" :class="{ 'font-bold text-green-900': selected == '{{ $room->id }}', 'text-gray-900 group-hover:text-green-700': selected != '{{ $room->id }}' }">
+                                                    {{ $room->name }} (Cap: {{ $room->capacity }})
+                                                </span>
+                                                <span x-show="selected == '{{ $room->id }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                    <i class="fas fa-check text-xs"></i>
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                                 @error('room_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         @endif
 
                         <div class="mb-4">
-                            <label for="topic" class="block text-sm font-medium text-gray-700">Topic <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model="topic" id="topic" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('topic') border-red-500 @enderror" placeholder="e.g., Quarterly Review">
+                            <label for="topic" class="block text-sm font-medium text-gray-700 mb-1">Topic <span class="text-red-500">*</span></label>
+                            <input type="text" wire:model="topic" id="topic" 
+                                class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 placeholder-gray-400 @error('topic') border-red-500 @enderror" 
+                                placeholder="e.g., Quarterly Review">
                             @error('topic') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -82,54 +134,128 @@
                                     const formattedMinute = String(selectedMinute).padStart(2, '0');
                                     const newStartTime = `${this.date}T${this.hour}:${formattedMinute}`;
                                     @this.set('start_time', newStartTime);
-                                    this.startTime = newStartTime; // Update Alpine's startTime for calculation
+                                    this.startTime = newStartTime; 
                                 }
                             }">
-                                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date <span class="text-red-500">*</span></label>
-                                <input type="date" x-model="date" @change="updateStartTime()" id="start_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('start_time') border-red-500 @enderror">
+                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date <span class="text-red-500">*</span></label>
+                                <div class="relative group">
+                                    <input type="date" x-model="date" @change="updateStartTime()" id="start_date" 
+                                        class="block w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 cursor-pointer @error('start_time') border-red-500 @enderror">
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                </div>
                                 @error('start_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
-                                <label for="start_hour" class="block text-sm font-medium text-gray-700 mt-2">Start Time <span class="text-red-500">*</span></label>
-                                <div class="flex space-x-2 mt-1">
-                                    <select x-model="hour" @change="updateStartTime()" id="start_hour" class="block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('start_time') border-red-500 @enderror">
-                                        @foreach (range(7, 18) as $h)
-                                            <option value="{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}">{{ str_pad($h, 2, '0', STR_PAD_LEFT) }}</option>
-                                        @endforeach
-                                    </select>
-                                    <select x-model="minute" @change="updateStartTime()" id="start_minute" class="block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('start_time') border-red-500 @enderror">
-                                        <option value="00">00</option>
-                                        <option value="15">15</option>
-                                        <option value="30">30</option>
-                                        <option value="45">45</option>
-                                    </select>
+                                <label for="start_hour" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Start Time <span class="text-red-500">*</span></label>
+                                <div class="flex space-x-2">
+                                    <!-- Hour Dropdown -->
+                                    <div class="w-1/2 relative" x-data="{ open: false }" @click.away="open = false">
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="hour"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-48 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            @foreach (range(7, 18) as $h)
+                                                @php $val = str_pad($h, 2, '0', STR_PAD_LEFT); @endphp
+                                                <div @click="hour = '{{ $val }}'; updateStartTime(); open = false"
+                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                     :class="{ 'text-green-900 bg-green-50': hour == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' }">
+                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': hour == '{{ $val }}' }">{{ $val }}</span>
+                                                    <span x-show="hour == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- Minute Dropdown -->
+                                    <div class="w-1/2 relative" x-data="{ open: false }" @click.away="open = false">
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="minute"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-48 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            @foreach (['00', '15', '30', '45'] as $m)
+                                                <div @click="minute = '{{ $m }}'; updateStartTime(); open = false"
+                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                     :class="{ 'text-green-900 bg-green-50': minute == '{{ $m }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' }">
+                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': minute == '{{ $m }}' }">{{ $m }}</span>
+                                                    <span x-show="minute == '{{ $m }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <label for="duration" class="block text-sm font-medium text-gray-700">Duration <span class="text-red-500">*</span></label>
-                                <select wire:model.live="duration" x-model="duration" id="duration" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('duration') border-red-500 @enderror">
-                                    <optgroup label="Rapat Cepat">
-                                        <option value="15">15 Minutes</option>
-                                        <option value="30">30 Minutes</option>
-                                        <option value="45">45 Minutes</option>
-                                    </optgroup>
-                                    <optgroup label="Rapat Standar">
-                                        <option value="60">1 Hour</option>
-                                        <option value="75">1 Hour 15 Minutes</option>
-                                        <option value="90">1 Hour 30 Minutes</option>
-                                        <option value="105">1 Hour 45 Minutes</option>
-                                        <option value="120">2 Hours</option>
-                                    </optgroup>
-                                    <optgroup label="Sesi Panjang">
-                                        <option value="150">2.5 Hours</option>
-                                        <option value="180">3 Hours</option>
-                                        <option value="210">3.5 Hours</option>
-                                        <option value="240">4 Hours</option>
-                                        <option value="270">4.5 Hours</option>
-                                        <option value="300">5 Hours</option>
-                                        <option value="330">5.5 Hours</option>
-                                        <option value="360">6 Hours</option>
-                                    </optgroup>
-                                </select>
+                                <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Duration <span class="text-red-500">*</span></label>
+                                <div class="relative" x-data="{ 
+                                    open: false, 
+                                    duration: @entangle('duration').live,
+                                    options: {
+                                        '15': '15 Minutes', '30': '30 Minutes', '45': '45 Minutes',
+                                        '60': '1 Hour', '75': '1 Hour 15 Minutes', '90': '1 Hour 30 Minutes', '105': '1 Hour 45 Minutes', '120': '2 Hours',
+                                        '150': '2.5 Hours', '180': '3 Hours', '210': '3.5 Hours', '240': '4 Hours', '270': '4.5 Hours', '300': '5 Hours', '330': '5.5 Hours', '360': '6 Hours'
+                                    },
+                                    get label() { return this.options[this.duration] || 'Select Duration' }
+                                }" @click.away="open = false">
+                                    <button type="button" @click="open = !open" 
+                                        class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                        :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                        <span class="block truncate" x-text="label"></span>
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                        </span>
+                                    </button>
+
+                                    <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                        class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                        style="display: none;">
+                                        
+                                        <!-- Rapat Cepat -->
+                                        <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50">Rapat Cepat</div>
+                                        @foreach (['15' => '15 Minutes', '30' => '30 Minutes', '45' => '45 Minutes'] as $val => $text)
+                                            <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150" :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
+                                                <span class="block truncate font-medium" :class="{ 'font-semibold': duration == '{{ $val }}' }">{{ $text }}</span>
+                                                <span x-show="duration == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600"><i class="fas fa-check text-xs"></i></span>
+                                            </div>
+                                        @endforeach
+
+                                        <!-- Rapat Standar -->
+                                        <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 border-t border-gray-100">Rapat Standar</div>
+                                        @foreach (['60' => '1 Hour', '75' => '1 Hour 15 Minutes', '90' => '1 Hour 30 Minutes', '105' => '1 Hour 45 Minutes', '120' => '2 Hours'] as $val => $text)
+                                            <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150" :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
+                                                <span class="block truncate font-medium" :class="{ 'font-semibold': duration == '{{ $val }}' }">{{ $text }}</span>
+                                                <span x-show="duration == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600"><i class="fas fa-check text-xs"></i></span>
+                                            </div>
+                                        @endforeach
+
+                                        <!-- Sesi Panjang -->
+                                        <div class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 border-t border-gray-100">Sesi Panjang</div>
+                                        @foreach (['150' => '2.5 Hours', '180' => '3 Hours', '210' => '3.5 Hours', '240' => '4 Hours', '270' => '4.5 Hours', '300' => '5 Hours', '330' => '5.5 Hours', '360' => '6 Hours'] as $val => $text)
+                                            <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150" :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
+                                                <span class="block truncate font-medium" :class="{ 'font-semibold': duration == '{{ $val }}' }">{{ $text }}</span>
+                                                <span x-show="duration == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600"><i class="fas fa-check text-xs"></i></span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                                 <div class="mt-1 text-xs text-gray-500">
                                     Suggested End Time: <span x-text="calculateEndTime()" class="font-semibold"></span>
                                 </div>
@@ -138,13 +264,44 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="priority_guest_id" class="block text-sm font-medium text-gray-700">Priority Guest (Optional)</label>
-                            <select wire:model="priority_guest_id" id="priority_guest_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('priority_guest_id') border-red-500 @enderror">
-                                <option value="">-- No Priority Guest --</option>
-                                @foreach ($priorityGuests as $guest)
-                                    <option value="{{ $guest->id }}">{{ $guest->name }} - {{ $guest->title }}</option>
-                                @endforeach
-                            </select>
+                            <label for="priority_guest_id" class="block text-sm font-medium text-gray-700 mb-1">Priority Guest (Optional)</label>
+                            <div class="relative" x-data="{ 
+                                open: false, 
+                                selected: @entangle('priority_guest_id'),
+                                selectedName: '{{ $priorityGuests->firstWhere('id', $priority_guest_id) ? ($priorityGuests->firstWhere('id', $priority_guest_id)->name . ' - ' . $priorityGuests->firstWhere('id', $priority_guest_id)->title) : '-- No Priority Guest --' }}'
+                            }" @click.away="open = false">
+                                <button type="button" @click="open = !open" 
+                                    class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                    :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                    <span class="block truncate" x-text="selectedName"></span>
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                    </span>
+                                </button>
+
+                                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                    class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                    style="display: none;">
+                                    <div @click="selected = ''; selectedName = '-- No Priority Guest --'; open = false; $wire.set('priority_guest_id', null)"
+                                         class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                         :class="{ 'text-green-900 bg-green-50': !selected, 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected }">
+                                        <span class="block truncate font-medium" :class="{ 'font-semibold': !selected }">-- No Priority Guest --</span>
+                                        <span x-show="!selected" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                            <i class="fas fa-check text-xs"></i>
+                                        </span>
+                                    </div>
+                                    @foreach ($priorityGuests as $guest)
+                                        <div @click="selected = '{{ $guest->id }}'; selectedName = '{{ addslashes($guest->name . ' - ' . $guest->title) }}'; open = false; $wire.set('priority_guest_id', '{{ $guest->id }}')"
+                                             class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                             :class="{ 'text-green-900 bg-green-50': selected == '{{ $guest->id }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected != '{{ $guest->id }}' }">
+                                            <span class="block truncate font-medium" :class="{ 'font-semibold': selected == '{{ $guest->id }}' }">{{ $guest->name }} - {{ $guest->title }}</span>
+                                            <span x-show="selected == '{{ $guest->id }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                <i class="fas fa-check text-xs"></i>
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                             @error('priority_guest_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -159,16 +316,47 @@
                         <div x-show="$wire.recurring" x-transition class="mt-4 pt-4 border-t">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="frequency" class="block text-sm font-medium text-gray-700">Repeat</label>
-                                    <select wire:model="frequency" id="frequency" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
-                                        <option value="daily">Daily</option>
-                                        <option value="weekly">Weekly</option>
-                                        <option value="monthly">Monthly</option>
-                                    </select>
+                                    <label for="frequency" class="block text-sm font-medium text-gray-700 mb-1">Repeat</label>
+                                    <div class="relative" x-data="{ 
+                                        open: false, 
+                                        selected: @entangle('frequency'),
+                                        options: { 'daily': 'Daily', 'weekly': 'Weekly', 'monthly': 'Monthly' }, 
+                                        get label() { return this.options[this.selected] || 'Daily' }
+                                    }" @click.away="open = false">
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="label"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $val => $text)
+                                                <div @click="selected = '{{ $val }}'; open = false"
+                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                     :class="{ 'text-green-900 bg-green-50': selected == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected != '{{ $val }}' }">
+                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': selected == '{{ $val }}' }">{{ $text }}</span>
+                                                    <span x-show="selected == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label for="ends_at" class="block text-sm font-medium text-gray-700">End Date</label>
-                                    <input type="date" wire:model="ends_at" id="ends_at" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
+                                    <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                    <div class="relative group">
+                                        <input type="date" wire:model="ends_at" id="ends_at" 
+                                            class="block w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 cursor-pointer">
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
