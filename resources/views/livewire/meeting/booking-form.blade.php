@@ -461,6 +461,7 @@
                                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
                                             <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">By</th>
+                                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -480,10 +481,19 @@
                                                 <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                     {{ $meeting->user->name }}
                                                 </td>
+                                                <td class="px-4 py-3 whitespace-nowrap text-xs">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        {{ $meeting->calculated_status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                        {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
+                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-gray-100 text-gray-800' : '' }}
+                                                        {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
+                                                        {{ ucfirst($meeting->calculated_status) }}
+                                                    </span>
+                                                </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 italic">
+                                                <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500 italic">
                                                     No upcoming meetings scheduled.
                                                 </td>
                                             </tr>

@@ -1,8 +1,0 @@
-Total Records Received: 1874
-Data Type: List of Employees (Indexed Array)
-First 5 items sample (Name only):
-[0] Samuel Koesno Habil (NPK: 11011083)
-[1] Albertus Subiakto (NPK: 11011094)
-[2] Budi Santoso (NPK: 11021173)
-[3] Heribertus Wijanarko (NPK: 11021174)
-[4] Joni Ismiyaton (NPK: 11021202)

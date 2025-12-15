@@ -3,7 +3,7 @@
 **Framework:** Laravel 12.x
 **PHP Version:** 8.2+
 
-Dokumen ini ditujukan untuk Tim IT / DevOps sebagai panduan deployment, configuration, dan maintenance aplikasi DOORS.
+Dokumen ini ditujukan untuk Tim IT / DevOps sebagai panduan deployment, configuration, dan maintenance aplikasi DOORS.  
 
 ---
 

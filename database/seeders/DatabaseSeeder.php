@@ -71,8 +71,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ConfigurationSeeder::class);
         $this->call(LoginApiKeySeeder::class); // Add this line // Ensure all required data is present before meetings
 
-        $this->call(MeetingSeeder::class);
-        $this->call(PantryOrderSeeder::class);
+        if (!app()->isProduction()) {
+            $this->call(MeetingSeeder::class);
+            $this->call(PantryOrderSeeder::class);
+        }
 
         // Enable foreign key checks
         \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();

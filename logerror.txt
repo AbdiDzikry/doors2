@@ -1,6 +1,1 @@
-http://127.0.0.1:8000/meeting/room-reservations 
-
-bagaimana jika pada halaman ini ditambahkan test 
-update real time untuk chip status pada component card nya
-jadi tidak perlu refresh untuk melihat ruangan apa yang
-in use 
+oke lalu apakah ada folder dan juga file lain yang tidak terpakai di projek saya saat ini. dikarenakan saya tidak ingin membingungkan developer saat dia memasukkan ke server stagign
