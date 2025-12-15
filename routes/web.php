@@ -17,12 +17,17 @@ use App\Http\Controllers\Settings\ConfigurationController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Dashboard\ReceptionistDashboardController;
 use App\Http\Controllers\Meeting\UserBookingController;
+use App\Http\Controllers\GuideController;
+use App\Http\Controllers\SurveyController;
 
 Route::redirect('/', '/login');
 
 // Public booking page for users (no auth required)
 Route::prefix('user-booking')->name('user-booking.')->group(function () {
     Route::get('/', [UserBookingController::class, 'index'])->name('index');
+    // User Guide
+    Route::get('/guide', [GuideController::class, 'index'])->name('guide.index');
+
     Route::get('/search', [UserBookingController::class, 'search'])->name('search');
     Route::post('/select', [UserBookingController::class, 'select'])->name('select');
 });
@@ -36,7 +41,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');
+    Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');
     Route::view('/guide', 'guide.index')->name('guide.index');
+
+    // Survey
+    Route::get('/survey/give', [SurveyController::class, 'create'])->name('survey.create');
+    Route::post('/survey', [SurveyController::class, 'store'])->name('survey.store');
+    Route::get('/survey/results', [SurveyController::class, 'index'])->name('survey.index');
 });
 
 Route::middleware(['auth', 'role:Super Admin|Admin'])->name('master.')->prefix('master')->group(function () {

@@ -219,21 +219,24 @@
                             <i class="fas fa-book-open mr-3"></i>
                             <span>User Guide</span>
                         </x-sidebar-link>
+                        
+                        <x-sidebar-link :href="route('survey.create')" :active="request()->routeIs('survey.create')">
+                            <i class="far fa-smile mr-3"></i>
+                            <span>Give Feedback</span>
+                        </x-sidebar-link>
                     @endrole
-
-
 
                     <!-- Settings Group -->
 
                     @role('Super Admin')
 
-                    <div x-data="{ open: {{ request()->routeIs('settings.*') ? 'true' : 'false' }} }" class="relative">
+                    <div x-data="{ open: {{ request()->routeIs('settings.*') || request()->routeIs('survey.index') ? 'true' : 'false' }} }" class="relative">
 
-                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('settings.*')">
+                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('settings.*') || request()->routeIs('survey.index')">
 
                             <i class="fas fa-cogs mr-3"></i>
 
-                            <span>Settings</span>
+                            <span>Settings & Tools</span>
 
                             <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
 
@@ -254,6 +257,14 @@
                                 <i class="fas fa-user-shield mr-3"></i>
 
                                 <span>Role & Permissions</span>
+
+                            </x-sidebar-link>
+                            
+                            <x-sidebar-link :href="route('survey.index')" :active="request()->routeIs('survey.index')">
+
+                                <i class="fas fa-poll mr-3"></i>
+
+                                <span>Survey Results</span>
 
                             </x-sidebar-link>
 
