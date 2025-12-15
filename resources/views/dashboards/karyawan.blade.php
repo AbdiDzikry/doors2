@@ -10,18 +10,19 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Welcome Banner -->
-        <div class="bg-white rounded-xl shadow-lg border-l-4 border-green-500 p-6 md:p-8 mb-8 flex items-center justify-between">
+        <!-- Welcome Banner -->
+        <div class="bg-white rounded-xl shadow-lg border-l-4 border-green-500 p-4 md:p-5 mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
+                <h1 class="text-xl font-extrabold text-gray-900 tracking-tight mb-1">
                     Welcome Back, {{ Auth::user()->name }}!
                 </h1>
-                <p class="text-lg text-gray-500">
+                <p class="text-sm text-gray-500">
                     Here's a quick overview of your schedule for today, <span class="font-medium text-green-600">{{ now()->format('l, d M Y') }}</span>.
                 </p>
             </div>
             <div class="hidden lg:block relative">
-                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-green-50 rounded-full opacity-50 z-0"></div>
-                <i class="far fa-smile-beam text-6xl text-green-500 relative z-10"></i>
+                <div class="absolute -right-3 -bottom-3 w-16 h-16 bg-green-50 rounded-full opacity-50 z-0"></div>
+                <i class="far fa-smile-beam text-4xl text-green-500 relative z-10"></i>
             </div>
         </div>
 
