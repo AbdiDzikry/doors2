@@ -36,15 +36,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');
-    Route::get('master/rooms/images/{filename}', [RoomController::class, 'getImage'])->name('master.rooms.image');
-    Route::view('/guide', 'guide.index')->name('guide.index');
 
-    // Survey
+    Route::view('/guide', 'guide.index')->name('guide.index');
     Route::get('/survey/give', [SurveyController::class, 'create'])->name('survey.create');
     Route::post('/survey', [SurveyController::class, 'store'])->name('survey.store');
     Route::get('/survey/results', [SurveyController::class, 'index'])->name('survey.index');

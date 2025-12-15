@@ -9,7 +9,7 @@ class SurveyController extends Controller
     public function index()
     {
         // Enforce Superadmin access
-        if (!auth()->user()->hasRole('superadmin')) {
+        if (!auth()->user()->hasRole('Super Admin')) {
             abort(403, 'Unauthorized access.');
         }
 
