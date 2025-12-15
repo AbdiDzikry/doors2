@@ -26,7 +26,8 @@ Langkah standar untuk fresh installation di server production:
 
 1.  **Clone Repository**
     ```bash
-        https://github.com/AbdiDzikry/doors4.git
+    git clone https://github.com/AbdiDzikry/doors2.git
+    cd doors2
     ```
 
 2.  **Install Dependencies**
@@ -184,3 +185,50 @@ Aplikasi DOORS dibangun dengan standar keamanan Laravel (Secure by Default):
 
 4.  **Sensitive Data:**
     API Key dan credential database **TIDAK** boleh di-hardcode di source code, melainkan harus via environment variable (`.env`).
+
+---
+
+## 8. New Features - User Satisfaction Survey (SUS)
+
+**Added:** December 2025  
+**Purpose:** Mengukur tingkat kepuasan dan usability pengguna menggunakan metode System Usability Scale (SUS).
+
+### A. Database Migration
+Fitur ini menambahkan tabel baru `survey_responses`:
+```bash
+php artisan migrate
+```
+
+Tabel ini menyimpan:
+- 10 jawaban pertanyaan SUS (q1-q10, skala 1-5)
+- Skor SUS yang dihitung otomatis (0-100)
+- Komentar tambahan (opsional)
+- User ID (relasi ke tabel users)
+
+### B. Access Control
+- **Form Survey:** Dapat diakses oleh semua user yang login di `/survey/give`
+- **Dashboard Hasil:** **HANYA** dapat diakses oleh user dengan role `Super Admin` di `/survey/results`
+- Jika user non-admin mencoba akses hasil, akan mendapat error 403 Unauthorized
+
+### C. Features
+1. **User Interface:**
+   - Form dengan 10 pertanyaan standar SUS dalam Bahasa Indonesia
+   - Rating 1-5 (Sangat Tidak Setuju - Sangat Setuju)
+   - Field komentar opsional
+
+2. **Admin Dashboard:**
+   - Rata-rata Skor SUS (0-100)
+   - Grading otomatis (A/B/C/F berdasarkan standar industri)
+   - Total responden
+   - Tabel detail semua feedback dengan pagination
+
+### D. Testing di Staging
+Untuk memverifikasi fitur ini di staging:
+1. Login sebagai user biasa → Akses `/survey/give` → Submit survey
+2. Login sebagai Super Admin → Akses `/survey/results` → Verifikasi data muncul
+3. Login sebagai Admin/Manager/Karyawan → Coba akses `/survey/results` → Harus ditolak (403)
+
+---
+
+**Last Updated:** 15 December 2025  
+**Contact:** Development Team
