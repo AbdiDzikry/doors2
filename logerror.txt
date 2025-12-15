@@ -1,7 +1,3 @@
-owh iya kan aplikasi ini nanti akan digunakan banyak orang yak
+http://127.0.0.1:8000/survey/give
 
-saya ingin membuat survey kepuasan pengguna untuk projek saya ini
-
-kira kira apakah ada yang cocok.
-
-owh iya tolong di catat bahwa yang bisa akses hasil survey hanya role superadmin saja
+bisakah kita memakai matriks SUS? atau ada metode lain?

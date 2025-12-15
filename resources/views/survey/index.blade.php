@@ -1,39 +1,80 @@
 @extends('layouts.master')
 
-@section('title', 'Survey Results')
+@section('title', 'SUS Survey Results')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">User Satisfaction Results</h1>
-        <div class="text-sm text-gray-500">
-            Visible only to <span class="font-bold text-red-600">Superadmin</span>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">System Usability Scale (SUS) Results</h1>
+            <p class="text-gray-500 text-sm mt-1">Measuring usability performance based on 10 standard questions.</p>
+        </div>
+        <div class="text-sm bg-red-100 text-red-800 px-3 py-1 rounded-full font-medium">
+            Superadmin Access Only
         </div>
     </div>
 
+    @php
+        $grade = 'F';
+        $color = 'text-red-600';
+        $bg = 'bg-red-100';
+        
+        if ($averageScore >= 80.3) {
+            $grade = 'A (Excellent)';
+            $color = 'text-green-600';
+            $bg = 'bg-green-100';
+        } elseif ($averageScore >= 68) {
+            $grade = 'B (Good)';
+            $color = 'text-blue-600';
+            $bg = 'bg-blue-100';
+        } elseif ($averageScore >= 51) {
+            $grade = 'C (OK)';
+            $color = 'text-yellow-600';
+            $bg = 'bg-yellow-100';
+        }
+    @endphp
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Average Score -->
         <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                    <i class="fas fa-chart-bar text-2xl"></i>
-                </div>
+            <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">Average Rating</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ number_format($averageRating, 1) }} <span class="text-base text-gray-400">/ 5.0</span></p>
+                    <p class="text-sm text-gray-500 font-medium">Average SUS Score</p>
+                    <p class="text-4xl font-extrabold text-gray-800 mt-2">{{ number_format($averageScore, 1) }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Scale: 0 - 100</p>
+                </div>
+                <div class="p-3 rounded-full bg-green-50 text-green-600">
+                    <i class="fas fa-poll text-2xl"></i>
                 </div>
             </div>
         </div>
 
+        <!-- Grade -->
         <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                    <i class="fas fa-comments text-2xl"></i>
-                </div>
+            <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">Total Responses</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $totalResponses }}</p>
+                    <p class="text-sm text-gray-500 font-medium">Usability Grade</p>
+                    <p class="text-4xl font-extrabold {{ $color }} mt-2">{{ $grade }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Based on industry standards</p>
+                </div>
+                <div class="p-3 rounded-full {{ $bg }} {{ $color }}">
+                    <i class="fas fa-award text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Responses -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-gray-500 font-medium">Total Respondents</p>
+                    <p class="text-4xl font-extrabold text-gray-800 mt-2">{{ $totalResponses }}</p>
+                    <p class="text-xs text-gray-400 mt-1">Users submitted</p>
+                </div>
+                <div class="p-3 rounded-full bg-purple-50 text-purple-600">
+                    <i class="fas fa-users text-2xl"></i>
                 </div>
             </div>
         </div>
@@ -41,19 +82,22 @@
 
     <!-- Results Table -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800">Recent Submissions</h3>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($responses as $response)
-                        <tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $response->created_at->format('d M Y H:i') }}
                             </td>
@@ -62,12 +106,10 @@
                                 <div class="text-xs text-gray-500">{{ $response->user->email ?? '-' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex text-yellow-400 text-xs">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="{{ $i <= $response->rating ? 'fas' : 'far' }} fa-star"></i>
-                                    @endfor
-                                </div>
-                                <span class="text-xs text-gray-500 ml-1">({{ $response->rating }})</span>
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                    {{ $response->sus_score >= 80 ? 'bg-green-100 text-green-800' : ($response->sus_score >= 68 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ number_format($response->sus_score, 1) }}
+                                </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-700">
                                 {{ $response->comments ?? '-' }}
