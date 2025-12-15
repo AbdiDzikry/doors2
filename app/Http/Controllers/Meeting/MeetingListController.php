@@ -264,18 +264,58 @@ class MeetingListController extends Controller
                 $department = $mp->participant->department ?? '-';
             }
 
+            // Helper function to sanitize string for XML
+            $sanitize = function ($value) {
+                if ($value === null) {
+                    return '';
+                }
+                if (!is_string($value)) {
+                    $value = (string) $value;
+                }
+                // Ensure valid UTF-8 and remove invalid XML characters
+                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+                // Remove ALL control characters including newlines/carriage returns
+                $value = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+                // Normalize whitespace (replace multiple spaces with single space)
+                $value = preg_replace('/\s+/', ' ', $value);
+                // Trim whitespace from both ends
+                return trim($value);
+            };
+
+            // Format start_time to readable string before sanitization
+            $startTimeStr = $meeting->start_time ? \Carbon\Carbon::parse($meeting->start_time)->format('d-m-Y H:i') : '-';
+            $bookedBy = $meeting->user ? $sanitize($meeting->user->name) : '-';
+
             return [
-                'Meeting Topic' => $meeting->topic,
-                'Start Time' => $meeting->start_time,
-                'Participant Name' => $name,
-                'Email' => $email,
+                'Meeting Topic' => $sanitize($meeting->topic),
+                'Start Time' => $startTimeStr,  // Use formatted string, no sanitization needed
+                'Booked By' => $bookedBy,  // NEW COLUMN
+                'Participant Name' => $sanitize($name),
+                'Email' => $sanitize($email),
                 'Type' => $mp->participant_type === \App\Models\User::class ? 'Internal' : 'External',
-                'NPK' => $npk,
-                'Department' => $department,
+                'NPK' => $sanitize($npk),
+                'Department' => $sanitize($department),
                 'Status' => $mp->attended_at ? 'Hadir' : 'Belum Hadir',
                 'Attendance Time' => $mp->attended_at ? \Carbon\Carbon::parse($mp->attended_at)->format('d-m-Y H:i') : '-',
             ];
         });
+
+        // If no participants, create at least one row with meeting info
+        if ($data->isEmpty()) {
+            $bookedBy = $meeting->user ? $meeting->user->name : '-';
+            $data = collect([[
+                'Meeting Topic' => $meeting->topic ?? '',
+                'Start Time' => $meeting->start_time ? \Carbon\Carbon::parse($meeting->start_time)->format('d-m-Y H:i') : '-',
+                'Booked By' => $bookedBy,  // NEW COLUMN
+                'Participant Name' => 'No participants',
+                'Email' => '-',
+                'Type' => '-',
+                'NPK' => '-',
+                'Department' => '-',
+                'Status' => '-',
+                'Attendance Time' => '-',
+            ]]);
+        }
 
         return (new \Rap2hpoutre\FastExcel\FastExcel($data))->download("Attendance_Report_{$meeting->id}.xlsx");
     }

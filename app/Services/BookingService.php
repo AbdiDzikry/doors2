@@ -158,6 +158,15 @@ class BookingService
 
     protected function attachParticipantsAndPantryOrders(Meeting $meeting, array $internalParticipants, array $externalParticipants, array $pantryOrders)
     {
+        // Auto-add organizer as participant (if not already in the list)
+        if (!in_array($meeting->user_id, $internalParticipants)) {
+            MeetingParticipant::create([
+                'meeting_id' => $meeting->id,
+                'participant_id' => $meeting->user_id,
+                'participant_type' => User::class,
+            ]);
+        }
+
         // Attach Internal Participants
         foreach ($internalParticipants as $userId) {
             MeetingParticipant::create([
@@ -179,7 +188,7 @@ class BookingService
         // Create Pantry Orders
         foreach ($pantryOrders as $order) {
             if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
-                PantryOrder::create([
+                $pantryOrder = PantryOrder::create([
                     'meeting_id' => $meeting->id,
                     'pantry_item_id' => $order['pantry_item_id'],
                     'quantity' => $order['quantity'],
