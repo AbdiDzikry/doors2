@@ -1,1 +1,1 @@
-oke lalu apakah ada folder dan juga file lain yang tidak terpakai di projek saya saat ini. dikarenakan saya tidak ingin membingungkan developer saat dia memasukkan ke server stagign
+apakah env saya sudah benar dan semua env nya digunakan untuk projek saya? akan saya masukkan ke dalam example dan sensor isi key nya
