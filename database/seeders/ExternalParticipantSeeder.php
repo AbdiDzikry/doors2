@@ -16,25 +16,25 @@ class ExternalParticipantSeeder extends Seeder
         // Tamu dari Toyota
         ExternalParticipant::firstOrCreate(
             ['email' => 'aditya.pratama@toyota.co.id'],
-            ['name' => 'Aditya Pratama', 'company_name' => 'PT Toyota Motor Manufacturing Indonesia', 'type' => 'Tamu Korporat']
+            ['name' => 'Aditya Pratama', 'company' => 'PT Toyota Motor Manufacturing Indonesia', 'type' => 'external']
         );
 
         // Tamu dari Astra
         ExternalParticipant::firstOrCreate(
             ['email' => 'budi.santoso@astra.co.id'],
-            ['name' => 'Budi Santoso', 'company_name' => 'PT Astra International Tbk', 'type' => 'Tamu Korporat']
+            ['name' => 'Budi Santoso', 'company' => 'PT Astra International Tbk', 'type' => 'external']
         );
 
         // Tamu dari Vendor IT
         ExternalParticipant::firstOrCreate(
             ['email' => 'support@netindo.com'],
-            ['name' => 'Citra Lestari', 'company_name' => 'PT Netindo Solusi Digital', 'type' => 'Vendor']
+            ['name' => 'Citra Lestari', 'company' => 'PT Netindo Solusi Digital', 'type' => 'external']
         );
             
         // Tamu dari Honda
         ExternalParticipant::firstOrCreate(
             ['email' => 'dimas.wibowo@hpm.co.id'],
-            ['name' => 'Dimas Wibowo', 'company_name' => 'PT Honda Prospect Motor', 'type' => 'Tamu Korporat']
+            ['name' => 'Dimas Wibowo', 'company' => 'PT Honda Prospect Motor', 'type' => 'external']
         );
     }
 }
