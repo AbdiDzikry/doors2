@@ -567,5 +567,22 @@
                 <span class="font-bold mr-2">Gagal!</span> {{ session('error') }}
             </div>
         @endif
+
+        @if($errors->any())
+            <div x-data="{ show: true }" x-show="show" class="fixed bottom-20 right-6 bg-red-50 text-red-700 px-6 py-4 rounded-xl shadow-2xl z-50 border border-red-200">
+                <div class="flex items-start">
+                    <span class="text-2xl mr-3">⚠️</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-1">Periksa Inputan Anda</h4>
+                        <ul class="list-disc list-inside text-sm font-medium">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button @click="show = false" class="mt-3 text-xs font-bold uppercase tracking-wider text-red-500 hover:text-red-700">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </x-tablet-layout>
