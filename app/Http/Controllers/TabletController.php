@@ -134,88 +134,98 @@ class TabletController extends Controller
             return back()->with('error', 'Ruangan tidak tersedia untuk waktu yang dipilih.');
         }
 
-        // Create Meeting
-        $meeting = \App\Models\Meeting::create([
-            'topic' => $request->topic,
-            'description' => 'Booked via Room Display (Kiosk)',
-            'room_id' => $room->id,
-            'user_id' => $user->id,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'status' => 'scheduled',
-            'type' => 'offline',
-        ]);
-        
-        // Add organizer as participant
-        \App\Models\MeetingParticipant::create([
-            'meeting_id' => $meeting->id,
-            'participant_id' => $user->id,
-            'participant_type' => \App\Models\User::class,
-            'status' => 'pending'
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Process Internal Participants (IDs)
-        if ($request->filled('internal_participants')) {
-            $input = $request->internal_participants;
-            \Illuminate\Support\Facades\Log::info('Processing Internal Participants: ', ['type' => gettype($input), 'value' => $input]);
+            // Create Meeting
+            $meeting = \App\Models\Meeting::create([
+                'topic' => $request->topic,
+                'description' => 'Booked via Room Display (Kiosk)',
+                'room_id' => $room->id,
+                'user_id' => $user->id,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'status' => 'scheduled',
+                'type' => 'offline',
+            ]);
+            
+            // Add organizer as participant
+            \App\Models\MeetingParticipant::create([
+                'meeting_id' => $meeting->id,
+                'participant_id' => $user->id,
+                'participant_type' => \App\Models\User::class,
+                'status' => 'pending'
+            ]);
 
-            if (is_string($input)) {
-                $ids = json_decode($input, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                     // Try decoding assuming it's a list from Livewire like "[1,2]" string
-                     $ids = explode(',', str_replace(['[', ']', '"'], '', $input));
-                }
-            } else {
-                $ids = $input;
-            }
+            // Process Internal Participants (IDs)
+            if ($request->filled('internal_participants')) {
+                $input = $request->internal_participants;
+                \Illuminate\Support\Facades\Log::info('Processing Internal Participants: ', ['type' => gettype($input), 'value' => $input]);
 
-            if (is_array($ids)) {
-                foreach ($ids as $userId) {
-                    // Flatten if nested array (e.g. [[1,2]])
-                    if (is_array($userId)) {
-                        foreach ($userId as $nestedId) {
-                            if (!$nestedId || $nestedId == $user->id) continue;
-                             \App\Models\MeetingParticipant::firstOrCreate([
-                                'meeting_id' => $meeting->id,
-                                'participant_id' => trim((string)$nestedId),
-                                'participant_type' => \App\Models\User::class
-                            ], ['status' => 'pending']);
-                        }
-                        continue;
+                if (is_string($input)) {
+                    $ids = json_decode($input, true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                         // Try decoding assuming it's a list from Livewire like "[1,2]" string
+                         $ids = explode(',', str_replace(['[', ']', '"'], '', $input));
                     }
+                } else {
+                    $ids = $input;
+                }
 
-                    if (!$userId || $userId == $user->id) continue;
-                    \App\Models\MeetingParticipant::firstOrCreate([
-                        'meeting_id' => $meeting->id,
-                        'participant_id' => trim((string)$userId),
-                        'participant_type' => \App\Models\User::class
-                    ], ['status' => 'pending']);
+                if (is_array($ids)) {
+                    foreach ($ids as $userId) {
+                        // Flatten if nested array (e.g. [[1,2]])
+                        if (is_array($userId)) {
+                            foreach ($userId as $nestedId) {
+                                if (!$nestedId || $nestedId == $user->id) continue;
+                                 \App\Models\MeetingParticipant::firstOrCreate([
+                                    'meeting_id' => $meeting->id,
+                                    'participant_id' => trim((string)$nestedId),
+                                    'participant_type' => \App\Models\User::class
+                                ], ['status' => 'pending']);
+                            }
+                            continue;
+                        }
+
+                        if (!$userId || $userId == $user->id) continue;
+                        \App\Models\MeetingParticipant::firstOrCreate([
+                            'meeting_id' => $meeting->id,
+                            'participant_id' => trim((string)$userId),
+                            'participant_type' => \App\Models\User::class
+                        ], ['status' => 'pending']);
+                    }
                 }
             }
-        }
 
-        // Process External Participants (IDs)
-        if ($request->filled('external_participants')) {
-            $input = $request->external_participants;
-            if (is_string($input)) {
-                $ids = json_decode($input, true);
-            } else {
-                $ids = $input;
-            }
+            // Process External Participants (IDs)
+            if ($request->filled('external_participants')) {
+                $input = $request->external_participants;
+                if (is_string($input)) {
+                    $ids = json_decode($input, true);
+                } else {
+                    $ids = $input;
+                }
 
-            if (is_array($ids)) {
-                foreach ($ids as $extId) {
-                    if (!$extId) continue;
-                    \App\Models\MeetingParticipant::firstOrCreate([
-                        'meeting_id' => $meeting->id,
-                        'participant_id' => trim($extId),
-                        'participant_type' => \App\Models\ExternalParticipant::class
-                    ], ['status' => 'pending']);
+                if (is_array($ids)) {
+                    foreach ($ids as $extId) {
+                        if (!$extId) continue;
+                        \App\Models\MeetingParticipant::firstOrCreate([
+                            'meeting_id' => $meeting->id,
+                            'participant_id' => trim($extId),
+                            'participant_type' => \App\Models\ExternalParticipant::class
+                        ], ['status' => 'pending']);
+                    }
                 }
             }
-        }
+            
+            DB::commit();
+            return back()->with('success', 'Booking Berhasil!');
 
-        return back()->with('success', 'Booking Berhasil!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Tablet Booking Error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memproses booking: ' . $e->getMessage());
+        }
     }
 
     public function checkIn(Request $request, $id)
