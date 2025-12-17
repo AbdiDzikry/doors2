@@ -1,9 +1,10 @@
 <div class="p-4">
     <div class="flex justify-between items-center mb-4 gap-2">
         <input type="text" wire:model.live="search" placeholder="Search by name, NPK, or email..." class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
-        <button type="button" wire:click="toggleCreateForm" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline whitespace-nowrap">
-            {{ $showCreateForm ? 'Cancel' : 'Create New' }}
-        </button>
+        <!-- <button type="button" wire:click="toggleCreateForm" wire:loading.attr="disabled" class="bg-[#089244] hover:bg-[#067a39] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline whitespace-nowrap transition-colors disabled:opacity-50">
+            <span wire:loading.remove wire:target="toggleCreateForm">{{ $showCreateForm ? 'Cancel' : 'Create New' }}</span>
+            <span wire:loading wire:target="toggleCreateForm">Loading...</span>
+        </button> -->
     </div>
 
     <!-- Create New Participant Form -->
@@ -36,7 +37,7 @@
                 <div class="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-gray-50">
                     <div class="flex flex-col">
                          <span class="font-medium text-sm text-gray-800">{{ $user->name }}</span>
-                         <span class="text-xs text-gray-500">{{ $user->department }} • {{ $user->email }}</span>
+                         <span class="text-xs text-gray-500">{{ $user->npk }} • {{ $user->department }} • {{ $user->email }}</span>
                     </div>
                     @if (!in_array($user->id, $selectedParticipants))
                         <button type="button" wire:click="addParticipant({{ $user->id }})" class="bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold py-1 px-3 rounded transition-colors">Add</button>

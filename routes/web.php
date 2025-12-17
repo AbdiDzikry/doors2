@@ -32,6 +32,8 @@ Route::prefix('user-booking')->name('user-booking.')->group(function () {
     Route::post('/select', [UserBookingController::class, 'select'])->name('select');
 });
 
+
+
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -91,5 +93,25 @@ Route::middleware(['auth', 'role:Resepsionis'])->name('dashboard.')->prefix('das
     Route::put('/receptionist/meetings/{meeting}/pantry-status', [ReceptionistDashboardController::class, 'updatePantryForMeeting'])->name('receptionist.meetings.pantry-status');
     Route::get('/receptionist/pantry-orders-partial', [ReceptionistDashboardController::class, 'getPantryOrdersPartial'])->name('receptionist.pantry-orders-partial');
 });
+
+// Tablet Kiosk Mode (Protected by Role/Permission)
+Route::middleware(['auth', 'can:access tablet mode'])->prefix('tablet')->name('tablet.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\TabletController::class, 'index'])->name('index');
+    Route::get('/room/{id}', [App\Http\Controllers\TabletController::class, 'show'])->name('show');
+    Route::post('/room/{id}/book', [App\Http\Controllers\TabletController::class, 'store'])->name('book');
+    Route::post('/room/meeting/{id}/check-in', [App\Http\Controllers\TabletController::class, 'checkIn'])->name('check-in');
+    Route::post('/room/meeting/{id}/cancel', [App\Http\Controllers\TabletController::class, 'cancel'])->name('cancel');
+});
+
+// Temporary Debug Route
+Route::get('/debug-perms', function() {
+    $user = auth()->user();
+    return [
+        'name' => $user->name,
+        'roles' => $user->getRoleNames(),
+        'permissions' => $user->getAllPermissions()->pluck('name'),
+        'can_access_tablet' => $user->can('access tablet mode')
+    ];
+})->middleware('auth');
 
 require __DIR__.'/auth.php';

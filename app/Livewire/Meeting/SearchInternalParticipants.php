@@ -21,15 +21,22 @@ class SearchInternalParticipants extends Component
         $this->selectedParticipants = $initialParticipants;
     }
 
+    public function updatedSearch($value)
+    {
+        \Illuminate\Support\Facades\Log::info('Livewire updatedSearch triggered. Value: ' . $value);
+    }
+
     public function render()
     {
         $users = collect();
-        if (strlen($this->search) >= 2) {
+        if (strlen($this->search) >= 1) {
+            \Illuminate\Support\Facades\Log::info('Searching for: ' . $this->search);
             $users = User::where('name', 'like', '%' . $this->search . '%')
                          ->orWhere('email', 'like', '%' . $this->search . '%')
                          ->orWhere('npk', 'like', '%' . $this->search . '%')
                          ->take(5)
                          ->get();
+            \Illuminate\Support\Facades\Log::info('Found users: ' . $users->count());
         }
 
         $selectedUsers = User::whereIn('id', $this->selectedParticipants)->get();
@@ -87,13 +94,13 @@ class SearchInternalParticipants extends Component
     {
         if (!in_array($userId, $this->selectedParticipants)) {
             $this->selectedParticipants[] = $userId;
-            $this->dispatch('internalParticipantsUpdated', $this->selectedParticipants);
+            $this->dispatch('internal-participants-updated', $this->selectedParticipants);
         }
     }
 
     public function removeParticipant($userId)
     {
         $this->selectedParticipants = array_diff($this->selectedParticipants, [$userId]);
-        $this->dispatch('internalParticipantsUpdated', $this->selectedParticipants);
+        $this->dispatch('internal-participants-updated', $this->selectedParticipants);
     }
 }

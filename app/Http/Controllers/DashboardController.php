@@ -54,6 +54,8 @@ class DashboardController extends Controller
             return view('dashboards.karyawan', $data);
         } elseif ($user->hasRole('Resepsionis')) {
             return redirect()->route('dashboard.receptionist');
+        } elseif ($user->hasRole('Tablet')) {
+            return redirect()->route('tablet.index');
         }
 
         // Fallback for any other user, or if you want a default dashboard

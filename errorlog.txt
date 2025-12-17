@@ -1,0 +1,4 @@
+installHook.js:1 Detected multiple instances of Alpine running
+overrideMethod @ installHook.js:1
+warnAboutMultipleInstancesOf @ livewire.js?id=646f9d24:10380
+(anonymous) @ livewire.js?id=646f9d24:10391

@@ -1,0 +1,12 @@
+anda tahu kan aplikasi yang saya buat adalah aplikasi
+peminjaman ruangan meeting, dan lalu saya ingin menambahkan
+fitur PWA Tablet.
+
+jadi nanti di tiap ruangan itu akan ada tablet yang digunakan
+untuk memesan ruangan on the spot, dan juga apk ini bisa diinstal
+ke dekstop jika dari mobile anda tahu kan ada notifikasi "instal
+aplikasi ke dekstop"
+
+tetapi saya tidak tahu bagaimana saya bisa membuat fitur PWA Tablet
+untuk aplikasi saya ini. sementara mari diskusi bagaimana 
+rencana anda terhadap fitur ini

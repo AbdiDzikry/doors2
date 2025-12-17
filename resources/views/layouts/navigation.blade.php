@@ -15,6 +15,12 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @can('access tablet mode')
+                        <x-nav-link :href="route('tablet.index')" :active="request()->routeIs('tablet.*')">
+                            {{ __('Mode Tablet') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -70,6 +76,12 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @can('access tablet mode')
+                <x-responsive-nav-link :href="route('tablet.index')" :active="request()->routeIs('tablet.*')">
+                    {{ __('Mode Tablet') }}
+                </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

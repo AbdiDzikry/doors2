@@ -35,14 +35,19 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'manage roles and permissions']);
 
         Permission::firstOrCreate(['name' => 'access pantry dashboard']);
+        Permission::firstOrCreate(['name' => 'access tablet mode']);
 
         // create roles and assign created permissions
 
         $role = Role::firstOrCreate(['name' => 'Super Admin']);
         $role->givePermissionTo(Permission::all());
 
+        $role = Role::firstOrCreate(['name' => 'Tablet']);
+        $role->givePermissionTo('access tablet mode');
+
         $role = Role::firstOrCreate(['name' => 'Admin']);
         $role->givePermissionTo('manage master data');
+        $role->givePermissionTo('access tablet mode');
         $role->givePermissionTo('manage users');
         $role->givePermissionTo('manage rooms');
         $role->givePermissionTo('manage pantry');

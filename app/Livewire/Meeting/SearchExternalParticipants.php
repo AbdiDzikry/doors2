@@ -91,13 +91,13 @@ class SearchExternalParticipants extends Component
     {
         if (!in_array($participantId, $this->selectedParticipants)) {
             $this->selectedParticipants[] = $participantId;
-            $this->dispatch('externalParticipantsUpdated', $this->selectedParticipants);
+            $this->dispatch('external-participants-updated', $this->selectedParticipants);
         }
     }
 
     public function removeParticipant($participantId)
     {
         $this->selectedParticipants = array_diff($this->selectedParticipants, [$participantId]);
-        $this->dispatch('externalParticipantsUpdated', $this->selectedParticipants);
+        $this->dispatch('external-participants-updated', $this->selectedParticipants);
     }
 }
