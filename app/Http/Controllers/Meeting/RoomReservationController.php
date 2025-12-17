@@ -134,6 +134,7 @@ class RoomReservationController extends Controller
                 }
             } else {
                 $meeting = Meeting::create($meetingData);
+                $this->attachParticipantsAndPantryOrders($meeting, $request);
                 $this->sendMeetingInvitation($meeting); // Re-enabled email sending
                 MeetingStatusUpdated::dispatch($meeting->room, $meeting); // Dispatch event
             }
