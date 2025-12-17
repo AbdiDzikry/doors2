@@ -66,15 +66,17 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
+            'name' => 'required|regex:/^[a-zA-Z\s]+$/',
+            'email' => 'nullable|email|unique:users',
             'password' => 'required|confirmed',
             'roles' => 'required|array',
-            'npk' => 'nullable|string|max:255',
+            'npk' => 'nullable|string|max:255|unique:users,npk',
             'division' => 'nullable|string|max:255',
             'department' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
+        ], [
+            'name.regex' => 'Name format is invalid. Only letters and spaces are allowed.',
         ]);
 
         $user = User::create([
@@ -118,15 +120,17 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|regex:/^[a-zA-Z\s]+$/',
             'email' => 'nullable|email|unique:users,email,'.$user->id,
             'password' => 'nullable|confirmed',
             'roles' => 'required|array',
-            'npk' => 'nullable|string|max:255',
+            'npk' => 'nullable|string|max:255|unique:users,npk,'.$user->id,
             'division' => 'nullable|string|max:255',
             'department' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
+        ], [
+            'name.regex' => 'Name format is invalid. Only letters and spaces are allowed.',
         ]);
 
         $user->update([

@@ -22,10 +22,8 @@
         filter: '{{ $filter }}', 
         open: false, 
         options: {
-            'day': 'Daily View', 
             'week': 'Weekly View', 
             'month': 'Monthly View', 
-            'year': 'Yearly View', 
             'custom': 'Custom Range'
         },
         get activeLabel() { return this.options[this.filter] }

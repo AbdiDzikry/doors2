@@ -11,39 +11,90 @@ use Illuminate\Support\Facades\Auth;
 class RecurringMeetingsList extends Component
 {
     public $recurringMeetings;
+    public $filter = 'all'; // Default to all
+    public $startDate;
+    public $endDate;
+
     public function mount()
     {
         $this->loadRecurringMeetings();
     }
+    
+    public function updatedFilter()
+    {
+        // Reset custom dates if switching away from custom
+        if ($this->filter !== 'custom') {
+            $this->startDate = null;
+            $this->endDate = null;
+        }
+        $this->loadRecurringMeetings();
+    }
+
+    public function updatedStartDate() { $this->loadRecurringMeetings(); }
+    public function updatedEndDate() { $this->loadRecurringMeetings(); }
 
     #[On('recurringMeetingsTabActivated')]
     public function loadRecurringMeetings()
     {
-        // Get all parent recurring meeting series created by the user
         $recurringSeries = RecurringMeeting::whereHas('meetings', function ($query) {
             $query->where('user_id', Auth::id());
         })
-        ->with(['meetings.room']) // Eager load children meetings and their rooms
+        ->with(['meetings.room'])
         ->get();
 
-        // The view expects a collection where each item has topic, room, etc.
-        // The current $recurringSeries doesn't have that. So, we transform the collection.
-        $this->recurringMeetings = $recurringSeries->map(function ($series) {
-            // Get the first child meeting to extract common properties
+        // Calculate Date Range
+        $effectiveStartDate = null;
+        $effectiveEndDate = null;
+
+        if ($this->filter === 'custom') {
+             $effectiveStartDate = $this->startDate ? \Carbon\Carbon::parse($this->startDate)->startOfDay() : null;
+             $effectiveEndDate = $this->endDate ? \Carbon\Carbon::parse($this->endDate)->endOfDay() : null;
+        } else {
+            switch ($this->filter) {
+                case 'day':
+                    $effectiveStartDate = now()->startOfDay();
+                    $effectiveEndDate = now()->endOfDay();
+                    break;
+                case 'week':
+                    $effectiveStartDate = now()->startOfWeek();
+                    $effectiveEndDate = now()->endOfWeek();
+                    break;
+                case 'month':
+                    $effectiveStartDate = now()->startOfMonth();
+                    $effectiveEndDate = now()->endOfMonth();
+                    break;
+                case 'year':
+                    $effectiveStartDate = now()->startOfYear();
+                    $effectiveEndDate = now()->endOfYear();
+                    break;
+                case 'all':
+                    // Keep null
+                    break;
+            }
+        }
+
+        $this->recurringMeetings = $recurringSeries->map(function ($series) use ($effectiveStartDate, $effectiveEndDate) {
             $firstMeeting = $series->meetings->first();
-            if (!$firstMeeting) {
-                return null; // Skip if there are no associated meetings for some reason
+            if (!$firstMeeting) return null;
+
+            // Filter Children by Date Range
+            $filteredChildren = $series->meetings->filter(function ($meeting) use ($effectiveStartDate, $effectiveEndDate) {
+                if (!$effectiveStartDate || !$effectiveEndDate) return true; // Show all if no range
+                return $meeting->start_time >= $effectiveStartDate && $meeting->start_time <= $effectiveEndDate;
+            })->sortBy('start_time');
+
+            if ($filteredChildren->isEmpty()) {
+                return null;
             }
 
-            // Dynamically add properties to the series object to match the view's expectations
             $series->topic = $firstMeeting->topic;
             $series->room = $firstMeeting->room;
-            $series->children = $series->meetings->sortBy('start_time'); // Pass sorted children meetings
-            $series->recurring_type = $series->frequency; // Align with view's property name
-            $series->recurring_end_date = $series->ends_at; // Align with view's property name
+            $series->children = $filteredChildren;
+            $series->recurring_type = $series->frequency;
+            $series->recurring_end_date = $series->ends_at;
 
             return $series;
-        })->filter(); // filter() will remove any nulls from the collection
+        })->filter()->values(); // Reset keys after filtering
     }
 
     #[On('confirmMeeting')]

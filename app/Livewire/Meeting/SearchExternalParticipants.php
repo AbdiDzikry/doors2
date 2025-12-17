@@ -15,6 +15,7 @@ class SearchExternalParticipants extends Component
     public $newEmail = '';
     public $newCompany = '';
     public $newPhone = '';
+    public $newAddress = '';
 
     public function mount($initialParticipants = [])
     {
@@ -52,6 +53,7 @@ class SearchExternalParticipants extends Component
         $this->newEmail = '';
         $this->newCompany = '';
         $this->newPhone = '';
+        $this->newAddress = '';
         $this->resetErrorBag();
     }
 
@@ -59,9 +61,10 @@ class SearchExternalParticipants extends Component
     {
         $this->validate([
             'newName' => 'required|string|max:255',
-            'newEmail' => 'required|email|unique:external_participants,email',
+            'newEmail' => 'nullable|email|unique:external_participants,email',
             'newCompany' => 'required|string|max:255',
-            'newPhone' => 'nullable|string|max:20',
+            'newPhone' => 'required|string|max:20',
+            'newAddress' => 'nullable|string|max:255',
         ]);
 
         $participant = ExternalParticipant::create([
@@ -69,7 +72,8 @@ class SearchExternalParticipants extends Component
             'email' => $this->newEmail,
             'company' => $this->newCompany,
             'phone' => $this->newPhone,
-            'type' => 'guest', // Default type
+            'address' => $this->newAddress,
+            'type' => 'external', // Default type
         ]);
 
         // Automatically add to selected

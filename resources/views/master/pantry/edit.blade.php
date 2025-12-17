@@ -102,23 +102,13 @@
                                 </div>
                                 <input type="number" name="stock" id="stock" value="{{ old('stock', $item->stock) }}"
                                     class="pl-10 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                                    placeholder="0">
+                                    placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '');" onblur="this.value = this.value ? parseInt(this.value) : 0">
                             </div>
 
 
 
 
 
-                            <!-- Image -->
-                            <div class="sm:col-span-6">
-                                <label for="image" class="block text-sm font-medium text-gray-700">Item Image</label>
-                                <div class="mt-1 flex items-center">
-                                    @if($item->image)
-                                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}" class="w-16 h-16 rounded-md object-cover mr-4">
-                                    @endif
-                                    <input type="file" name="image" id="image" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"/>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

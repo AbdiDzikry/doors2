@@ -33,9 +33,13 @@ class ExternalParticipantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|regex:/^[a-zA-Z\s]+$/',
             'email' => 'required|email|unique:external_participants',
+            'phone' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'type' => 'required|in:internal,external',
+        ], [
+            'name.regex' => 'Name format is invalid. Only letters and spaces are allowed.',
+            'phone.regex' => 'Phone format is invalid.',
         ]);
 
         ExternalParticipant::create($request->all());
@@ -66,9 +70,13 @@ class ExternalParticipantController extends Controller
     public function update(Request $request, ExternalParticipant $externalParticipant)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|regex:/^[a-zA-Z\s]+$/',
             'email' => 'required|email|unique:external_participants,email,'.$externalParticipant->id,
+            'phone' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'type' => 'required|in:internal,external',
+        ], [
+            'name.regex' => 'Name format is invalid. Only letters and spaces are allowed.',
+            'phone.regex' => 'Phone format is invalid.',
         ]);
 
         $externalParticipant->update($request->all());
@@ -90,11 +98,19 @@ class ExternalParticipantController extends Controller
 
     public function downloadTemplate()
     {
-        $template = new ExternalParticipantsTemplateExport();
-        // FastExcel does not have a direct way to create a header-only file.
-        // We can create a collection containing only the headers and export that.
-        $headings = $template->headings();
-        $data = collect([$headings]);
+        if (ob_get_length()) ob_end_clean();
+        ob_start();
+        // Create an empty row with keys as headers to generating the template structure
+        $data = collect([
+            [
+                'NAME' => 'John Doe',
+                'EMAIL' => 'john@example.com',
+                'PHONE' => '08123456789',
+                'COMPANY' => 'Example Corp',
+                'ADDRESS' => 'Jl. Example No. 123',
+            ]
+        ]);
+        
         return (new FastExcel($data))->download('external_participants_template.xlsx');
     }
 
@@ -106,15 +122,25 @@ class ExternalParticipantController extends Controller
 
         try {
             (new FastExcel)->import($request->file('file'), function ($line) {
-                ExternalParticipant::create([
-                    'name'       => $line['NAME'] ?? $line['name'] ?? null,
-                    'email'      => $line['EMAIL'] ?? $line['email'] ?? null,
-                    'phone'      => $line['PHONE'] ?? $line['phone'] ?? null,
-                    'company'    => $line['COMPANY'] ?? $line['company'] ?? null,
-                    'department' => $line['DEPARTMENT'] ?? $line['department'] ?? null,
-                    'address'    => $line['ADDRESS'] ?? $line['address'] ?? null,
-                    'type'       => 'external',
-                ]);
+                // Determine keys based on case insensitivity or varations
+                $name = $line['NAME'] ?? $line['name'] ?? null;
+                $email = $line['EMAIL'] ?? $line['email'] ?? null;
+                
+                // Skip if essential data is missing
+                if (!$name || !$email) {
+                    return;
+                }
+
+                ExternalParticipant::updateOrCreate(
+                    ['email' => $email], // Avoid duplicates by email
+                    [
+                        'name'       => $name,
+                        'phone'      => $line['PHONE'] ?? $line['phone'] ?? null,
+                        'company'    => $line['COMPANY'] ?? $line['company'] ?? null,
+                        'address'    => $line['ADDRESS'] ?? $line['address'] ?? null,
+                        'type'       => 'external',
+                    ]
+                );
             });
         } catch (\Exception $e) {
             return redirect()->route('master.external-participants.index')->with('error', 'Error importing file: ' . $e->getMessage());
@@ -125,19 +151,35 @@ class ExternalParticipantController extends Controller
 
     public function export()
     {
-        $export = new ExternalParticipantsExport();
-        $collection = $export->collection();
-        $headings = $export->headings();
+        if (ob_get_length()) ob_end_clean();
+        ob_start();
+        $participants = ExternalParticipant::all();
 
-        return (new FastExcel($collection))->download('external_participants.xlsx', function ($participant) use ($headings) {
-            $row = [];
-            $row[$headings[0]] = $participant->name;
-            $row[$headings[1]] = $participant->email;
-            $row[$headings[2]] = $participant->phone;
-            $row[$headings[3]] = $participant->company;
-            $row[$headings[4]] = $participant->department;
-            $row[$headings[5]] = $participant->address;
-            return $row;
+        // Helper function to sanitize string for XML (copied from MeetingListController)
+        $sanitize = function ($value) {
+            if ($value === null) {
+                return '';
+            }
+            if (!is_string($value)) {
+                $value = (string) $value;
+            }
+            // Ensure valid UTF-8
+            $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+            // Remove control characters (including newlines for safer CSV/Excel cells)
+            $value = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
+            // Normalize whitespace
+            $value = preg_replace('/\s+/', ' ', $value);
+            return trim($value);
+        };
+
+        return (new FastExcel($participants))->download('external_participants.xlsx', function ($participant) use ($sanitize) {
+            return [
+                'NAME' => $sanitize($participant->name),
+                'EMAIL' => $sanitize($participant->email),
+                'PHONE' => $sanitize($participant->phone),
+                'COMPANY' => $sanitize($participant->company),
+                'ADDRESS' => $sanitize($participant->address),
+            ];
         });
     }
 }

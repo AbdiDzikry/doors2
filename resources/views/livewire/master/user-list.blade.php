@@ -41,11 +41,15 @@
                         <td class="px-5 py-5 border-b border-gray-200 text-sm">{{ $user->phone }}</td>
                         <td class="px-5 py-5 border-b border-gray-200 text-sm">{{ implode(', ', $user->getRoleNames()->toArray()) }}</td>
                         <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                            <a href="{{ route('master.users.edit', $user) }}" class="text-primary hover:text-primary-dark mr-3">Edit</a>
+                            <a href="{{ route('master.users.edit', $user) }}" class="text-gray-400 hover:text-blue-600 transition-colors mr-3" title="Edit">
+                                <i class="far fa-edit text-lg"></i>
+                            </a>
                             <form action="{{ route('master.users.destroy', $user) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this user?')">Delete</button>
+                                <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors" onclick="return confirm('Are you sure you want to delete this user?')" title="Delete">
+                                    <i class="far fa-trash-alt text-lg"></i>
+                                </button>
                             </form>
                         </td>
                     </tr>

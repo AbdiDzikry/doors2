@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/survey/results', [SurveyController::class, 'index'])->name('survey.index');
 });
 
-Route::middleware(['auth', 'role:Super Admin|Admin'])->name('master.')->prefix('master')->group(function () {
+Route::middleware(['auth', 'can:manage master data'])->name('master.')->prefix('master')->group(function () {
     // ... existing routes
     Route::get('external-participants/template', [ExternalParticipantController::class, 'downloadTemplate'])->name('external-participants.template');
     Route::post('external-participants/import', [ExternalParticipantController::class, 'import'])->name('external-participants.import');
@@ -64,7 +64,7 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->name('master.')->prefix('
     Route::resource('recurring-meetings', RecurringMeetingController::class);
 });
 
-Route::middleware(['auth', 'role:Super Admin|Admin|Resepsionis'])->name('master.')->prefix('master')->group(function () {
+Route::middleware(['auth', 'can:manage pantry'])->name('master.')->prefix('master')->group(function () {
     Route::resource('pantry-items', PantryItemController::class);
 });
 
@@ -79,9 +79,10 @@ Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->gr
     Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 });
 
-Route::middleware(['auth', 'role:Super Admin'])->name('settings.')->prefix('settings')->group(function () {
-    Route::resource('configurations', ConfigurationController::class);
-    Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role']);
+// Settings routes requiring specific permissions
+Route::name('settings.')->prefix('settings')->group(function () {
+    Route::resource('configurations', ConfigurationController::class)->middleware(['auth', 'can:manage configurations']);
+    Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role'])->middleware(['auth', 'can:manage roles and permissions']);
 });
 
 Route::middleware(['auth', 'role:Resepsionis'])->name('dashboard.')->prefix('dashboard')->group(function () {

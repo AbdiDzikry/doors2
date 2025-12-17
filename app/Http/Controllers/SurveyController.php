@@ -24,7 +24,9 @@ class SurveyController extends Controller
 
     public function create()
     {
-        return view('survey.create');
+        // Fetch existing response for the current user
+        $response = \App\Models\SurveyResponse::where('user_id', auth()->id())->first();
+        return view('survey.create', compact('response'));
     }
 
     public function store(\Illuminate\Http\Request $request)
@@ -53,22 +55,25 @@ class SurveyController extends Controller
         // Total Score * 2.5
         $susScore = ($oddSum + $evenSum) * 2.5;
 
-        \App\Models\SurveyResponse::create([
-            'user_id' => auth()->id(),
-            'q1' => $validated['q1'],
-            'q2' => $validated['q2'],
-            'q3' => $validated['q3'],
-            'q4' => $validated['q4'],
-            'q5' => $validated['q5'],
-            'q6' => $validated['q6'],
-            'q7' => $validated['q7'],
-            'q8' => $validated['q8'],
-            'q9' => $validated['q9'],
-            'q10' => $validated['q10'],
-            'sus_score' => $susScore,
-            'comments' => $validated['comments'],
-        ]);
+        // Use updateOrCreate to ensure one response per user
+        \App\Models\SurveyResponse::updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'q1' => $validated['q1'],
+                'q2' => $validated['q2'],
+                'q3' => $validated['q3'],
+                'q4' => $validated['q4'],
+                'q5' => $validated['q5'],
+                'q6' => $validated['q6'],
+                'q7' => $validated['q7'],
+                'q8' => $validated['q8'],
+                'q9' => $validated['q9'],
+                'q10' => $validated['q10'],
+                'sus_score' => $susScore,
+                'comments' => $validated['comments'],
+            ]
+        );
 
-        return redirect()->route('dashboard')->with('success', 'Thank you for your feedback! Your input helps us improve. 🚀');
+        return redirect()->route('dashboard')->with('success', 'Thank you! Your feedback has been updated. 🚀');
     }
 }

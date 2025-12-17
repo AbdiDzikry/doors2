@@ -80,6 +80,36 @@
         </div>
     </div>
 
+    <!-- Grading Guide -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
+        <h3 class="font-bold text-blue-900 mb-2 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i> Understanding SUS Scores
+        </h3>
+        <p class="text-sm text-blue-800 mb-3">The System Usability Scale (SUS) is a globally recognized standard. Ratings are based on the percentile rank:</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                <span class="font-bold text-gray-700">> 80.3</span>
+                <span class="text-gray-600">= Grade A (Excellent)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                <span class="font-bold text-gray-700">68 - 80.3</span>
+                <span class="text-gray-600">= Grade B (Good)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                <span class="font-bold text-gray-700">51 - 68</span>
+                <span class="text-gray-600">= Grade C (OK)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <span class="font-bold text-gray-700">< 51</span>
+                <span class="text-gray-600">= Grade F (Poor)</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Results Table -->
     <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">

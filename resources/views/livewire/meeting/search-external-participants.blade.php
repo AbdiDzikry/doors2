@@ -24,15 +24,20 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="block text-gray-700 text-xs font-bold mb-1" for="newEmail">Email <span class="text-red-500">*</span></label>
-                    <input type="email" wire:model="newEmail" id="newEmail" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newEmail') border-red-500 @enderror">
-                    @error('newEmail') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                </div>
-                 <div>
-                    <label class="block text-gray-700 text-xs font-bold mb-1" for="newPhone">Phone (Optional)</label>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="newPhone">Phone <span class="text-red-500">*</span></label>
                     <input type="text" wire:model="newPhone" id="newPhone" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newPhone') border-red-500 @enderror">
                     @error('newPhone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1" for="newEmail">Email</label>
+                    <input type="email" wire:model="newEmail" id="newEmail" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newEmail') border-red-500 @enderror">
+                    @error('newEmail') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-xs font-bold mb-1" for="newAddress">Address</label>
+                <textarea wire:model="newAddress" id="newAddress" rows="2" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all duration-200 @error('newAddress') border-red-500 @enderror"></textarea>
+                @error('newAddress') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             <div class="flex justify-end">
                 <button type="button" wire:click="createNewParticipant" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm">

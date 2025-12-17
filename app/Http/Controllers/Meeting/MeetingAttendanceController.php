@@ -16,6 +16,10 @@ class MeetingAttendanceController extends Controller
             'npk' => 'required|string',
         ]);
 
+        if ($meeting->calculated_status === 'cancelled') {
+            return back()->with('error', 'Meeting is cancelled. Cannot record attendance.');
+        }
+
         $npk = $request->input('npk');
 
         // Find user by NPK

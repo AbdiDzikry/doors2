@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         // Create Super Admin
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@doors.com'],
-            ['name' => 'Super Admin', 'password' => bcrypt('password')]
+            ['name' => 'Super Admin', 'password' => bcrypt('password'), 'npk' => 'SA001', 'position' => 'Super Admin', 'division' => 'Board', 'department' => 'Executive', 'phone' => '081200000000']
         );
         if (!$superAdmin->hasRole('Super Admin')) {
             $superAdmin->assignRole('Super Admin');
@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         // Create Admin
         $admin = User::firstOrCreate(
             ['email' => 'admin@doors.com'],
-            ['name' => 'Admin', 'password' => bcrypt('password')]
+            ['name' => 'Admin', 'password' => bcrypt('password'), 'npk' => 'ADM01', 'position' => 'Administrator', 'division' => 'IT', 'department' => 'Infrastructure', 'phone' => '081200000001']
         );
         if (!$admin->hasRole('Admin')) {
             $admin->assignRole('Admin');
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
         // Create Manager
         $manager = User::firstOrCreate(
             ['email' => 'manager@doors.com'],
-            ['name' => 'Manager', 'password' => bcrypt('password')]
+            ['name' => 'Manager', 'password' => bcrypt('password'), 'npk' => 'MGR01', 'position' => 'General Manager', 'division' => 'Operations', 'department' => 'Facility Management', 'phone' => '081200000002']
         );
         if (!$manager->hasRole('Manager')) {
             $manager->assignRole('Manager');
@@ -48,7 +48,7 @@ class DatabaseSeeder extends Seeder
         // Create Resepsionis
         $resepsionis = User::firstOrCreate(
             ['email' => 'resepsionis@doors.com'],
-            ['name' => 'Resepsionis', 'password' => bcrypt('password')]
+            ['name' => 'Resepsionis', 'password' => bcrypt('password'), 'npk' => 'REC01', 'position' => 'Receptionist', 'division' => 'GA', 'department' => 'Front Office', 'phone' => '081200000003']
         );
         if (!$resepsionis->hasRole('Resepsionis')) {
             $resepsionis->assignRole('Resepsionis');
@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
         // Create Karyawan
         $karyawan = User::firstOrCreate(
             ['email' => 'karyawan@doors.com'],
-            ['name' => 'Karyawan', 'password' => bcrypt('password')]
+            ['name' => 'Karyawan', 'password' => bcrypt('password'), 'npk' => 'EMP01', 'position' => 'Staff', 'division' => 'IT', 'department' => 'Development', 'phone' => '081200000004']
         );
         if (!$karyawan->hasRole('Karyawan')) {
             $karyawan->assignRole('Karyawan');

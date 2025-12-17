@@ -20,6 +20,8 @@ class ExternalParticipantFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'company' => $this->faker->company(),
+            'phone' => $this->faker->phoneNumber(),
+            'address' => $this->faker->address(),
             'type' => 'external',
         ];
     }

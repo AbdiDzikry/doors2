@@ -10,6 +10,7 @@
         <div class="mb-4">
             <label for="key" class="block text-gray-700 text-sm font-bold mb-2">Key:</label>
             <input type="text" name="key" id="key" value="{{ old('key') }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('key') border-red-500 @enderror">
+            <p class="text-xs text-gray-500 mt-1">Unique identifier, e.g., <code>default_meeting_duration</code>. Use lowercase and underscores.</p>
             @error('key')
                 <p class="text-red-500 text-xs italic">{{ $message }}</p>
             @enderror
@@ -17,6 +18,7 @@
         <div class="mb-4">
             <label for="value" class="block text-gray-700 text-sm font-bold mb-2">Value:</label>
             <textarea name="value" id="value" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @error('value') border-red-500 @enderror">{{ old('value') }}</textarea>
+            <p class="text-xs text-gray-500 mt-1">The value for this setting, e.g., <code>60</code> for numbers or plain text.</p>
             @error('value')
                 <p class="text-red-500 text-xs italic">{{ $message }}</p>
             @enderror

@@ -19,63 +19,63 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="mb-4">
                         <label for="name" class="block text-sm font-medium text-gray-700">Name <span class="text-red-500">*</span></label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('name') border-red-500 @enderror">
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('name') border-red-500 @enderror" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="npk" class="block text-sm font-medium text-gray-700">NPK</label>
-                        <input type="text" name="npk" id="npk" value="{{ old('npk') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('npk') border-red-500 @enderror">
+                        <input type="text" name="npk" id="npk" value="{{ old('npk') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('npk') border-red-500 @enderror">
                         @error('npk')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('email') border-red-500 @enderror">
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('email') border-red-500 @enderror">
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="division" class="block text-sm font-medium text-gray-700">Division</label>
-                        <input type="text" name="division" id="division" value="{{ old('division') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('division') border-red-500 @enderror">
+                        <input type="text" name="division" id="division" value="{{ old('division') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('division') border-red-500 @enderror">
                         @error('division')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
-                        <input type="text" name="department" id="department" value="{{ old('department') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('department') border-red-500 @enderror">
+                        <input type="text" name="department" id="department" value="{{ old('department') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('department') border-red-500 @enderror">
                         @error('department')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
-                        <input type="text" name="position" id="position" value="{{ old('position') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('position') border-red-500 @enderror">
+                        <input type="text" name="position" id="position" value="{{ old('position') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('position') border-red-500 @enderror">
                         @error('position')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('phone') border-red-500 @enderror">
+                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('phone') border-red-500 @enderror">
                         @error('phone')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="password" class="block text-sm font-medium text-gray-700">Password <span class="text-red-500">*</span></label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('password') border-red-500 @enderror">
+                        <input type="password" name="password" id="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('password') border-red-500 @enderror">
                         @error('password')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password <span class="text-red-500">*</span></label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
+                        <input type="password" name="password_confirmation" id="password_confirmation" autocomplete="new-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
                     </div>
                     <div class="mb-4 md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Roles <span class="text-red-500">*</span></label>

@@ -13,10 +13,18 @@
             <p class="font-bold">About Application Configurations</p>
             <p class="text-sm">This page allows you to manage application-wide settings. Each setting is defined by a unique <strong>Key</strong> and its corresponding <strong>Value</strong>. The optional <strong>Description</strong> provides context for what the setting does.</p>
             <ul class="list-disc list-inside mt-2 text-sm">
-                <li><strong>Key:</strong> A unique identifier for the setting (e.g., `APP_NAME`, `LOGIN_API_KEY`). Keys are typically uppercase and use underscores for spaces.</li>
+                <li><strong>Key:</strong> A unique identifier for the setting. Keys are typically uppercase and use underscores for spaces.</li>
                 <li><strong>Value:</strong> The actual setting data. Be cautious when changing values, as they can directly affect application behavior.</li>
                 <li><strong>Description:</strong> Explains the purpose and expected format of the setting.</li>
             </ul>
+            <div class="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                <p class="font-bold text-xs uppercase tracking-wider text-blue-800 mb-2">Known System Keys / Examples</p>
+                <ul class="list-disc list-inside text-sm text-blue-900 space-y-1">
+                    <li><code class="font-bold">default_meeting_duration</code>: Sets the default duration for new meeting requests (in minutes). <em>Example: 60</em></li>
+                    <li><code class="font-bold">office_start_hour</code>: (Optional) Start of operational hours (0-23). <em>Example: 7</em></li>
+                    <li><code class="font-bold">office_end_hour</code>: (Optional) End of operational hours (0-23). <em>Example: 18</em></li>
+                </ul>
+            </div>
             <p class="mt-2 text-sm font-semibold">Caution: Incorrectly modifying configurations can lead to application errors. Only change settings if you understand their purpose.</p>
         </div>
 
@@ -70,21 +78,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $config->value }}</td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ $config->description }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('settings.configurations.edit', $config) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit Configuration">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14.25v4.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V7.5a2.25 2.25 0 012.25-2.25H9"></path>
-                                        </svg>
-                                        <span class="sr-only">Edit</span>
+                                <div class="flex items-center justify-end space-x-3">
+                                    <a href="{{ route('settings.configurations.edit', $config) }}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit Configuration">
+                                        <i class="far fa-edit text-lg"></i>
                                     </a>
                                     <form action="{{ route('settings.configurations.destroy', $config) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this configuration?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete Configuration">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.927a2.25 2.25 0 01-2.244-2.077L4.74 5.79a48.106 48.106 0 01-.994-3.21C3.547 2.045 3.82 1.75 4.25 1.75h15.5c.43 0 .703.295.546.646-.09.35-.22.678-.362.939m-6.523-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.927a2.25 2.25 0 01-2.244-2.077L4.74 5.79a48.106 48.106 0 01-.994-3.21C3.547 2.045 3.82 1.75 4.25 1.75h15.5c.43 0 .703.295.546.646-.09.35-.22.678-.362.939M7.5 4.5v.75m7.5-1.5v.75m-6.75 0h-1.5C6.927 3.75 6.75 3.927 6.75 4.148v.75m7.5 0h-1.5c-.219 0-.398-.177-.398-.398V4.148c0-.221.179-.398.398-.398h1.5c.219 0 .398.177.398.398v.75c0 .221-.179.398-.398.398z"></path>
-                                            </svg>
-                                            <span class="sr-only">Delete</span>
+                                        <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors" title="Delete Configuration">
+                                            <i class="far fa-trash-alt text-lg"></i>
                                         </button>
                                     </form>
                                 </div>

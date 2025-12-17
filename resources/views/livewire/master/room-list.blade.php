@@ -66,12 +66,12 @@
                         </td>                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex items-center justify-end space-x-3">
                                 <a href="{{ route('master.rooms.edit', $room->id) }}"
-                                   class="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors" title="Edit">
-                                    <i class="fas fa-pencil-alt text-xs"></i>
+                                   class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
+                                    <i class="far fa-edit text-lg"></i>
                                 </a>
                                 <button wire:click="confirmDelete('{{ $room->id }}')"
-                                   class="flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors" title="Delete">
-                                    <i class="fas fa-trash-alt text-xs"></i>
+                                   class="text-gray-400 hover:text-red-600 transition-colors" title="Delete">
+                                    <i class="far fa-trash-alt text-lg"></i>
                                 </button>
                             </div>
                         </td>

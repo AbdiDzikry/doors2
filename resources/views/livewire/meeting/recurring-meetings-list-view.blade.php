@@ -1,16 +1,68 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-800">My Recurring Meetings</h1>
             <p class="mt-1 text-sm text-gray-600">
-                A list view of your recurring meetings. Confirm or cancel upcoming occurrences here.
+                A list view of your recurring meetings. Filter by date to see upcoming occurrences.
             </p>
         </div>
-        <a href="{{ route('meeting.bookings.create') }}" class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
-            <i class="fas fa-plus mr-2"></i>
-            Create New Meeting
-        </a>
+        
+        <div class="flex flex-col sm:flex-row items-end sm:items-center gap-4 w-full sm:w-auto">
+             <!-- Date Inputs (Custom) -->
+             <div class="flex gap-2" x-show="$wire.filter === 'custom'" x-transition x-cloak>
+                <div>
+                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Start</label>
+                     <input type="date" wire:model.live="startDate" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm text-xs py-1.5 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div>
+                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">End</label>
+                     <input type="date" wire:model.live="endDate" class="block w-full bg-white border border-gray-300 rounded-md shadow-sm text-xs py-1.5 focus:ring-green-500 focus:border-green-500">
+                </div>
+            </div>
+
+            <!-- Filter Dropdown -->
+             <div class="relative w-full sm:w-auto" x-data="{ open: false }">
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5 sm:hidden">Period</label>
+                <button type="button" @click="open = !open" @click.away="open = false"
+                    class="relative w-full sm:w-40 bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm">
+                    <span class="block truncate">
+                        @if($filter == 'day') Today
+                        @elseif($filter == 'week') This Week
+                        @elseif($filter == 'month') This Month
+                        @elseif($filter == 'year') This Year
+                        @elseif($filter == 'all') All Time
+                        @elseif($filter == 'custom') Custom Range
+                        @endif
+                    </span>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </button>
+
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                    class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+                    style="display: none;">
+                    
+                    @foreach(['day' => 'Today', 'week' => 'This Week', 'month' => 'This Month', 'year' => 'This Year', 'all' => 'All Time', 'custom' => 'Custom Range'] as $val => $label)
+                        <div wire:click="$set('filter', '{{ $val }}')" @click="open = false"
+                            class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 hover:text-green-900 {{ $filter === $val ? 'bg-green-50 text-green-900 font-semibold' : 'text-gray-900' }}">
+                            <span class="block truncate">{{ $label }}</span>
+                            @if($filter === $val)
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+        </div>
     </div>
 
     @forelse ($recurringMeetings as $series)

@@ -32,12 +32,7 @@ class PantryItemController extends Controller
             'description' => 'nullable|string',
             'type' => 'required|in:makanan,minuman',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-
-        if ($request->hasFile('image')) {
-            $validatedData['image'] = $request->file('image')->store('pantry-items', 'public');
-        }
 
         PantryItem::create($validatedData);
 
@@ -71,16 +66,7 @@ class PantryItemController extends Controller
             'description' => 'nullable|string',
             'type' => 'required|in:makanan,minuman',
             'stock' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($pantryItem->image) {
-                Storage::disk('public')->delete($pantryItem->image);
-            }
-            $validatedData['image'] = $request->file('image')->store('pantry-items', 'public');
-        }
 
         $pantryItem->update($validatedData);
 

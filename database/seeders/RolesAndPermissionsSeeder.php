@@ -31,6 +31,9 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'book rooms']);
         Permission::firstOrCreate(['name' => 'view analytics']);
 
+        Permission::firstOrCreate(['name' => 'manage configurations']);
+        Permission::firstOrCreate(['name' => 'manage roles and permissions']);
+
         Permission::firstOrCreate(['name' => 'access pantry dashboard']);
 
         // create roles and assign created permissions
@@ -45,6 +48,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $role->givePermissionTo('manage pantry');
         $role->givePermissionTo('manage external participants');
         $role->givePermissionTo('manage priority guests');
+        $role->givePermissionTo('manage configurations');
+        $role->givePermissionTo('manage roles and permissions');
 
         $role = Role::firstOrCreate(['name' => 'Karyawan']);
         $role->givePermissionTo('access meeting room');

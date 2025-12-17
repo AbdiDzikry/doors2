@@ -27,7 +27,7 @@ class MeetingListController extends Controller
         $sortBy = $request->input('sort_by', 'start_time');
         $sortDirection = $request->input('sort_direction', 'asc');
 
-        $filter = $request->input('filter', 'day');
+        $filter = $request->input('filter', 'month');
         $startDateInput = $request->input('start_date');
         $endDateInput = $request->input('end_date');
 
@@ -130,6 +130,10 @@ class MeetingListController extends Controller
             case 'year':
                 $effectiveStartDate = $carbonStartDate->startOfYear();
                 $effectiveEndDate = $carbonEndDate->endOfYear();
+                break;
+            case 'all':
+                $effectiveStartDate = \Carbon\Carbon::create(2000, 1, 1)->startOfDay();
+                $effectiveEndDate = \Carbon\Carbon::create(2100, 12, 31)->endOfDay();
                 break;
             case 'custom':
             default:
@@ -239,6 +243,10 @@ class MeetingListController extends Controller
 
     public function exportAttendance(Meeting $meeting)
     {
+        if ($meeting->calculated_status === 'cancelled') {
+            abort(403, 'Meeting is cancelled.');
+        }
+
         // Authorization: Allow specific roles, meeting owner, OR participants
         // Load participants first to check and then export
         $participants = $meeting->meetingParticipants()->with('participant')->get();

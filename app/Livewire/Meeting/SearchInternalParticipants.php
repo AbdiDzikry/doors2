@@ -59,17 +59,15 @@ class SearchInternalParticipants extends Component
     {
         $this->validate([
             'newName' => 'required|string|max:255',
-            'newEmail' => 'required|email|unique:users,email',
             'newNpk' => 'required|string|unique:users,npk',
-            'newDepartment' => 'required|string|max:255',
         ]);
 
         $user = User::create([
             'name' => $this->newName,
-            'email' => $this->newEmail,
+            'email' => null, // Email is optional now
             'npk' => $this->newNpk,
-            'department' => $this->newDepartment,
-            'password' => bcrypt('password'), // Default password
+            'department' => null, // Department is optional/skipped
+            'password' => bcrypt($this->newNpk), // Default password is NPK
         ]);
 
         $user->assignRole('Karyawan'); // Default role

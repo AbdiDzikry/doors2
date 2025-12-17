@@ -31,12 +31,19 @@
                                             <div>
                                                 <p class="font-medium text-gray-700">{{ $childMeeting->start_time->format('d M Y, H:i') }} - {{ $childMeeting->end_time->format('H:i') }}</p>
                                                 <p class="text-sm">
+                                                <p class="text-sm">
                                                     @if ($childMeeting->status === 'cancelled')
-                                                        <span class="text-red-600">Cancelled</span>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                            <i class="fas fa-times-circle mr-1"></i> Cancelled
+                                                        </span>
                                                     @elseif($childMeeting->confirmation_status === 'confirmed')
-                                                        <span class="text-green-600">Confirmed</span>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <i class="fas fa-check-circle mr-1"></i> Confirmed
+                                                        </span>
                                                     @else
-                                                        <span class="text-yellow-600">Pending Confirmation</span>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                            <i class="fas fa-hourglass-half mr-1"></i> Pending Confirmation
+                                                        </span>
                                                     @endif
                                                 </p>
                                             </div>

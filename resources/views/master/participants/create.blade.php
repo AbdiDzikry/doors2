@@ -36,7 +36,7 @@
                                 </div>
                                 <input type="text" name="name" id="name" value="{{ old('name') }}"
                                     class="pl-10 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm @error('name') border-red-500 @enderror"
-                                    required placeholder="e.g. John Doe">
+                                    required placeholder="e.g. John Doe" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
                                 @error('name')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
 
@@ -60,7 +60,7 @@
                                 </div>
                                 <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
                                     class="pl-10 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm @error('phone') border-red-500 @enderror"
-                                    placeholder="e.g. +62 812 3456 7890">
+                                    placeholder="e.g. +62 812 3456 7890" oninput="this.value = this.value.replace(/[^0-9\s+\-()]/g, '')">
                                 @error('phone')<p class="mt-2 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
                         </div>

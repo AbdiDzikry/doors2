@@ -94,9 +94,9 @@
 
                                         @php
                                             $statusClasses = match($nextMeeting->calculated_status) {
-                                                'scheduled' => 'bg-blue-100 text-blue-800',
-                                                'ongoing' => 'bg-green-100 text-green-800 ring-2 ring-green-500 ring-opacity-50',
-                                                'completed' => 'bg-gray-100 text-gray-800',
+                                                'scheduled' => 'bg-indigo-50 text-indigo-700',
+                                                'ongoing' => 'bg-blue-100 text-blue-800 ring-2 ring-blue-500 ring-opacity-50',
+                                                'completed' => 'bg-green-100 text-green-800',
                                                 'cancelled' => 'bg-red-100 text-red-800',
                                                 default => 'bg-gray-100 text-gray-800',
                                             };
@@ -104,7 +104,7 @@
                                         <div class="flex items-center text-sm mt-2">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
                                                 @if($nextMeeting->calculated_status === 'ongoing')
-                                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
                                                 @endif
                                                 {{ ucfirst($nextMeeting->calculated_status) }}
                                             </span>
@@ -170,17 +170,20 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                              @php
-                                                $statusClasses = match($meeting->calculated_status) {
-                                                    'scheduled' => 'bg-blue-100 text-blue-800',
-                                                    'ongoing' => 'bg-green-100 text-green-800',
-                                                    'completed' => 'bg-gray-100 text-gray-800',
-                                                    'cancelled' => 'bg-red-100 text-red-800',
-                                                    default => 'bg-gray-100 text-gray-800',
-                                                };
-                                            @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $statusClasses }}">
-                                                {{ ucfirst($meeting->calculated_status) }}
-                                            </span>
+                                            $statusClasses = match($meeting->calculated_status) {
+                                                'scheduled' => 'bg-indigo-50 text-indigo-700',
+                                                'ongoing' => 'bg-blue-100 text-blue-800',
+                                                'completed' => 'bg-green-100 text-green-800',
+                                                'cancelled' => 'bg-red-100 text-red-800',
+                                                default => 'bg-gray-100 text-gray-800',
+                                            };
+                                        @endphp
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $statusClasses }}">
+                                            @if($meeting->calculated_status === 'ongoing')
+                                                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
+                                            @endif
+                                            {{ ucfirst($meeting->calculated_status) }}
+                                        </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                             <a href="{{ route('meeting.meeting-lists.show', $meeting) }}" class="text-gray-400 hover:text-green-600 transition-colors">

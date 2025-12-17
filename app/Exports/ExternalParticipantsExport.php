@@ -8,7 +8,7 @@ class ExternalParticipantsExport
 {
     public function collection()
     {
-        return ExternalParticipant::select('name', 'email', 'phone', 'company', 'department', 'address')->get();
+        return ExternalParticipant::select('name', 'email', 'phone', 'company', 'address')->get();
     }
 
     public function headings(): array
@@ -18,7 +18,6 @@ class ExternalParticipantsExport
             'EMAIL',
             'PHONE',
             'COMPANY',
-            'DEPARTMENT',
             'ADDRESS',
         ];
     }

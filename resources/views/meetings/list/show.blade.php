@@ -40,16 +40,21 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-500">Status</h3>
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            @switch($meeting->calculated_status)
-                                @case('scheduled') bg-blue-100 text-blue-800 @break
-                                @case('ongoing') bg-yellow-100 text-yellow-800 @break
-                                @case('completed') bg-green-100 text-green-800 @break
-                                @case('cancelled') bg-red-100 text-red-800 @break
-                                @default bg-gray-100 text-gray-800
-                            @endswitch">
-                            {{ ucfirst($meeting->calculated_status) }}
-                        </span>
+                        @php
+                                $statusClasses = match($meeting->calculated_status) {
+                                    'scheduled' => 'bg-indigo-50 text-indigo-700',
+                                    'ongoing' => 'bg-blue-100 text-blue-800 ring-2 ring-blue-500 ring-opacity-50',
+                                    'completed' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800',
+                                    default => 'bg-gray-100 text-gray-800',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
+                                @if($meeting->calculated_status === 'ongoing')
+                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
+                                @endif
+                                {{ ucfirst($meeting->calculated_status) }}
+                            </span>
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-500">Booked By</h3>
@@ -110,12 +115,14 @@
                 <div class="flex flex-wrap justify-between items-center mb-4 border-b border-gray-100 pb-2 gap-2">
                     <h2 class="text-lg font-semibold text-gray-800">Participants</h2>
                     <div class="flex items-center gap-2">
+                        @if ($meeting->calculated_status !== 'cancelled')
                         <a href="{{ route('meeting.meetings.attendance.export', $meeting->id) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
                             <i class="fas fa-file-excel mr-2"></i> Download Absensi
                         </a>
                         <button @click="showAttendanceModal = true" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
                              <i class="far fa-id-card mr-2"></i> Record Attendance
                         </button>
+                        @endif
                     </div>
                 </div>
 

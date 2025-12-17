@@ -51,6 +51,43 @@ class BookingForm extends Component
         'externalParticipantsUpdated' => 'updateExternalParticipants',
         'pantryOrdersUpdated' => 'updatePantryOrders',
     ];
+    public $occupiedSlots = [];
+
+    public function updatedRoomId()
+    {
+        $this->calculateOccupiedSlots();
+    }
+
+    public function updatedStartTime()
+    {
+        $this->calculateOccupiedSlots();
+    }
+
+    public function calculateOccupiedSlots()
+    {
+        if (!$this->room_id) {
+            $this->occupiedSlots = [];
+            return;
+        }
+
+        // We use the computed property roomMeetings which already uses the correct date
+        $meetings = $this->getRoomMeetingsProperty(); 
+        $slots = [];
+
+        foreach ($meetings as $meeting) {
+            $start = \Carbon\Carbon::parse($meeting->start_time);
+            $end = \Carbon\Carbon::parse($meeting->end_time);
+            $slots[] = [
+                'start' => $start->format('H:i'),
+                'end' => $end->format('H:i'),
+                'start_minutes' => $start->hour * 60 + $start->minute,
+                'end_minutes' => $end->hour * 60 + $end->minute,
+            ];
+        }
+
+        $this->occupiedSlots = $slots;
+    }
+
     public function mount($selectedRoomId = null)
     {
         $this->selectedRoomId = $selectedRoomId;
@@ -91,7 +128,47 @@ class BookingForm extends Component
                 ->where('status', '!=', 'cancelled')
                 ->first();
         }
+        
+        $this->calculateOccupiedSlots();
+        $this->adjustStartTimeToAvailable();
     }
+
+    public function adjustStartTimeToAvailable()
+    {
+        if (empty($this->occupiedSlots)) {
+            return;
+        }
+
+        $currentTime = \Carbon\Carbon::parse($this->start_time);
+        
+        $limitTime = $currentTime->copy()->hour(18)->minute(0);
+        $attempts = 0;
+        
+        while ($attempts < 50 && $currentTime->lt($limitTime)) {
+            $minutes = $currentTime->hour * 60 + $currentTime->minute;
+            $isBlocked = false;
+
+            foreach ($this->occupiedSlots as $slot) {
+                if ($minutes >= $slot['start_minutes'] && $minutes < $slot['end_minutes']) {
+                    $isBlocked = true;
+                    // Jump to end of this booked slot
+                    $startOfNextSlot = $slot['end_minutes'];
+                    $h = floor($startOfNextSlot / 60);
+                    $m = $startOfNextSlot % 60;
+                    $currentTime->hour($h)->minute($m);
+                    break;
+                }
+            }
+
+            if (!$isBlocked) {
+                $this->start_time = $currentTime->format('Y-m-d\TH:i');
+                return;
+            }
+            
+            $attempts++;
+        }
+    }
+
 
     public function render()
     {
@@ -187,13 +264,16 @@ class BookingForm extends Component
             return collect();
         }
 
+        $date = $this->start_time ? \Carbon\Carbon::parse($this->start_time) : now();
+
         return Meeting::where('room_id', $this->room_id)
-            ->where('start_time', '>=', now()->startOfDay())
-            ->where('start_time', '<=', now()->endOfDay()) // Restrict to today only
+            ->where('start_time', '>=', $date->copy()->startOfDay())
+            ->where('end_time', '<=', $date->copy()->endOfDay())
             ->where('status', '!=', 'cancelled')
             ->orderBy('start_time')
             ->take(10)
-            ->with('user') // Eager load user for "Booked By"
+            ->with('user')
             ->get();
     }
+
 }

@@ -122,7 +122,9 @@
                                             'custom': 'Custom Range', 
                                             'day': 'Today', 
                                             'week': 'This Week', 
-                                            'month': 'This Month'
+                                            'month': 'This Month',
+                                            'year': 'This Year',
+                                            'all': 'All Time'
                                         },
                                         get activeLabel() { return this.options[this.filter] } 
                                     }" @click.away="open = false">
@@ -238,10 +240,10 @@
                                         <!-- Status -->
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
-                                                $statusClasses = match($meeting->calculated_status) {
-                                                    'scheduled' => 'bg-blue-100 text-blue-800',
-                                                    'ongoing' => 'bg-green-100 text-green-800 ring-2 ring-green-500 ring-opacity-50',
-                                                    'completed' => 'bg-gray-100 text-gray-800',
+                                            $statusClasses = match($meeting->calculated_status) {
+                                                    'scheduled' => 'bg-indigo-50 text-indigo-700',
+                                                    'ongoing' => 'bg-blue-100 text-blue-800 ring-2 ring-blue-500 ring-opacity-50',
+                                                    'completed' => 'bg-green-100 text-green-800',
                                                     'cancelled' => 'bg-red-100 text-red-800',
                                                     default => 'bg-gray-100 text-gray-800',
                                                 };
@@ -249,7 +251,7 @@
                                             @endphp
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
                                                 @if($meeting->calculated_status === 'ongoing')
-                                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
                                                 @endif
                                                 {{ $statusLabel }}
                                             </span>

@@ -14,7 +14,7 @@
         </div>
 
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-            <form action="{{ route('master.users.update', $user) }}" method="POST">
+            <form action="{{ route('master.users.update', $user) }}" method="POST" autocomplete="off">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -34,7 +34,7 @@
                     </div>
                     <div class="mb-4">
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('email') border-red-500 @enderror">
+                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('email') border-red-500 @enderror">
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -69,14 +69,24 @@
                     </div>
                     <div class="mb-4">
                         <label for="password" class="block text-sm font-medium text-gray-700">New Password (optional):</label>
-                        <input type="password" name="password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('password') border-red-500 @enderror">
+                        <div class="relative mt-1" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" name="password" id="password" autocomplete="new-password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm pr-10 @error('password') border-red-500 @enderror">
+                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                            </button>
+                        </div>
                         @error('password')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm New Password:</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm">
+                        <div class="relative mt-1" x-data="{ show: false }">
+                            <input :type="show ? 'text' : 'password'" name="password_confirmation" id="password_confirmation" autocomplete="new-password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm pr-10">
+                            <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                                <i class="fas" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-4 md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700">Roles <span class="text-red-500">*</span></label>
