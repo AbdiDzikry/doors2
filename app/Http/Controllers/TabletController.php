@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Room;
 use App\Models\Meeting;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class TabletController extends Controller
 {
