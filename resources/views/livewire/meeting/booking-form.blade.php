@@ -444,7 +444,7 @@
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                                         {{ $meeting->calculated_status === 'scheduled' ? 'bg-blue-100 text-blue-800' : '' }}
                                                         {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
-                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-gray-100 text-gray-800' : '' }}
+                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
                                                         {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
                                                         {{ ucfirst($meeting->calculated_status) }}
                                                     </span>

@@ -161,6 +161,21 @@
                                     </div>
                                 </div>
                                 <div>
+                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Status</label>
+                                    <div class="relative">
+                                        <select name="status_filter" class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer appearance-none">
+                                            <option value="all" {{ request('status_filter') == 'all' ? 'selected' : '' }}>All Status</option>
+                                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
+                                            <option value="ongoing" {{ request('status_filter') == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+                                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                            <i class="fas fa-chevron-down text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
                                      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Search</label>
                                      <input type="text" name="search" value="{{ request('search') }}" placeholder="Topic, Room..." class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 text-xs py-1.5 bg-gray-50">
                                 </div>
@@ -185,12 +200,19 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    @foreach (['topic' => 'Topic', 'room.name' => 'Room', 'start_time' => 'Date & Time', 'user.name' => 'Booked By'] as $column => $title)
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                            {{ $title }}
+                                    @foreach (['topic' => 'Topic', 'room.name' => 'Room', 'start_time' => 'Date & Time', 'user.name' => 'Booked By', 'calculated_status' => 'Status'] as $column => $title)
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onclick="window.location.href='{{ request()->fullUrlWithQuery(['sort_by' => $column, 'sort_direction' => request('sort_by') === $column && request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}'">
+                                            <div class="flex items-center space-x-1">
+                                                <span>{{ $title }}</span>
+                                                @if(request('sort_by') === $column)
+                                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-500"></i>
+                                                @else
+                                                    <i class="fas fa-sort text-gray-300 text-[10px]"></i>
+                                                @endif
+                                            </div>
                                         </th>
                                     @endforeach
-                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="relative px-6 py-4"><span class="sr-only">Actions</span></th>
                                 </tr>
                             </thead>

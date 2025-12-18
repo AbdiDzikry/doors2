@@ -1,1 +1,44 @@
-http://127.0.0.1:8000/meeting/bookings/create?room_id=3
+bootstrap.js:11 WebSocket connection to 'ws://localhost:8080/app/1wofi3vjou9hnxfvbb2r?protocol=7&client=js&version=8.4.0&flash=false' failed: WebSocket is closed before the connection is established.
+close @ pusher-js.js?v=62f94cdb:1272
+abort @ pusher-js.js?v=62f94cdb:3425
+(anonymous) @ pusher-js.js?v=62f94cdb:2489
+(anonymous) @ pusher-js.js?v=62f94cdb:732
+(anonymous) @ pusher-js.js?v=62f94cdb:708
+setTimeout
+Timer @ pusher-js.js?v=62f94cdb:706
+timers_OneOffTimer @ pusher-js.js?v=62f94cdb:731
+tryStrategy @ pusher-js.js?v=62f94cdb:2488
+connect @ pusher-js.js?v=62f94cdb:2471
+connect @ pusher-js.js?v=62f94cdb:2601
+startConnecting @ pusher-js.js?v=62f94cdb:2173
+connect @ pusher-js.js?v=62f94cdb:2132
+connect @ pusher-js.js?v=62f94cdb:3902
+pusher_Pusher @ pusher-js.js?v=62f94cdb:3892
+connect @ laravel-echo.js?v=51723052:471
+c2 @ laravel-echo.js?v=51723052:417
+o @ laravel-echo.js?v=51723052:457
+connect @ laravel-echo.js?v=51723052:733
+E @ laravel-echo.js?v=51723052:720
+(anonymous) @ bootstrap.js:11
+app.js:8 WebSocket connection to 'ws://localhost:8080/app/1wofi3vjou9hnxfvbb2r?protocol=7&client=js&version=8.4.0&flash=false' failed: WebSocket is closed before the connection is established.
+close @ pusher-js.js?v=62f94cdb:1272
+abort @ pusher-js.js?v=62f94cdb:3425
+(anonymous) @ pusher-js.js?v=62f94cdb:2489
+(anonymous) @ pusher-js.js?v=62f94cdb:732
+(anonymous) @ pusher-js.js?v=62f94cdb:708
+setTimeout
+Timer @ pusher-js.js?v=62f94cdb:706
+timers_OneOffTimer @ pusher-js.js?v=62f94cdb:731
+tryStrategy @ pusher-js.js?v=62f94cdb:2488
+connect @ pusher-js.js?v=62f94cdb:2471
+connect @ pusher-js.js?v=62f94cdb:2601
+startConnecting @ pusher-js.js?v=62f94cdb:2173
+connect @ pusher-js.js?v=62f94cdb:2132
+connect @ pusher-js.js?v=62f94cdb:3902
+pusher_Pusher @ pusher-js.js?v=62f94cdb:3892
+connect @ laravel-echo.js?v=51723052:471
+c2 @ laravel-echo.js?v=51723052:417
+o @ laravel-echo.js?v=51723052:457
+connect @ laravel-echo.js?v=51723052:733
+E @ laravel-echo.js?v=51723052:720
+(anonymous) @ app.js:8

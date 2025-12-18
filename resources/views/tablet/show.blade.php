@@ -118,10 +118,10 @@
                                             <!-- Main Row -->
                                             <tr class="hover:bg-gray-50/80 transition-colors group cursor-pointer" @click="toggleMeeting({{ $meeting->id }})">
                                                 <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-900 font-bold">
-                                                    {{ $meeting->start_time->format('H:i') }} - {{ $meeting->end_time->format('H:i') }}
+                                                    {{ $meeting->start_time->format('H:i') }} - {{ $meeting->end_time->format('H:i') }} WIB
                                                 </td>
                                                 <td class="px-6 py-5 text-sm text-gray-800 font-medium">
-                                                    <div class="truncate max-w-[200px]" title="{{ $meeting->topic }}">
+                                                    <div class="truncate max-w-[200px] capitalize" title="{{ $meeting->topic }}">
                                                         {{ $meeting->topic }}
                                                     </div>
                                                 </td>
@@ -139,7 +139,7 @@
                                                             Ongoing
                                                         </span>
                                                     @elseif($meeting->calculated_status == 'completed')
-                                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-[#089244] border border-green-200">
                                                             Selesai
                                                         </span>
                                                     @else
@@ -301,7 +301,8 @@
                             </h2>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Masukkan NPK Anda <span class="text-red-500">*</span></label>
-                                <input type="text" name="npk" required placeholder="Contoh: 12345678"
+                                <input type="text" name="npk" required placeholder="Contoh: 12345678" inputmode="numeric"
+                                    x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '')"
                                     class="w-full text-lg border-gray-300 rounded-lg shadow-sm focus:ring-[#089244] focus:border-[#089244] py-3">
                             </div>
                         </div>
@@ -324,18 +325,14 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Date & Duration Column -->
                                     <div class="space-y-4">
-                                        <!-- Date -->
+                                        <!-- Date (Fixed to Today) -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                                             <div class="relative">
-                                                <input type="date" x-model="date" 
-                                                    class="block w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-gray-900 font-medium focus:outline-none focus:ring-1 focus:ring-[#089244] focus:border-[#089244] cursor-pointer">
-                                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </span>
+                                                <input type="date" x-model="date" disabled
+                                                    class="block w-full bg-gray-100 border border-gray-300 rounded-lg shadow-sm pl-3 pr-4 py-2.5 text-gray-500 font-medium cursor-not-allowed">
                                             </div>
+                                            <p class="text-xs text-gray-400 mt-1">Pemesanan via Tablet hanya untuk hari ini.</p>
                                         </div>
 
                                         <!-- Duration -->
@@ -343,16 +340,19 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
                                             <div class="relative" x-data="{ 
                                                 open: false, 
-                                                options: {
-                                                    '15': '15 Menit', '30': '30 Menit', '45': '45 Menit',
-                                                    '60': '1 Jam', '75': '1 Jam 15 Menit', '90': '1 Jam 30 Menit', '105': '1 Jam 45 Menit', '120': '2 Jam',
-                                                    '150': '2.5 Jam', '180': '3 Jam', '210': '3.5 Jam', '240': '4 Jam', '270': '4.5 Jam', '300': '5 Jam', '330': '5.5 Jam', '360': '6 Jam'
+                                                getDurationLabel(m) {
+                                                    let h = Math.floor(m / 60);
+                                                    let min = m % 60;
+                                                    let label = '';
+                                                    if (h > 0) label += h + ' Jam ';
+                                                    if (min > 0) label += min + ' Menit';
+                                                    return label.trim();
                                                 }
                                             }" @click.away="open = false">
                                                 <button type="button" @click="open = !open" 
                                                     class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-4 pr-10 py-2.5 text-left focus:ring-1 focus:ring-[#089244] focus:border-[#089244]"
                                                     :class="{ 'border-[#089244] ring-1 ring-[#089244]': open }">
-                                                    <span class="block truncate" x-text="options[duration] || 'Pilih Durasi'"></span>
+                                                    <span class="block truncate" x-text="duration ? getDurationLabel(duration) : 'Pilih Durasi'"></span>
                                                     <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -361,63 +361,153 @@
                                                 </button>
 
                                                 <div x-show="open" class="absolute z-20 mt-1 w-full bg-white shadow-xl max-h-60 rounded-xl py-1 overflow-auto border border-[#089244]/30" style="display: none;">
+                                                    
+                                                    <!-- Rapat Cepat -->
                                                     <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-gray-50">Rapat Cepat</div>
                                                     @foreach ([15, 30, 45] as $val)
                                                         <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer py-2 pl-4 hover:bg-green-50 hover:text-[#089244]">{{ $val }} Menit</div>
                                                     @endforeach
+
+                                                    <!-- Rapat Standar -->
                                                     <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-gray-50 border-t">Rapat Standar</div>
-                                                    @foreach ([60, 90, 120] as $val)
-                                                        <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer py-2 pl-4 hover:bg-green-50 hover:text-[#089244]">{{ $val }} Menit</div>
+                                                    @foreach (range(60, 120, 15) as $val)
+                                                        @php
+                                                            $h = floor($val / 60);
+                                                            $m = $val % 60;
+                                                            $label = ($h > 0 ? $h . ' Jam ' : '') . ($m > 0 ? $m . ' Menit' : '');
+                                                        @endphp
+                                                        <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer py-2 pl-4 hover:bg-green-50 hover:text-[#089244]">{{ trim($label) }}</div>
+                                                    @endforeach
+
+                                                    <!-- Sesi Panjang -->
+                                                    <div class="px-4 py-2 text-xs font-bold text-gray-500 uppercase bg-gray-50 border-t">Sesi Panjang</div>
+                                                    @foreach (range(135, 360, 15) as $val)
+                                                        @php
+                                                            $h = floor($val / 60);
+                                                            $m = $val % 60;
+                                                            $label = ($h > 0 ? $h . ' Jam ' : '') . ($m > 0 ? $m . ' Menit' : '');
+                                                        @endphp
+                                                        <div @click="duration = '{{ $val }}'; open = false" class="cursor-pointer py-2 pl-4 hover:bg-green-50 hover:text-[#089244]">{{ trim($label) }}</div>
                                                     @endforeach
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Start Time Column (Split Dropdown) -->
+                                    <!-- Start Time Column (Smart Dropdown) -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Waktu Mulai <span class="text-red-500">*</span></label>
-                                        <div class="flex items-center gap-3">
-                                            <!-- Hour -->
-                                            <div class="relative w-1/2" x-data="{ open: false }" @click.away="open = false">
-                                                <button type="button" @click="open = !open" 
-                                                    class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-3 text-center focus:outline-none focus:ring-1 focus:ring-[#089244] focus:border-[#089244]"
-                                                    :class="{ 'border-[#089244] ring-1 ring-[#089244]': open }">
-                                                    <span class="block text-lg font-bold text-gray-800" x-text="hour"></span>
-                                                    <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                                                </button>
-                                                <div x-show="open" class="absolute z-20 mt-1 w-full bg-white shadow-xl max-h-48 rounded-xl py-1 overflow-auto border border-[#089244]/30">
-                                                    @foreach(range(7, 18) as $h)
-                                                        @php $val = str_pad($h, 2, '0', STR_PAD_LEFT); @endphp
-                                                        <div @click="hour = '{{ $val }}'; open = false" class="cursor-pointer py-2 text-center hover:bg-green-50 hover:text-[#089244] font-bold text-gray-700 transition-colors">
-                                                            {{ $val }}
-                                                        </div>
-                                                    @endforeach
+                                        
+                                        <!-- Realtime Logic Wrapper -->
+                                        <div x-data="{
+                                            occupiedSlots: {{ json_encode($occupiedSlots ?? []) }},
+                                            getCurrentTimeMinutes() {
+                                                const now = new Date();
+                                                return now.getHours() * 60 + now.getMinutes();
+                                            },
+                                            isTimeBlocked(h, m) {
+                                                const time = parseInt(h) * 60 + parseInt(m);
+                                                // 1. Block if passed (realtime)
+                                                if (time < this.getCurrentTimeMinutes()) return true;
+                                                // 2. Block if occupied
+                                                return this.occupiedSlots.some(slot => time >= slot.start_minutes && time < slot.end_minutes);
+                                            },
+                                            isHourBlocked(h) {
+                                                // Block hour if all 15-min slots are blocked (past or occupied)
+                                                return ['00', '15', '30', '45'].every(m => this.isTimeBlocked(h, m));
+                                            },
+                                            init() {
+                                                // Smart Auto-Select Nearest Future Slot
+                                                let nowMins = this.getCurrentTimeMinutes();
+                                                // Round up to next 15
+                                                let t = Math.ceil(nowMins / 15) * 15;
+                                                
+                                                // Search until end of day (24*60 = 1440)
+                                                for(let i = 0; i < 96; i++) { // Max iterations to prevent infinite loop
+                                                    if (t >= 1440) break;
+
+                                                    // Check matches isTimeBlocked logic (Realtime + Occupied)
+                                                    // We duplicate logic here slightly or interpret manually
+                                                    
+                                                    // Is it occupied?
+                                                    let isOccupied = this.occupiedSlots.some(slot => t >= slot.start_minutes && t < slot.end_minutes);
+                                                    
+                                                    // Is it passed? (Shouldn't be if we started at nowMins, but good to be safe)
+                                                    let isPassed = t < nowMins;
+
+                                                    if(!isOccupied && !isPassed) {
+                                                         let h = Math.floor(t / 60);
+                                                         let m = t % 60;
+                                                         this.hour = String(h).padStart(2,'0');
+                                                         this.minute = String(m).padStart(2,'0');
+                                                         break;
+                                                    }
+                                                    t += 15;
+                                                }
+                                            }
+                                        }">
+                                            <div class="flex items-center gap-3">
+                                                <!-- Hour -->
+                                                <div class="relative w-1/2" x-data="{ open: false }" @click.away="open = false">
+                                                    <button type="button" @click="open = !open" 
+                                                        class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-3 text-center focus:outline-none focus:ring-1 focus:ring-[#089244] focus:border-[#089244]"
+                                                        :class="{ 'border-[#089244] ring-1 ring-[#089244]': open }">
+                                                        <span class="block text-lg font-bold text-gray-800" x-text="hour"></span>
+                                                        <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                                    </button>
+                                                    <div x-show="open" class="absolute z-20 mt-1 w-full bg-white shadow-xl max-h-48 rounded-xl py-1 overflow-auto border border-[#089244]/30">
+                                                        @foreach(range(0, 23) as $h) <!-- Allow full day range, validation/logic handles blockage -->
+                                                            @php $val = str_pad($h, 2, '0', STR_PAD_LEFT); @endphp
+                                                            <div @click="if(!isHourBlocked('{{ $val }}')) { hour = '{{ $val }}'; open = false; }" 
+                                                                 class="cursor-pointer py-2 text-center transition-colors relative"
+                                                                 :class="{
+                                                                    'hover:bg-green-50 hover:text-[#089244] font-bold text-gray-700': !isHourBlocked('{{ $val }}'),
+                                                                    'bg-gray-50 text-gray-400 cursor-not-allowed': isHourBlocked('{{ $val }}')
+                                                                 }">
+                                                                {{ $val }}
+                                                                    <span x-show="isHourBlocked('{{ $val }}')" class="absolute right-4 text-xs text-red-300">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                                                    </svg>
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <span class="text-2xl font-bold text-gray-300">:</span>
+
+                                                <!-- Minute -->
+                                                <div class="relative w-1/2" x-data="{ open: false }" @click.away="open = false">
+                                                    <button type="button" @click="open = !open" 
+                                                        class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-3 text-center focus:outline-none focus:ring-1 focus:ring-[#089244] focus:border-[#089244]"
+                                                        :class="{ 'border-[#089244] ring-1 ring-[#089244]': open }">
+                                                        <span class="block text-lg font-bold text-gray-800" x-text="minute"></span>
+                                                        <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                                    </button>
+                                                    <div x-show="open" class="absolute z-20 mt-1 w-full bg-white shadow-xl max-h-48 rounded-xl py-1 overflow-auto border border-[#089244]/30">
+                                                        @foreach(['00', '15', '30', '45'] as $m)
+                                                            <div @click="if(!isTimeBlocked(hour, '{{ $m }}')) { minute = '{{ $m }}'; open = false; }" 
+                                                                 class="cursor-pointer py-2 text-center transition-colors relative"
+                                                                 :class="{
+                                                                     'hover:bg-green-50 hover:text-[#089244] font-bold text-gray-700': !isTimeBlocked(hour, '{{ $m }}'),
+                                                                     'bg-gray-50 text-gray-400 cursor-not-allowed': isTimeBlocked(hour, '{{ $m }}')
+                                                                 }">
+                                                                {{ $m }}
+                                                                <span x-show="isTimeBlocked(hour, '{{ $m }}')" class="absolute right-4 text-xs text-red-300">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                                                    </svg>
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <span class="text-2xl font-bold text-gray-300">:</span>
-
-                                            <!-- Minute -->
-                                            <div class="relative w-1/2" x-data="{ open: false }" @click.away="open = false">
-                                                <button type="button" @click="open = !open" 
-                                                    class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-3 text-center focus:outline-none focus:ring-1 focus:ring-[#089244] focus:border-[#089244]"
-                                                    :class="{ 'border-[#089244] ring-1 ring-[#089244]': open }">
-                                                    <span class="block text-lg font-bold text-gray-800" x-text="minute"></span>
-                                                    <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                                                </button>
-                                                <div x-show="open" class="absolute z-20 mt-1 w-full bg-white shadow-xl max-h-48 rounded-xl py-1 overflow-auto border border-[#089244]/30">
-                                                    @foreach(['00', '15', '30', '45'] as $m)
-                                                        <div @click="minute = '{{ $m }}'; open = false" class="cursor-pointer py-2 text-center hover:bg-green-50 hover:text-[#089244] font-bold text-gray-700 transition-colors">
-                                                            {{ $m }}
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
+                                            <p class="text-sm text-gray-500 mt-3 font-medium text-center md:text-left">
+                                                Selesai: <span class="font-bold text-[#089244]" x-text="calculateEndTime()"></span>
+                                            </p>
                                         </div>
-                                        <p class="text-sm text-gray-500 mt-3 font-medium text-center md:text-left">
-                                            Selesai: <span class="font-bold text-[#089244]" x-text="calculateEndTime()"></span>
-                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -545,4 +635,35 @@
             </div>
         @endif
     </div>
+
+    @push('scripts')
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', function () {
+            const roomId = {{ $room->id }};
+            const refreshInterval = 5 * 60 * 1000; // 5 Minutes
+
+            // 1. Keep-Alive Pinger & Auto Refresh Fallback
+            setInterval(() => {
+                console.log('Autorefresh: Syncing data...');
+                window.location.reload();
+            }, refreshInterval);
+
+            // 2. Realtime Updates via Reverb/Echo
+            if (window.Echo) {
+                console.log(`Listening for updates on room.${roomId}...`);
+                
+                window.Echo.channel('rooms')
+                    .listen('RoomStatusUpdated', (e) => {
+                        console.log('Event Received:', e);
+                        if (e.roomId == roomId) {
+                            console.log('Room status changed. Reloading...');
+                            window.location.reload();
+                        }
+                    });
+            } else {
+                console.error('Echo is not initialized. Realtime updates disabled.');
+            }
+        });
+    </script>
+    @endpush
 </x-tablet-layout>

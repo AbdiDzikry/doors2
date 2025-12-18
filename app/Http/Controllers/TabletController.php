@@ -88,7 +88,17 @@ class TabletController extends Controller
         $defaultHour = $defaultStartTime->format('H');
         $defaultMinute = $defaultStartTime->format('i');
 
-        return view('tablet.show', compact('room', 'todaysMeetings', 'currentMeeting', 'defaultHour', 'defaultMinute'));
+        // Prepare occupied slots for frontend (AlpineJS)
+        $occupiedSlots = $todaysMeetings->map(function ($meeting) {
+            $start = \Carbon\Carbon::parse($meeting->start_time);
+            $end = \Carbon\Carbon::parse($meeting->end_time);
+            return [
+                'start_minutes' => $start->hour * 60 + $start->minute,
+                'end_minutes' => $end->hour * 60 + $end->minute,
+            ];
+        })->values();
+
+        return view('tablet.show', compact('room', 'todaysMeetings', 'currentMeeting', 'defaultHour', 'defaultMinute', 'occupiedSlots'));
     }
 
     public function store(Request $request, $id)

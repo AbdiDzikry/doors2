@@ -64,24 +64,8 @@ class MeetingListController extends Controller
         } else {
             $query = Meeting::query();
             
-            // Use the scope (or whereBetween since we have dates) - let's use whereBetween to avoid double parsing overhead, 
-            // even though we added the scope. The scope is useful for other places where we might not need view variables.
-            // But to strictly follow "Update MeetingListController to use the scope":
-            //$query->filterByDate($filter, $startDateInput, $endDateInput); 
-            // Actually, using whereBetween is more efficient here since we already calculated dates.
-            // I will use whereBetween here for efficiency but I acknowledge the scope exists for API/other uses.
+            // Date Filter
             $query->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
-
-            // Define allowed sortable columns
-            $allowedSortBy = ['topic', 'start_time', 'end_time'];
-
-            // Validate sort_by and sort_direction
-            if (!in_array($sortBy, $allowedSortBy)) {
-                $sortBy = 'start_time';
-            }
-            if (!in_array(strtolower($sortDirection), ['asc', 'desc'])) {
-                $sortDirection = 'asc';
-            }
 
             if ($request->filled('search')) {
                 $search = $request->input('search');
@@ -96,9 +80,50 @@ class MeetingListController extends Controller
                 });
             }
 
-            $query->orderBy($sortBy, $sortDirection);
-
+            // Get Collection
             $meetings = $query->with('room', 'user')->get();
+
+            // 1. Filter by Status (calculated_status)
+            if ($request->filled('status_filter') && $request->input('status_filter') !== 'all') {
+                $statusFilter = $request->input('status_filter');
+                $meetings = $meetings->filter(function ($meeting) use ($statusFilter) {
+                    return $meeting->calculated_status === $statusFilter;
+                });
+            }
+
+            // 2. Sort Logic
+            // Default sort: Status (Scheduled -> Ongoing -> Completed -> Cancelled), then Start Time
+            // We define a helper for Status Weight
+            $getStatusWeight = function ($status) {
+                return match($status) {
+                    'scheduled' => 1,
+                    'ongoing' => 2,
+                    'completed' => 3,
+                    'cancelled' => 4,
+                    default => 5,
+                };
+            };
+
+            if ($request->has('sort_by') && in_array($sortBy, ['topic', 'room.name', 'start_time', 'user.name', 'calculated_status'])) {
+                $descending = $sortDirection === 'desc';
+                
+                if ($sortBy === 'calculated_status') {
+                    $meetings = $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
+                        return $getStatusWeight($meeting->calculated_status);
+                    }, SORT_REGULAR, $descending);
+                } else {
+                    $meetings = $descending 
+                        ? $meetings->sortByDesc($sortBy) 
+                        : $meetings->sortBy($sortBy);
+                }
+            } else {
+                // Default Sorting: Custom Status Order, then Start Time Ascending
+                $meetings = $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
+                    // Combine status weight and timestamp for sorting
+                    // Multi-level sort: Status first, then Start Time
+                    return [$getStatusWeight($meeting->calculated_status), $meeting->start_time->timestamp];
+                });
+            }
         }
 
         return view('meetings.list.index', compact('meetings', 'myMeetings', 'stats', 'filter', 'effectiveStartDate', 'effectiveEndDate', 'activeTab', 'sortBy', 'sortDirection'));
