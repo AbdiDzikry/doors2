@@ -72,12 +72,8 @@ class DatabaseSeeder extends Seeder
         $this->call(LoginApiKeySeeder::class); // Add this line // Ensure all required data is present before meetings
 
         if (app()->environment('local')) {
-            // Restore 1800 dummy users for testing
-            if (User::count() < 100) { // Safety check to avoid double seeding
-                User::factory(1800)->create()->each(function ($u) {
-                    $u->assignRole('Karyawan');
-                });
-            }
+            // Restore REAL employee data from API
+            $this->call(SyncEmployeeSeeder::class);
 
             $this->call(MeetingSeeder::class);
             $this->call(PantryOrderSeeder::class);
