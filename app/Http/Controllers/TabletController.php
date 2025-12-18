@@ -93,6 +93,13 @@ class TabletController extends Controller
 
     public function store(Request $request, $id)
     {
+        // Force cast to integer to prevent "must be an integer" validation error on strings like "09"
+        $request->merge([
+            'start_hour' => (int) $request->start_hour,
+            'start_minute' => (int) $request->start_minute,
+            'duration' => (int) $request->duration,
+        ]);
+
         $request->validate([
             'npk' => 'required|exists:users,npk',
             'topic' => 'required|string|max:255',

@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10B981">
+    <link rel="manifest" href="{{ asset('build/manifest.webmanifest') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/pwa-icon-192x192.png') }}">
+    
     <title>{{ config('app.name', 'Doors') }} - Tablet Mode</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -75,6 +81,26 @@
             </div>
         @endif
 
+        <!-- PWA Install Prompt -->
+        <div id="install-prompt" class="hidden max-w-7xl mx-auto mt-6 mb-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900">Install Aplikasi Tablet</h4>
+                        <p class="text-sm text-blue-700">Pasang aplikasi ini di layar utama untuk akses lebih cepat & offline.</p>
+                    </div>
+                </div>
+                <button id="install-button" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-colors text-sm whitespace-nowrap">
+                    Install Sekarang
+                </button>
+            </div>
+        </div>
+
         <!-- Footer Actions -->
         <div class="max-w-7xl mx-auto mt-12 text-center border-t border-gray-200 pt-8">
             <form method="POST" action="{{ route('logout') }}" class="inline-block">
@@ -88,5 +114,38 @@
             </form>
         </div>
     </div>
+
+    <script>
+        let deferredPrompt;
+        const installPrompt = document.getElementById('install-prompt');
+        const installButton = document.getElementById('install-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            
+            // Check if already in standalone mode (installed)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                return; 
+            }
+
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI notify the user they can install the PWA
+            installPrompt.classList.remove('hidden');
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            // Hide the prompt
+            installPrompt.classList.add('hidden');
+        });
+    </script>
 </body>
 </html>

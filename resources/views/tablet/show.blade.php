@@ -16,38 +16,7 @@
                 this.currentTime = `${h}:${m}`;
             },
 
-            // Booking Form Logic
-            date: '{{ now()->format("Y-m-d") }}',
-            hour: '{{ now()->format("H") }}',
-            minute: '00',
-            duration: '60',
-            initBooking() {
-                // Round Start Time
-                let now = new Date();
-                let m = now.getMinutes();
-                let h = now.getHours();
-                if (m < 15) { this.minute = '15'; }
-                else if (m < 30) { this.minute = '30'; }
-                else if (m < 45) { this.minute = '45'; }
-                else { this.minute = '00'; this.hour = String(h + 1).padStart(2, '0'); }
-                this.hour = String(this.hour).padStart(2, '0');
-            },
-            updateHiddenInputs() {
-                $refs.dateInput.value = this.date;
-                $refs.hourInput.value = this.hour;
-                $refs.minuteInput.value = this.minute;
-                $refs.durationInput.value = this.duration;
-            },
-            calculateEndTime() {
-                let totalMin = (parseInt(this.hour) * 60) + parseInt(this.minute) + parseInt(this.duration);
-                let h = Math.floor(totalMin / 60) % 24;
-                let m = totalMin % 60;
-                return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-            },
-
             // Modal / Dropdown Logic
-            // modalOpen: false, // Deprecated
-            // selectedMeeting: null, // Deprecated
             expandedMeeting: null,
             toggleMeeting(id) {
                 if (this.expandedMeeting === id) {
@@ -55,13 +24,9 @@
                 } else {
                     this.expandedMeeting = id;
                 }
-            },
-            openModal(meeting) { // Legacy: keeping briefly for safety until full replacement
-                this.selectedMeeting = meeting;
-                this.modalOpen = true;
             }
          }"
-         x-init="initClock(); initBooking(); $watch('date', () => updateHiddenInputs()); $watch('hour', () => updateHiddenInputs()); $watch('minute', () => updateHiddenInputs()); $watch('duration', () => updateHiddenInputs());">
+         x-init="initClock()">
          
         <!-- Top Bar -->
         <div class="bg-white shadow-md px-8 py-4 flex justify-between items-center z-20 shrink-0 border-b border-gray-200">
@@ -290,20 +255,43 @@
                         x-data="{
                             internalParticipants: [],
                             externalParticipants: [],
+                            
+                            
+                            // Booking State
+                            date: '{{ now()->format('Y-m-d') }}',
+                            duration: '60',
+                            hour: '{{ $defaultHour ?? now()->format('H') }}',
+                            minute: '{{ $defaultMinute ?? (now()->format('i') < 30 ? '00' : '30') }}',
+                            
                             updateParticipants() {
-                                $refs.internalInput.value = JSON.stringify(this.internalParticipants);
-                                $refs.externalInput.value = JSON.stringify(this.externalParticipants);
+                                // No longer needed for refs, but keeps event listeners working if they rely on it?
+                                // Actually we can just update the array variables, and :value will handle the json stringify.
+                                // The listeners below update the arrays.
+                            },
+
+                            calculateEndTime() {
+                                let h = parseInt(this.hour);
+                                let m = parseInt(this.minute);
+                                let d = parseInt(this.duration);
+                                
+                                let totalMinutes = (h * 60) + m + d;
+                                let endH = Math.floor(totalMinutes / 60);
+                                let endM = totalMinutes % 60;
+                                
+                                if (endH >= 24) endH = endH - 24;
+
+                                return String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
                             }
                         }"
-                        @internal-participants-updated.window="internalParticipants = $event.detail[0]; updateParticipants()"
-                        @external-participants-updated.window="externalParticipants = $event.detail[0]; updateParticipants()">
+                        @internal-participants-updated.window="internalParticipants = $event.detail[0]"
+                        @external-participants-updated.window="externalParticipants = $event.detail[0]">
                         @csrf
-                        <input type="hidden" name="start_date" x-ref="dateInput">
-                        <input type="hidden" name="start_hour" x-ref="hourInput">
-                        <input type="hidden" name="start_minute" x-ref="minuteInput">
-                        <input type="hidden" name="duration" x-ref="durationInput">
-                        <input type="hidden" name="internal_participants" x-ref="internalInput">
-                        <input type="hidden" name="external_participants" x-ref="externalInput">
+                        <input type="hidden" name="start_date" x-model="date">
+                        <input type="hidden" name="start_hour" x-model="hour">
+                        <input type="hidden" name="start_minute" x-model="minute">
+                        <input type="hidden" name="duration" x-model="duration">
+                        <input type="hidden" name="internal_participants" x-model="JSON.stringify(internalParticipants)">
+                        <input type="hidden" name="external_participants" x-model="JSON.stringify(externalParticipants)">
                         
                         <!-- 0. Booker Identification (NPK) -->
                         <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#089244]">
@@ -333,35 +321,7 @@
                                         class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500">
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6"
-                                     x-data="{
-                                        date: '{{ now()->format('Y-m-d') }}',
-                                        duration: '60',
-                                        hour: '{{ $defaultHour ?? now()->format('H') }}',
-                                        minute: '{{ $defaultMinute ?? (now()->format('i') < 30 ? '00' : '30') }}',
-                                        calculateEndTime() {
-                                            let h = parseInt(this.hour);
-                                            let m = parseInt(this.minute);
-                                            let d = parseInt(this.duration);
-                                            
-                                            let totalMinutes = (h * 60) + m + d;
-                                            let endH = Math.floor(totalMinutes / 60);
-                                            let endM = totalMinutes % 60;
-                                            
-                                            // Handle day overflow
-                                            if (endH >= 24) endH = endH - 24;
-
-                                            return String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
-                                        },
-                                        updateHiddenInputs() { 
-                                            $refs.dateInput.value = this.date;
-                                            $refs.hourInput.value = this.hour;
-                                            $refs.minuteInput.value = this.minute;
-                                            $refs.durationInput.value = this.duration;
-                                        }
-                                     }"
-                                     x-init="updateHiddenInputs()"
-                                     x-effect="updateHiddenInputs()">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Date & Duration Column -->
                                     <div class="space-y-4">
                                         <!-- Date -->

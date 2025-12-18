@@ -17,7 +17,7 @@ use App\Http\Controllers\Settings\ConfigurationController;
 use App\Http\Controllers\Settings\RolePermissionController;
 use App\Http\Controllers\Dashboard\ReceptionistDashboardController;
 use App\Http\Controllers\Meeting\UserBookingController;
-use App\Http\Controllers\GuideController;
+// use App\Http\Controllers\GuideController;
 use App\Http\Controllers\SurveyController;
 
 Route::redirect('/', '/login');
@@ -26,7 +26,7 @@ Route::redirect('/', '/login');
 Route::prefix('user-booking')->name('user-booking.')->group(function () {
     Route::get('/', [UserBookingController::class, 'index'])->name('index');
     // User Guide
-    Route::get('/guide', [GuideController::class, 'index'])->name('guide.index');
+    // Route::get('/guide', [GuideController::class, 'index'])->name('guide.index');
 
     Route::get('/search', [UserBookingController::class, 'search'])->name('search');
     Route::post('/select', [UserBookingController::class, 'select'])->name('select');
