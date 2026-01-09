@@ -17,7 +17,7 @@ use App\Mail\MeetingInvitation;
 use App\Services\IcsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request; // Although not directly used as a type-hinted parameter in Livewire methods, it's good to have for context if needed.
+use Livewire\Attributes\On; // Add Import
 
 class BookingForm extends Component
 {
@@ -39,19 +39,42 @@ class BookingForm extends Component
 
     // Participants and Pantry Items
     public $internalParticipants = []; // Array of user IDs
+    public $picParticipants = []; // Array of user IDs who are PICs
     public $externalParticipants = []; // Array of external participant IDs
     public $pantryOrders = []; // Array of ['pantry_item_id' => id, 'quantity' => qty]
 
     public $current_meeting;
     public $selectedRoom;
 
-    // Listeners for child components
-    protected $listeners = [
-        'internalParticipantsUpdated' => 'updateInternalParticipants',
-        'externalParticipantsUpdated' => 'updateExternalParticipants',
-        'pantryOrdersUpdated' => 'updatePantryOrders',
-    ];
+    // REMOVED $listeners property
+
     public $occupiedSlots = [];
+
+    // ... (keep existing methods up to updateInternalParticipants)
+
+    #[On('internal-participants-updated')]
+    public function updateInternalParticipants($payload)
+    {
+        if (is_array($payload) && isset($payload['participants'])) {
+             $this->internalParticipants = $payload['participants'];
+             $this->picParticipants = $payload['pics'] ?? [];
+        } else {
+             // Fallback for simple array check (legacy)
+             $this->internalParticipants = $payload;
+        }
+    }
+
+    #[On('external-participants-updated')]
+    public function updateExternalParticipants($participants)
+    {
+        $this->externalParticipants = $participants;
+    }
+
+    #[On('pantryOrdersUpdated')]
+    public function updatePantryOrders($orders)
+    {
+        $this->pantryOrders = $orders;
+    }
 
     public function updatedRoomId()
     {
@@ -169,7 +192,6 @@ class BookingForm extends Component
         }
     }
 
-
     public function render()
     {
         // $selectedRoom is now a public property, no need to re-fetch
@@ -231,7 +253,8 @@ class BookingForm extends Component
                 $data,
                 $this->internalParticipants,
                 $this->externalParticipants,
-                $this->pantryOrders
+                $this->pantryOrders,
+                $this->picParticipants
             );
 
             session()->flash('success', 'Meeting scheduled successfully!');
@@ -242,21 +265,7 @@ class BookingForm extends Component
         }
     }
 
-    // Listener methods to update participants and pantry orders from child components
-    public function updateInternalParticipants($participants)
-    {
-        $this->internalParticipants = $participants;
-    }
-
-    public function updateExternalParticipants($participants)
-    {
-        $this->externalParticipants = $participants;
-    }
-
-    public function updatePantryOrders($orders)
-    {
-        $this->pantryOrders = $orders;
-    }
+    // Listener methods are defined above with #[On] attributes
 
     public function getRoomMeetingsProperty()
     {

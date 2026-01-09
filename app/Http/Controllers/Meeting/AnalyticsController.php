@@ -12,10 +12,18 @@ class AnalyticsController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('Super Admin');
+
         $filter = $request->input('filter', 'month');
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : today();
 
-        // Set the start and end dates based on the filter
+        // Admin Filters
+        $divisionFilter = $request->input('division');
+        $departmentFilter = $request->input('department');
+        $searchFilter = $request->input('search');
+
+        // Date Range Logic
         switch ($filter) {
             case 'day':
                 $startDate = $date->copy()->startOfDay();
@@ -43,61 +51,108 @@ class AnalyticsController extends Controller
                 break;
         }
 
+        // Base Query
+        $query = Meeting::query();
+        $query->whereBetween('meetings.start_time', [$startDate, $endDate]);
+
+        // Role Scope
+        if (!$isSuperAdmin) {
+            // Employee: Own meetings (Booker or Participant)
+            $query->where(function($q) use ($user) {
+                $q->where('meetings.user_id', $user->id)
+                  ->orWhereHas('meetingParticipants', function($sq) use ($user) {
+                      $sq->where('participant_type', \App\Models\User::class)
+                        ->where('participant_id', $user->id);
+                  });
+            });
+        } else {
+            // Admin Filters
+            if ($divisionFilter) {
+                $query->whereHas('user', function($q) use ($divisionFilter) {
+                    $q->where('division', $divisionFilter);
+                });
+            }
+            if ($departmentFilter) {
+                $query->whereHas('user', function($q) use ($departmentFilter) {
+                    $q->where('department', $departmentFilter);
+                });
+            }
+            if ($searchFilter) {
+                 $query->where(function($q) use ($searchFilter) {
+                    $q->where('meetings.topic', 'like', "%{$searchFilter}%")
+                      ->orWhereHas('user', function($uq) use ($searchFilter) {
+                          $uq->where('name', 'like', "%{$searchFilter}%");
+                      })
+                      ->orWhereHas('room', function($rq) use ($searchFilter) {
+                          $rq->where('name', 'like', "%{$searchFilter}%");
+                      });
+                 });
+            }
+        }
+
+        // Fetch Data for Calculation
+        // Cloning query for different metrics to avoid interference if needed, 
+        // but 'get()' returns collection which we can process.
+        // However, for aggregation queries (like busy hours), we need DB builder.
+        
         // 1. Busy Hours
-        $busyHoursQuery = Meeting::select(DB::raw('HOUR(start_time) as hour, count(*) as count'))
-            ->whereBetween('start_time', [$startDate, $endDate])
+        $meetingsForBusyHours = (clone $query)->select(DB::raw('HOUR(start_time) as hour, count(*) as count'))
             ->groupBy('hour')
             ->orderBy('hour')
             ->pluck('count', 'hour')->all();
-
+            
         $busyHours = [];
         for ($i = 0; $i < 24; $i++) {
-            // Format to 24-hour number
-            $busyHours[strval($i)] = $busyHoursQuery[$i] ?? 0;
+            $busyHours[strval($i)] = $meetingsForBusyHours[$i] ?? 0;
         }
 
-        // 2. Department Usage
-        $departmentUsageRaw = Meeting::join('users', 'meetings.user_id', '=', 'users.id')
-            ->select('users.department', DB::raw('count(meetings.id) as count'))
-            ->whereBetween('meetings.start_time', [$startDate, $endDate])
-            ->groupBy('users.department')
-            ->pluck('count', 'department')->all();
-
+        // 2. Department Metrics
         $departmentUsage = [];
-        foreach ($departmentUsageRaw as $department => $count) {
-            if (empty($department) || $department === 'N/A') {
-                $departmentUsage['No Department'] = ($departmentUsage['No Department'] ?? 0) + $count;
-            } else {
-                $departmentUsage[$department] = ($departmentUsage[$department] ?? 0) + $count;
+        if ($isSuperAdmin) {
+            // Admin: Booking by Department
+             $departmentUsageRaw = (clone $query)->join('users', 'meetings.user_id', '=', 'users.id')
+                ->select('users.department', DB::raw('count(meetings.id) as count'))
+                ->groupBy('users.department')
+                ->pluck('count', 'department')->all();
+                
+            foreach ($departmentUsageRaw as $department => $count) {
+                $key = (empty($department) || $department === 'N/A') ? 'No Department' : $department;
+                $departmentUsage[$key] = ($departmentUsage[$key] ?? 0) + $count;
+            }
+        } else {
+            // Employee: "Invited by Department"
+            // Shows the departments of the organizers who invited the current user
+            
+            // Filter meetings where user is NOT the organizer (so they were invited)
+            $invitedStats = (clone $query)
+                ->where('meetings.user_id', '!=', $user->id) 
+                ->join('users', 'meetings.user_id', '=', 'users.id')
+                ->select('users.department', DB::raw('count(meetings.id) as count'))
+                ->groupBy('users.department')
+                ->pluck('count', 'department')->all();
+
+            foreach ($invitedStats as $department => $count) {
+                $key = (empty($department) || $department === 'N/A') ? 'No Department' : $department;
+                $departmentUsage[$key] = $count;
             }
         }
 
         // 3. Room Usage
-        $roomUsage = Meeting::join('rooms', 'meetings.room_id', '=', 'rooms.id')
+        $roomUsage = (clone $query)->join('rooms', 'meetings.room_id', '=', 'rooms.id')
             ->select('rooms.name', DB::raw('count(meetings.id) as count'))
-            ->whereBetween('meetings.start_time', [$startDate, $endDate])
             ->groupBy('rooms.name')
             ->pluck('count', 'name')->all();
 
-        // 4. Meeting Status Distribution
-        $meetings = Meeting::whereBetween('start_time', [$startDate, $endDate])->get();
-        $meetingStatusDistribution = $meetings->groupBy('calculated_status')->map->count()->all();
-
+        // 4. Meeting Status Distribution & Duration
+        // We can fetch collection for these 
+        $meetingsCollection = $query->get();
+        
+        $meetingStatusDistribution = $meetingsCollection->groupBy('calculated_status')->map->count()->all();
 
         // 5. Peak Days
-        $peakDaysQuery = Meeting::select(DB::raw('DAYNAME(start_time) as day_name, DAYOFWEEK(start_time) as day_num, count(*) as count'))
-            ->whereBetween('start_time', [$startDate, $endDate])
-            ->groupBy('day_name', 'day_num')
-            ->orderBy('day_num')
-            ->get();
-
-        $peakDays = [];
-        $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        foreach ($daysOfWeek as $day) {
-            $peakDays[$day] = 0;
-        }
-        foreach ($peakDaysQuery as $row) {
-            $peakDays[$row->day_name] = $row->count;
+        $peakDays = array_fill_keys(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 0);
+        foreach ($meetingsCollection as $meeting) {
+            $peakDays[$meeting->start_time->format('l')]++;
         }
 
         // 6. Meeting Duration
@@ -107,9 +162,8 @@ class AnalyticsController extends Controller
             'Long (> 2h)' => 0
         ];
 
-        foreach ($meetings as $meeting) {
+        foreach ($meetingsCollection as $meeting) {
             $durationInMinutes = $meeting->start_time->diffInMinutes($meeting->end_time);
-
             if ($durationInMinutes < 60) {
                 $meetingDuration['Short (< 1h)']++;
             } elseif ($durationInMinutes >= 60 && $durationInMinutes <= 120) {
@@ -117,6 +171,14 @@ class AnalyticsController extends Controller
             } else {
                 $meetingDuration['Long (> 2h)']++;
             }
+        }
+        
+        // Fetch unique Divisions and Departments for Filter Dropdowns (Admin only)
+        $divisions = [];
+        $departments = [];
+        if ($isSuperAdmin) {
+            $divisions = \App\Models\User::distinct()->whereNotNull('division')->pluck('division');
+            $departments = \App\Models\User::distinct()->whereNotNull('department')->pluck('department');
         }
 
         return view('meetings.analytics.index', compact(
@@ -129,7 +191,10 @@ class AnalyticsController extends Controller
             'filter',
             'date',
             'startDate',
-            'endDate'
+            'endDate',
+            'isSuperAdmin',
+            'divisions',
+            'departments'
         ));
     }
 }

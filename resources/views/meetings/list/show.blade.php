@@ -114,14 +114,46 @@
             <div class="lg:col-span-2 bg-white shadow-md rounded-xl p-6" x-data="{ showAttendanceModal: false }">
                 <div class="flex flex-wrap justify-between items-center mb-4 border-b border-gray-100 pb-2 gap-2">
                     <h2 class="text-lg font-semibold text-gray-800">Participants</h2>
-                    <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2">
                         @if ($meeting->calculated_status !== 'cancelled')
                         <a href="{{ route('meeting.meetings.attendance.export', $meeting->id) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
                             <i class="fas fa-file-excel mr-2"></i> Download Absensi
                         </a>
-                        <button @click="showAttendanceModal = true" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
-                             <i class="far fa-id-card mr-2"></i> Record Attendance
-                        </button>
+                        
+                        @php
+                            $currentUser = auth()->user();
+                            $isOrganizer = $meeting->user_id === $currentUser->id;
+                            $isSuperAdmin = $currentUser->hasRole('Super Admin');
+                            $isPic = $meeting->meetingParticipants()
+                                        ->where('participant_id', $currentUser->id)
+                                        ->where('participant_type', 'App\Models\User')
+                                        ->where('is_pic', true)
+                                        ->exists();
+                            $canRecordAttendance = ($isSuperAdmin || $isOrganizer || $isPic);
+
+                            $now = now();
+                            $startTime = \Carbon\Carbon::parse($meeting->start_time);
+                            $endTimePlus30 = \Carbon\Carbon::parse($meeting->end_time)->addMinutes(30);
+                            $isWithinWindow = $now->between($startTime, $endTimePlus30);
+                        @endphp
+
+                        @if($canRecordAttendance)
+                            @if($isWithinWindow)
+                                <button @click="showAttendanceModal = true" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
+                                     <i class="far fa-id-card mr-2"></i> Record Attendance
+                                </button>
+                            @else
+                                <span class="bg-gray-300 text-gray-500 text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center cursor-not-allowed group relative" 
+                                      title="Attendance available: {{ $startTime->format('H:i') }} - {{ $endTimePlus30->format('H:i') }}">
+                                     <i class="far fa-id-card mr-2"></i> Record Attendance
+                                     
+                                     <!-- Tooltip -->
+                                     <div class="absolute bottom-full mb-2 hidden group-hover:block w-48 bg-gray-800 text-white text-xs rounded p-2 z-10 text-center">
+                                         Window: {{ $startTime->format('H:i') }} - {{ $endTimePlus30->format('H:i') }}
+                                     </div>
+                                </span>
+                            @endif
+                        @endif
                         @endif
                     </div>
                 </div>
@@ -136,6 +168,16 @@
                                         <span class="text-xs text-gray-500">{{ $participant->participant?->email ?? '' }}</span>
                                     </div>
                                     <div class="flex flex-col sm:items-end space-y-1 mt-2 sm:mt-0">
+                                        @if($meeting->user_id === $participant->participant_id && $participant->participant_type === 'App\Models\User')
+                                            <span class="text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md">
+                                                <i class="fas fa-user-tie mr-1"></i> Organizer
+                                            </span>
+                                        @endif
+                                        @if($participant->is_pic)
+                                            <span class="text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-md">
+                                                <i class="fas fa-user-shield mr-1"></i> PIC
+                                            </span>
+                                        @endif
                                         <span class="text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-md">Internal</span>
                                         @if ($participant->attended_at)
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
@@ -174,15 +216,50 @@
                             @csrf
                             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start">
-                                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <i class="far fa-id-badge text-green-600"></i>
+                                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <i class="fas fa-tasks text-blue-600"></i>
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                        <h3 class="text-lg leading-6 font-medium text-gray-900">Record Attendance</h3>
-                                        <div class="mt-2">
-                                            <p class="text-sm text-gray-500 mb-4">Please enter your NPK to confirm your attendance.</p>
-                                            <label for="npk" class="block text-sm font-medium text-gray-700">NPK</label>
-                                            <input type="text" name="npk" id="npk" required class="mt-1 focus:ring-green-500 focus:border-green-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" placeholder="Enter NPK">
+                                        <h3 class="text-lg leading-6 font-medium text-gray-900">Manage Attendance</h3>
+                                        <div class="mt-4">
+                                            <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+                                                <div class="flex">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-info-circle text-blue-400"></i>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <p class="text-sm text-blue-700">
+                                                            Attendance can be recorded from <br>
+                                                            <span class="font-bold">{{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }}</span> until 
+                                                            <span class="font-bold">{{ \Carbon\Carbon::parse($meeting->end_time)->addMinutes(30)->format('H:i') }}</span>.
+                                                        </p>
+                                                        <p class="text-xs text-blue-600 mt-1">
+                                                            ⚠️ If attendance is not recorded within <strong>30 minutes</strong> of the start time, the meeting will be <strong>automatically cancelled</strong> to free up the room.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mb-2">Check the box next to participants who are present.</p>
+                                            <div class="max-h-60 overflow-y-auto border rounded-md p-2 space-y-2">
+                                                @foreach ($meeting->meetingParticipants as $participant)
+                                                    <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                                        <input type="checkbox" name="participant_ids[]" value="{{ $participant->id }}" 
+                                                            {{ $participant->attended_at ? 'checked' : '' }}
+                                                            class="form-checkbox h-5 w-5 text-green-600 rounded focus:ring-green-500 border-gray-300 transition duration-150 ease-in-out">
+                                                        <div class="flex flex-col">
+                                                            <span class="text-sm font-medium text-gray-900">
+                                                                {{ $participant->participant?->name ?? 'Unknown' }}
+                                                                @if($participant->is_pic) 
+                                                                    <span class="text-xs text-indigo-600 font-bold ml-1">(PIC)</span>
+                                                                @endif
+                                                            </span>
+                                                            <span class="text-xs text-gray-500">
+                                                                {{ $participant->participant_type == 'App\Models\User' ? 'Internal' : 'External' }}
+                                                            </span>
+                                                        </div>
+                                                    </label>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

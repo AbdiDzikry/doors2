@@ -29,39 +29,99 @@
          x-init="initClock()">
          
         <!-- Top Bar -->
-        <div class="bg-white shadow-md px-8 py-4 flex justify-between items-center z-20 shrink-0 border-b border-gray-200">
-            <div class="flex items-center gap-4">
+        <div class="bg-white shadow-md px-8 py-4 grid grid-cols-3 items-center z-20 shrink-0 border-b border-gray-200">
+            <!-- Left: Logo -->
+            <div class="flex items-center gap-4 justify-self-start">
                 <x-application-logo class="block h-10 w-auto fill-current text-[#089244]" />
-                <h1 class="text-2xl font-extrabold text-[#089244] tracking-tight">
+                <h1 class="text-2xl font-extrabold text-[#089244] tracking-tight whitespace-nowrap">
                     Doors <span class="text-gray-400 font-medium text-lg">Panel</span>
                 </h1>
             </div>
             
-            <!-- Tabs -->
-            <div class="flex bg-gray-100 p-1.5 rounded-xl shadow-inner">
+            <!-- Center: Tabs -->
+            <div class="flex bg-gray-100 p-1.5 rounded-xl shadow-inner justify-self-center">
                 <button @click="tab = 'list'" 
-                    class="px-8 py-2.5 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2"
+                    class="px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
                     :class="tab === 'list' ? 'bg-white text-[#089244] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'">
                     <i class="fas fa-list-ul"></i> Jadwal Hari Ini
                 </button>
                 <button @click="tab = 'booking'" 
-                    class="px-8 py-2.5 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2"
+                    class="px-6 py-2.5 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
                     :class="tab === 'booking' ? 'bg-white text-[#089244] shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'">
                     <i class="fas fa-calendar-plus"></i> Booking Ruangan
                 </button>
             </div>
 
-            <div class="text-right">
-                <div class="text-3xl font-black text-gray-800 tracking-tight leading-none" x-text="currentTime">--:--</div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">{{ now()->translatedFormat('l, d F Y') }}</div>
+            <!-- Right: Time & Battery -->
+            <div class="text-right flex flex-col items-end justify-self-end">
+                <div class="flex items-center gap-3">
+                     <!-- Battery Indicator -->
+                     <div x-data="{ 
+                            level: 100, 
+                            charging: false,
+                            status: 'Cukup',
+                            icon: 'fa-battery-full text-green-500',
+                            textCol: 'text-gray-400',
+                            init() {
+                                if ('getBattery' in navigator) {
+                                    navigator.getBattery().then(battery => {
+                                        this.updateBattery(battery);
+                                        battery.addEventListener('levelchange', () => this.updateBattery(battery));
+                                        battery.addEventListener('chargingchange', () => this.updateBattery(battery));
+                                    });
+                                }
+                            },
+                            updateBattery(b) {
+                                this.level = Math.round(b.level * 100);
+                                this.charging = b.charging;
+                                
+                                if (this.level > 80) {
+                                    this.status = 'Penuh';
+                                    this.icon = 'fa-battery-full text-green-500';
+                                    this.textCol = 'text-green-600';
+                                } else if (this.level > 50) {
+                                    this.status = 'Cukup';
+                                    this.icon = 'fa-battery-three-quarters text-green-500';
+                                    this.textCol = 'text-green-600';
+                                } else if (this.level > 20) {
+                                    this.status = 'Sedang';
+                                    // User Requested Red for this state
+                                    this.icon = 'fa-battery-half text-red-500'; 
+                                    this.textCol = 'text-red-500';
+                                } else {
+                                    this.status = 'Lemah';
+                                    this.icon = 'fa-battery-quarter text-red-600';
+                                    this.textCol = 'text-red-600';
+                                }
+
+                                if (this.level <= 10) {
+                                    this.icon = 'fa-battery-empty text-red-600 animate-pulse';
+                                }
+                            }
+                         }" class="flex items-center gap-2 text-gray-600 font-bold text-sm bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                         
+                         <!-- Icon -->
+                         <i class="fas text-xl mr-1" :class="icon"></i>
+                         
+                         <!-- Text Info -->
+                         <div class="flex flex-col leading-none">
+                             <span class="text-xs font-bold" x-text="level + '%'"></span>
+                             <span class="text-[10px] uppercase tracking-wide font-bold transition-colors duration-300" :class="textCol" x-text="status"></span>
+                         </div>
+                         
+                         <!-- Charging Indicator (Overlay or beside) -->
+                         <span x-show="charging" class="text-yellow-500 text-xs ml-1"><i class="fas fa-bolt"></i></span>
+                     </div>
+                    <div class="text-3xl font-black text-gray-800 tracking-tight leading-none" x-text="currentTime">--:--</div>
+                </div>
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1 whitespace-nowrap">{{ now()->translatedFormat('l, d F Y') }}</div>
             </div>
         </div>
-
         <!-- Main Content Grid -->
         <div class="flex-1 flex overflow-hidden p-6 gap-6 relative">
             
             <!-- LEFT COLUMN (Dynamic Content) -->
-            <div class="flex-1 overflow-hidden flex flex-col relative">
+            <div class="flex-1 overflow-hidden flex flex-col relative min-w-0">
                 
                 <!-- TAB 1: LIST MEETING -->
                 <div x-show="tab === 'list'" x-transition 
@@ -116,7 +176,7 @@
                                     <tbody class="bg-white divide-y divide-gray-100">
                                         @foreach($todaysMeetings as $meeting)
                                             <!-- Main Row -->
-                                            <tr class="hover:bg-gray-50/80 transition-colors group cursor-pointer" @click="toggleMeeting({{ $meeting->id }})">
+                                            <tr class="transition-colors group cursor-pointer {{ $meeting->calculated_status == 'ongoing' ? 'bg-red-100 border-l-4 border-red-500' : 'hover:bg-gray-50/80' }}" @click="toggleMeeting({{ $meeting->id }})">
                                                 <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-900 font-bold">
                                                     {{ $meeting->start_time->format('H:i') }} - {{ $meeting->end_time->format('H:i') }} WIB
                                                 </td>
@@ -135,7 +195,7 @@
                                                 </td>
                                                 <td class="px-6 py-5 whitespace-nowrap text-xs">
                                                     @if($meeting->calculated_status == 'ongoing')
-                                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-[#089244] border border-green-200">
+                                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-700 border border-red-200 animate-pulse">
                                                             Ongoing
                                                         </span>
                                                     @elseif($meeting->calculated_status == 'completed')
@@ -189,7 +249,12 @@
                                                                     @foreach($meeting->meetingParticipants as $mp)
                                                                         @if($mp->participant_id == $meeting->user_id && $mp->participant_type == 'App\Models\User') @continue @endif
                                                                         <li class="px-4 py-3 text-sm flex justify-between items-center bg-white hover:bg-gray-50">
-                                                                            <span class="font-medium text-gray-700">{{ $mp->participant ? $mp->participant->name : 'External Guest' }}</span>
+                                                                            <span class="font-medium text-gray-700">
+                                                                                {{ $mp->participant ? $mp->participant->name : 'External Guest' }}
+                                                                                @if($mp->is_pic)
+                                                                                    <span class="text-xs font-normal text-blue-500 ml-1">(PIC)</span>
+                                                                                @endif
+                                                                            </span>
                                                                             <span class="text-xs px-2 py-1 rounded-full font-bold {{ $mp->attended_at ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
                                                                                 {{ $mp->attended_at ? 'Hadir' : 'Belum Hadir' }}
                                                                             </span>
@@ -204,30 +269,22 @@
 
                                                             <!-- Right: Action Form -->
                                                             <div class="flex flex-col h-full justify-between">
-                                                                <form method="POST" action="{{ route('tablet.check-in', $meeting->id) }}">
-                                                                    @csrf
+                                                            <div class="flex flex-col h-full justify-between">
+                                                                <div class="mb-4">
                                                                     <div class="mb-4">
-                                                                        <label class="block text-sm font-bold text-gray-700 mb-2">Konfirmasi Kehadiran (NPK)</label>
-                                                                        <div class="flex gap-2">
-                                                                            <input type="text" name="npk" required placeholder="Masukkan NPK Anda..." autofocus
-                                                                                class="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-[#089244] focus:border-[#089244] text-lg px-4 py-2">
-                                                                            <button type="submit" class="bg-[#089244] hover:bg-[#067a39] text-white font-bold py-2 px-6 rounded-lg shadow-sm transition-colors flex items-center">
-                                                                                <i class="fas fa-check mr-2"></i> Absen
-                                                                            </button>
-                                                                        </div>
-                                                                        <p class="text-xs text-gray-400 mt-2">Masukkan NPK Organizer atau Peserta untuk konfirmasi kehadiran.</p>
+                                                                        @livewire('tablet.meeting-attendance', ['meeting' => $meeting], key('attendance-'.$meeting->id))
                                                                     </div>
-                                                                </form>
+                                                                </div>
 
                                                                 @if($meeting->status == 'scheduled' || $meeting->status == 'ongoing')
                                                                     <form method="POST" action="{{ route('tablet.cancel', $meeting->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan meeting ini?');" class="mt-auto pt-4 border-t border-gray-100">
                                                                         @csrf
                                                                         <div class="flex items-center justify-between">
                                                                             <div class="text-xs text-gray-400">
-                                                                                Ingin membatalkan meeting? <br>Hanya Organizer yang dapat membatalkan.
+                                                                                Ingin membatalkan meeting? <br>Hanya Organizer / PIC yang dapat membatalkan.
                                                                             </div>
                                                                             <div class="flex gap-2">
-                                                                                 <input type="text" name="npk" required placeholder="NPK Organizer" class="w-32 border-gray-300 rounded-lg text-xs py-1 px-2">
+                                                                                 <input type="text" name="npk" required placeholder="NPK Organizer / PIC" class="w-32 border-gray-300 rounded-lg text-xs py-1 px-2">
                                                                                  <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 font-bold py-1 px-3 rounded-lg text-xs border border-red-200 transition-colors">
                                                                                     Batalkan
                                                                                 </button>
@@ -264,9 +321,32 @@
                             minute: '{{ $defaultMinute ?? (now()->format('i') < 30 ? '00' : '30') }}',
                             
                             updateParticipants() {
-                                // No longer needed for refs, but keeps event listeners working if they rely on it?
-                                // Actually we can just update the array variables, and :value will handle the json stringify.
-                                // The listeners below update the arrays.
+                                // Legacy placeholder
+                            },
+
+                            updateInternalParticipants(detail) {
+                                console.log('Raw Internal Detail:', detail);
+                                // Handle Livewire 3 array wrapping (detail[0]) or direct object (detail)
+                                if (Array.isArray(detail) && detail.length > 0 && detail[0] && detail[0].participants) {
+                                    this.internalParticipants = detail[0].participants;
+                                } else if (detail && detail.participants) {
+                                    this.internalParticipants = detail.participants;
+                                } else {
+                                    console.warn('Unexpected internal participant format, defaulting to raw:', detail);
+                                    if(Array.isArray(detail)) this.internalParticipants = detail;
+                                }
+                                console.log('Set Internal Participants:', this.internalParticipants);
+                            },
+
+                            updateExternalParticipants(detail) {
+                                // Same logic for external
+                                if (Array.isArray(detail) && detail.length > 0 && detail[0] && detail[0].participants) {
+                                    this.externalParticipants = detail[0].participants;
+                                } else if (detail && detail.participants) {
+                                    this.externalParticipants = detail.participants;
+                                } else {
+                                     if(Array.isArray(detail)) this.externalParticipants = detail;
+                                }
                             },
 
                             calculateEndTime() {
@@ -283,15 +363,16 @@
                                 return String(endH).padStart(2, '0') + ':' + String(endM).padStart(2, '0');
                             }
                         }"
-                        @internal-participants-updated.window="internalParticipants = $event.detail[0]"
-                        @external-participants-updated.window="externalParticipants = $event.detail[0]">
+                        @internal-participants-updated.window="updateInternalParticipants($event.detail)"
+                        @external-participants-updated.window="updateExternalParticipants($event.detail)"
+                        >
                         @csrf
                         <input type="hidden" name="start_date" x-model="date">
                         <input type="hidden" name="start_hour" x-model="hour">
                         <input type="hidden" name="start_minute" x-model="minute">
                         <input type="hidden" name="duration" x-model="duration">
-                        <input type="hidden" name="internal_participants" x-model="JSON.stringify(internalParticipants)">
-                        <input type="hidden" name="external_participants" x-model="JSON.stringify(externalParticipants)">
+                        <input type="hidden" name="internal_participants" :value="JSON.stringify(internalParticipants)">
+                        <input type="hidden" name="external_participants" :value="JSON.stringify(externalParticipants)">
                         
                         <!-- 0. Booker Identification (NPK) -->
                         <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#089244]">
@@ -524,11 +605,6 @@
                                 Peserta Tambahan (Opsional)
                             </h2>
 
-                            <!-- Hidden Inputs for Form Submission -->
-                            <!-- Hidden Inputs for Form Submission -->
-                            <input type="hidden" name="internal_participants" :value="JSON.stringify(internal)">
-                            <input type="hidden" name="external_participants" :value="JSON.stringify(external)">
-
                             <!-- Tab Nav -->
                             <div class="border-b border-gray-200 mb-4">
                                 <nav class="-mb-px flex space-x-6">
@@ -537,11 +613,6 @@
                                         class="whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm transition-colors">
                                         Internal (Karyawan)
                                     </button>
-                                    <!-- <button type="button" @click="activePartTab = 'external'" 
-                                        :class="{'border-[#089244] text-[#089244]': activePartTab === 'external', 'border-transparent text-gray-500 hover:text-gray-700': activePartTab !== 'external'}" 
-                                        class="whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm transition-colors">
-                                        Eksternal (Tamu)
-                                    </button> -->
                                 </nav>
                             </div>
 
@@ -639,29 +710,91 @@
     @push('scripts')
     <script type="module">
         document.addEventListener('DOMContentLoaded', function () {
+            // Config
             const roomId = {{ $room->id }};
-            const refreshInterval = 5 * 60 * 1000; // 5 Minutes
+            
+            // --- WebSocket & Smart Refresh Logic ---
+            let isUserActive = false;
+            let idleTimer;
 
-            // 1. Keep-Alive Pinger & Auto Refresh Fallback
-            setInterval(() => {
-                console.log('Autorefresh: Syncing data...');
-                window.location.reload();
-            }, refreshInterval);
+            // Reset idle timer on interaction
+            function resetIdleTimer() {
+                isUserActive = true;
+                clearTimeout(idleTimer);
+                // User is considered "idle" after 30 seconds of no activity
+                idleTimer = setTimeout(() => {
+                    isUserActive = false;
+                }, 30000);
+            }
+            
+            ['mousemove', 'mousedown', 'keypress', 'touchmove', 'click'].forEach(evt => {
+                document.addEventListener(evt, resetIdleTimer);
+            });
 
-            // 2. Realtime Updates via Reverb/Echo
-            if (window.Echo) {
-                console.log(`Listening for updates on room.${roomId}...`);
-                
-                window.Echo.channel('rooms')
-                    .listen('RoomStatusUpdated', (e) => {
-                        console.log('Event Received:', e);
-                        if (e.roomId == roomId) {
-                            console.log('Room status changed. Reloading...');
-                            window.location.reload();
+            // Helper: Check if modal is open
+            function isModalOpen() {
+                const modals = document.querySelectorAll('.fixed.inset-0.z-50'); 
+                for (let modal of modals) {
+                     if (window.getComputedStyle(modal).display !== 'none') return true;
+                }
+                return false;
+            }
+
+            // Main Refresh Function - Driven by WebSocket Events
+            window.performSmartRefresh = function() {
+                console.log('⚡ WebSocket Event Received. Evaluating refresh...');
+
+                // 1. If User is Active -> DELAY Refresh
+                if (isUserActive || isModalOpen()) {
+                    console.log('User active or modal open. Refresh delayed.');
+                    setTimeout(window.performSmartRefresh, 10000); 
+                    return;
+                }
+
+                // 2. Add random jitter
+                const jitter = Math.floor(Math.random() * 1500) + 500;
+                console.log(`Refreshing in ${jitter}ms...`);
+                setTimeout(() => {
+                    window.location.reload();
+                }, jitter);
+            }
+
+            // WebSocket Listener
+            setTimeout(() => {
+                if (typeof window.Echo !== 'undefined') {
+                    console.log('Connecting to WebSocket channel: rooms');
+                    window.Echo.channel('rooms')
+                        .listen('RoomStatusUpdated', (e) => {
+                            console.log('Update received:', e);
+                            const currentRoomId = {{ $room->id }};
+                            
+                            // Check if event is relevant for this room
+                            if (e.roomId == currentRoomId) {
+                                window.performSmartRefresh();
+                            }
+                        });
+                } else {
+                    console.error('Laravel Echo not loaded.');
+                }
+            }, 1000);
+
+            // Initial Idle Timer Start
+            resetIdleTimer();
+
+            // Battery Monitor (Original Logic Preserved)
+            if ('getBattery' in navigator) {
+                let batteryAlertSent = false;
+                navigator.getBattery().then(function(battery) {
+                    setInterval(() => {
+                        if (battery.level < 0.20 && !battery.charging && !batteryAlertSent) {
+                             fetch('{{ route('tablet.battery-alert') }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({ room_id: roomId, level: Math.round(battery.level * 100) })
+                            }).then(res => { if(res.ok) { batteryAlertSent = true; setTimeout(() => batteryAlertSent = false, 3600000); }});
                         }
-                    });
-            } else {
-                console.error('Echo is not initialized. Realtime updates disabled.');
+                    }, 60000);
+                });
             }
         });
     </script>

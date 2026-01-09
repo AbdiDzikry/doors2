@@ -9,3 +9,10 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('sync:employees')->dailyAt('02:00');
+
+// Schedule Room Status Update (Every Minute)
+// This ensures tablets update when a meeting starts/ends without polling
+Schedule::command('app:update-room-status')->everyMinute();
+
+// Schedule Auto-Cancel Unattended Meetings (Every 5 Minutes)
+Schedule::command('app:cancel-unattended-meetings')->everyFiveMinutes();

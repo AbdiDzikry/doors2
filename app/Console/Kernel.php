@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('meeting:cancel-unconfirmed')->everyMinute();
+        $schedule->command('meetings:cancel-unattended')->everyFiveMinutes();
     }
 
     /**

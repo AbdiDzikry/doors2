@@ -141,12 +141,62 @@
                             }">
                             <div class="mb-4">
                                 <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date <span class="text-red-500">*</span></label>
-                                <div class="relative group">
-                                    <input type="date" x-model="date" @change="updateStartTime()" id="start_date" 
-                                        class="block w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 cursor-pointer @error('start_time') border-red-500 @enderror">
-                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </span>
+                                <!-- Start Date Picker -->
+                                <div class="relative group" x-data="datePicker({ value: date })" @input="date = $event.detail; updateStartTime()">
+                                    <input type="hidden" x-model="value">
+                                    <button type="button" @click="open = !open" 
+                                        class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200 text-gray-700"
+                                        :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                        <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                            <i class="fas fa-calendar-alt text-xs"></i>
+                                        </span>
+                                    </button>
+
+                                    <!-- Calendar Dropdown -->
+                                    <div x-show="open" @click.away="open = false" 
+                                        class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30"
+                                        style="display: none;">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
+                                                    <i class="fas fa-arrow-up text-gray-600"></i>
+                                                </button>
+                                                <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
+                                                    <i class="fas fa-arrow-down text-gray-600"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-7 mb-2">
+                                            <template x-for="(day, index) in days" :key="index">
+                                                <div class="px-0.5">
+                                                    <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="grid grid-cols-7">
+                                            <template x-for="blank in blankdays">
+                                                <div class="text-center border p-1 border-transparent text-sm"></div>
+                                            </template>
+                                            <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
+                                                <div class="px-0.5 mb-1">
+                                                    <div @click="getDateValue(date)"
+                                                        x-text="date"
+                                                        class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
+                                                        :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
+                                                    ></div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
+                                            <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                            <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 @error('start_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
@@ -366,12 +416,62 @@
                                 </div>
                                 <div>
                                     <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                    <div class="relative group">
-                                        <input type="date" wire:model="ends_at" id="ends_at" 
-                                            class="block w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 cursor-pointer">
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                            <i class="fas fa-calendar-alt"></i>
-                                        </span>
+                                    <div class="relative group" x-data="datePicker({ value: @entangle('ends_at') })">
+                                        <input type="hidden" x-model="value" id="ends_at">
+                                        
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200 text-gray-700"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                                <i class="fas fa-calendar-alt text-xs"></i>
+                                            </span>
+                                        </button>
+
+                                        <!-- Calendar Dropdown -->
+                                        <div x-show="open" @click.away="open = false" 
+                                            class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30 bottom-0 left-0 lg:bottom-auto lg:top-full"
+                                            style="display: none;">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                    <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
+                                                        <i class="fas fa-arrow-up text-gray-600"></i>
+                                                    </button>
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
+                                                        <i class="fas fa-arrow-down text-gray-600"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-7 mb-2">
+                                                <template x-for="(day, index) in days" :key="index">
+                                                    <div class="px-0.5">
+                                                        <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="grid grid-cols-7">
+                                                <template x-for="blank in blankdays">
+                                                    <div class="text-center border p-1 border-transparent text-sm"></div>
+                                                </template>
+                                                <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
+                                                    <div class="px-0.5 mb-1">
+                                                        <div @click="getDateValue(date)"
+                                                            x-text="date"
+                                                            class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
+                                                            :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
+                                                        ></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
+                                                <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                                <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

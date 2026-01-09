@@ -23,5 +23,6 @@
         <div class="h-screen w-screen relative">
             {{ $slot }}
         </div>
+        @stack('scripts')
     </body>
 </html>

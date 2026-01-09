@@ -601,6 +601,110 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('datePicker', (config) => ({
+                value: config.value,
+                dateFormat: 'Y-m-d',
+                month: '',
+                year: '',
+                no_of_days: [],
+                blankdays: [],
+                days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                open: false,
+                
+                init() {
+                    let today = new Date();
+                    if (this.value) {
+                        today = new Date(this.value);
+                    }
+                    this.month = today.getMonth();
+                    this.year = today.getFullYear();
+                    this.getNoOfDays();
+
+                    this.$watch('value', value => {
+                         if (value) {
+                            let date = new Date(value);
+                            this.month = date.getMonth();
+                            this.year = date.getFullYear();
+                            this.getNoOfDays();
+                         }
+                    });
+                },
+
+                isToday(date) {
+                    const today = new Date();
+                    const d = new Date(this.year, this.month, date);
+                    return today.toDateString() === d.toDateString();
+                },
+
+                isSelected(date) {
+                    if (!this.value) return false;
+                    const d = new Date(this.year, this.month, date);
+                    const selected = new Date(this.value);
+                    return d.toDateString() === selected.toDateString();
+                },
+
+                getDateValue(date) {
+                    let selectedDate = new Date(this.year, this.month, date);
+                    // Use local time instead of ISO string to avoid timezone shifts
+                    const offset = selectedDate.getTimezoneOffset();
+                    selectedDate = new Date(selectedDate.getTime() - (offset*60*1000));
+                    
+                    this.value = selectedDate.toISOString().split('T')[0];
+                    this.$dispatch('input', this.value); 
+                    this.open = false;
+                },
+
+                getNoOfDays() {
+                    let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+                    
+                    // find where to start calendar day of week
+                    let dayOfWeek = new Date(this.year, this.month).getDay();
+                    let blankdaysArray = [];
+                    for ( var i=1; i <= dayOfWeek; i++) {
+                        blankdaysArray.push(i);
+                    }
+
+                    let daysArray = [];
+                    for ( var i=1; i <= daysInMonth; i++) {
+                        daysArray.push(i);
+                    }
+
+                    this.blankdays = blankdaysArray;
+                    this.no_of_days = daysArray;
+                },
+                
+                prevMonth() {
+                    if (this.month === 0) {
+                        this.year--;
+                        this.month = 11;
+                    } else {
+                        this.month--;
+                    }
+                    this.getNoOfDays();
+                },
+                
+                nextMonth() {
+                    if (this.month === 11) {
+                        this.year++;
+                        this.month = 0;
+                    } else {
+                        this.month++;
+                    }
+                    this.getNoOfDays();
+                },
+
+                get formattedDate() {
+                    if (!this.value) return '';
+                    // Format: DD/MM/YYYY for display
+                    const date = new Date(this.value);
+                    return ("0" + date.getDate()).slice(-2) + "/" + ("0" + (date.getMonth() + 1)).slice(-2) + "/" + date.getFullYear();
+                }
+            }));
+        });
+    </script>
     @stack('scripts')
 
 </body>

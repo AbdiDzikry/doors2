@@ -124,8 +124,9 @@ class TabletController extends Controller
         $room = \App\Models\Room::findOrFail($id);
         $user = \App\Models\User::where('npk', $request->npk)->first();
         
-        \Illuminate\Support\Facades\Log::info('Booking Request Received: ', $request->all());
-        \Illuminate\Support\Facades\Log::info('Internal Participants Payload: ' . $request->input('internal_participants', 'NULL'));
+        \Illuminate\Support\Facades\Log::info('--- TABLET BOOKING DEBUG ---');
+        \Illuminate\Support\Facades\Log::info('Raw Internal Payload:', ['data' => $request->input('internal_participants')]);
+        \Illuminate\Support\Facades\Log::info('Raw External Payload:', ['data' => $request->input('external_participants')]);
         
         // Construct Start Time
         $startTimeString = $request->start_date . ' ' . str_pad($request->start_hour, 2, '0', STR_PAD_LEFT) . ':' . str_pad($request->start_minute, 2, '0', STR_PAD_LEFT) . ':00';
@@ -297,12 +298,83 @@ class TabletController extends Controller
         $meeting = \App\Models\Meeting::findOrFail($id);
         $user = \App\Models\User::where('npk', $request->npk)->first();
 
-        if ($meeting->user_id !== $user->id) {
-            return back()->with('error', 'Hanya pembuat meeting yang dapat membatalkan.');
+        $isOrganizer = $meeting->user_id === $user->id;
+        $isPic = $meeting->meetingParticipants()
+            ->where('participant_id', $user->id)
+            ->where('participant_type', \App\Models\User::class)
+            ->where('is_pic', true)
+            ->exists();
+
+        if (!$isOrganizer && !$isPic) {
+            return back()->with('error', 'Hanya Organizer atau PIC yang dapat membatalkan.');
         }
 
         $meeting->update(['status' => 'cancelled']);
 
         return back()->with('success', 'Meeting berhasil dibatalkan.');
+    }
+
+    public function batteryAlert(Request $request)
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'level' => 'required|integer'
+        ]);
+
+        $room = Room::find($request->room_id);
+        
+        // Log locally
+        \Illuminate\Support\Facades\Log::warning("TABLET BATTERY LOW: Room {$room->name} is at {$request->level}%");
+
+        // Send to Receptionists & Super Admins
+        $recipients = User::role(['Resepsionis', 'Super Admin'])->get();
+        if ($recipients->isNotEmpty()) {
+            \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\TabletBatteryLow($room, $request->level));
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function checkUpdates(Request $request, $id)
+    {
+        $room = Room::findOrFail($id);
+        
+        // 1. Data Changes: Check ANY meeting from today onwards
+        $lastMeetingUpdate = $room->meetings()
+            ->where('start_time', '>=', now()->startOfDay())
+            ->latest('updated_at')
+            ->value('updated_at');
+
+        // 2. Room Data Changes
+        $roomUpdate = $room->updated_at;
+
+        // 3. Time-Based State Changes: Identify who is "Current" right now
+        // This ensures that when time crosses a meeting start/end, the hash changes.
+        $currentMeetingId = $room->meetings()
+            ->whereIn('status', ['scheduled', 'ongoing'])
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>', now())
+            ->value('id');
+
+        // 4. Participant Attendance Changes
+        // Check for latest update timestamp in meeting_participants table for relevant meetings
+        $lastParticipantUpdate = \Illuminate\Support\Facades\DB::table('meeting_participants')
+            ->join('meetings', 'meetings.id', '=', 'meeting_participants.meeting_id')
+            ->where('meetings.room_id', $id)
+            ->where('meetings.start_time', '>=', now()->startOfDay())
+            ->max('meeting_participants.updated_at');
+
+        // Generate Hash (Data Timestamp + Room Timestamp + Current Active Meeting ID + Participant Timestamp)
+        $hashString = ($lastMeetingUpdate ? $lastMeetingUpdate->timestamp : '0') 
+            . '|' . $roomUpdate->timestamp 
+            . '|' . ($currentMeetingId ?? 'none')
+            . '|' . ($lastParticipantUpdate ? strtotime($lastParticipantUpdate) : '0');
+            
+        $hash = md5($hashString);
+
+        return response()->json([
+            'hash' => $hash,
+            'timestamp' => now()->timestamp
+        ]);
     }
 }

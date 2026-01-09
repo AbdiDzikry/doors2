@@ -38,11 +38,13 @@ class DashboardController extends Controller
             return view($view, $data);
 
         } elseif ($user->hasRole('Karyawan')) {
-            $upcomingMeetings = Meeting::whereHas('meetingParticipants', function ($query) use ($user) {
-                $query->where('participant_id', $user->id)
-                      ->where('participant_type', User::class);
+            $upcomingMeetings = Meeting::where(function($q) use ($user) {
+                $q->whereHas('meetingParticipants', function ($query) use ($user) {
+                    $query->where('participant_id', $user->id)
+                          ->where('participant_type', User::class);
+                })
+                ->orWhere('user_id', $user->id);
             })
-            ->orWhere('user_id', $user->id)
             ->where('start_time', '>=', now())
             ->orderBy('start_time', 'asc')
             ->with('room')

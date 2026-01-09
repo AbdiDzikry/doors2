@@ -9,6 +9,7 @@ class SearchInternalParticipants extends Component
 {
     public $search = '';
     public $selectedParticipants = [];
+    public $picParticipants = [];
 
     public $showCreateForm = false;
     public $newName = '';
@@ -16,9 +17,10 @@ class SearchInternalParticipants extends Component
     public $newNpk = '';
     public $newDepartment = '';
 
-    public function mount($initialParticipants = [])
+    public function mount($initialParticipants = [], $initialPics = [])
     {
         $this->selectedParticipants = $initialParticipants;
+        $this->picParticipants = $initialPics;
     }
 
     public function updatedSearch($value)
@@ -94,13 +96,33 @@ class SearchInternalParticipants extends Component
     {
         if (!in_array($userId, $this->selectedParticipants)) {
             $this->selectedParticipants[] = $userId;
-            $this->dispatch('internal-participants-updated', $this->selectedParticipants);
+            $this->dispatchUpdates();
         }
     }
 
     public function removeParticipant($userId)
     {
         $this->selectedParticipants = array_diff($this->selectedParticipants, [$userId]);
-        $this->dispatch('internal-participants-updated', $this->selectedParticipants);
+        // Also remove from PIC if present
+        $this->picParticipants = array_diff($this->picParticipants, [$userId]);
+        $this->dispatchUpdates();
+    }
+
+    public function togglePic($userId)
+    {
+        if (in_array($userId, $this->picParticipants)) {
+             $this->picParticipants = array_diff($this->picParticipants, [$userId]);
+        } else {
+             $this->picParticipants[] = $userId;
+        }
+        $this->dispatchUpdates();
+    }
+
+    private function dispatchUpdates()
+    {
+        $this->dispatch('internal-participants-updated', [
+            'participants' => $this->selectedParticipants,
+            'pics' => $this->picParticipants
+        ]);
     }
 }

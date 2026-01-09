@@ -15,6 +15,7 @@ class MeetingParticipant extends Model
         'participant_type',
         'status',
         'attended_at',
+        'is_pic',
     ];
 
     public function meeting()

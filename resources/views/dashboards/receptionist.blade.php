@@ -3,6 +3,9 @@
 @section('content')
 <div class="container-fluid px-6 py-8" x-data="{ 'showToast': false, 'toastMessage': '' }" @keydown.escape.window="showToast = false">
     
+    <!-- Battery Notifications -->
+    @livewire('dashboard.receptionist.notifications')
+    
     <!-- Page Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <div>

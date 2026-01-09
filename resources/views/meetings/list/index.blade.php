@@ -90,24 +90,122 @@
                             <div class="md:col-span-5 grid grid-cols-2 gap-3" x-show="filter === 'custom'" x-cloak x-transition>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Start Date</label>
-                                    <div class="relative group">
-                                        <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}" 
-                                            class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-10 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer"
-                                            :class="{ 'border-green-500 ring-1 ring-green-500': '{{ request('start_date') }}'.length > 0 }">
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                            <i class="fas fa-calendar-alt text-xs"></i>
-                                        </span>
+                                    <div class="relative group" x-data="datePicker({ value: '{{ request('start_date') }}' })">
+                                        <input type="hidden" name="start_date" x-model="value" id="start_date">
+                                        
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                                <i class="fas fa-calendar-alt text-xs"></i>
+                                            </span>
+                                        </button>
+
+                                        <!-- Calendar Dropdown -->
+                                        <div x-show="open" @click.away="open = false" 
+                                            class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                    <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
+                                                        <i class="fas fa-arrow-up text-gray-600"></i>
+                                                    </button>
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
+                                                        <i class="fas fa-arrow-down text-gray-600"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-7 mb-2">
+                                                <template x-for="(day, index) in days" :key="index">
+                                                    <div class="px-0.5">
+                                                        <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="grid grid-cols-7">
+                                                <template x-for="blank in blankdays">
+                                                    <div class="text-center border p-1 border-transparent text-sm"></div>
+                                                </template>
+                                                <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
+                                                    <div class="px-0.5 mb-1">
+                                                        <div @click="getDateValue(date)"
+                                                            x-text="date"
+                                                            class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
+                                                            :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
+                                                        ></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
+                                                <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                                <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">End Date</label>
-                                    <div class="relative group">
-                                        <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}" 
-                                            class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-10 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer"
-                                              :class="{ 'border-green-500 ring-1 ring-green-500': '{{ request('end_date') }}'.length > 0 }">
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                            <i class="fas fa-calendar-alt text-xs"></i>
-                                        </span>
+                                    <div class="relative group" x-data="datePicker({ value: '{{ request('end_date') }}' })">
+                                        <input type="hidden" name="end_date" x-model="value" id="end_date">
+                                        
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                                <i class="fas fa-calendar-alt text-xs"></i>
+                                            </span>
+                                        </button>
+
+                                        <!-- Calendar Dropdown -->
+                                        <div x-show="open" @click.away="open = false" 
+                                            class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div>
+                                                    <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                    <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
+                                                        <i class="fas fa-arrow-up text-gray-600"></i>
+                                                    </button>
+                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
+                                                        <i class="fas fa-arrow-down text-gray-600"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-7 mb-2">
+                                                <template x-for="(day, index) in days" :key="index">
+                                                    <div class="px-0.5">
+                                                        <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="grid grid-cols-7">
+                                                <template x-for="blank in blankdays">
+                                                    <div class="text-center border p-1 border-transparent text-sm"></div>
+                                                </template>
+                                                <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
+                                                    <div class="px-0.5 mb-1">
+                                                        <div @click="getDateValue(date)"
+                                                            x-text="date"
+                                                            class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
+                                                            :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
+                                                        ></div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
+                                                <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                                <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -162,16 +260,42 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Status</label>
-                                    <div class="relative">
-                                        <select name="status_filter" class="block w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-700 cursor-pointer appearance-none">
-                                            <option value="all" {{ request('status_filter') == 'all' ? 'selected' : '' }}>All Status</option>
-                                            <option value="scheduled" {{ request('status_filter') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                            <option value="ongoing" {{ request('status_filter') == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
-                                            <option value="completed" {{ request('status_filter') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="cancelled" {{ request('status_filter') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        </select>
-                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                            <i class="fas fa-chevron-down text-xs"></i>
+                                    <div class="relative" x-data="{
+                                        status: '{{ request('status_filter', 'all') }}',
+                                        open: false,
+                                        options: {
+                                            'all': 'All Status',
+                                            'scheduled': 'Scheduled',
+                                            'ongoing': 'Ongoing',
+                                            'completed': 'Completed',
+                                            'cancelled': 'Cancelled'
+                                        },
+                                        get activeLabel() { return this.options[this.status] }
+                                    }" @click.away="open = false">
+                                        <input type="hidden" name="status_filter" x-model="status">
+                                        
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="activeLabel"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-xs border border-green-500/30"
+                                            style="display: none;">
+                                            <template x-for="(label, value) in options" :key="value">
+                                                <div @click="status = value; open = false"
+                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                     :class="{ 'text-green-900 bg-green-50': status === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': status !== value }">
+                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': status === value, 'font-normal': status !== value }" x-text="label"></span>
+                                                    <span x-show="status === value" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                    </span>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
@@ -321,6 +445,13 @@
                         </table>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="mt-4">
+                @if($meetings instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    {{ $meetings->links() }}
+                @endif
             </div>
 
             <!-- Other Tabs Content Placeholders (Keep existing includes/logic if complex, or simple placeholders if handled by Livewire elsewhere) -->

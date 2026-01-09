@@ -101,6 +101,8 @@ Route::middleware(['auth', 'can:access tablet mode'])->prefix('tablet')->name('t
     Route::post('/room/{id}/book', [App\Http\Controllers\TabletController::class, 'store'])->name('book');
     Route::post('/room/meeting/{id}/check-in', [App\Http\Controllers\TabletController::class, 'checkIn'])->name('check-in');
     Route::post('/room/meeting/{id}/cancel', [App\Http\Controllers\TabletController::class, 'cancel'])->name('cancel');
+    Route::post('/battery-alert', [App\Http\Controllers\TabletController::class, 'batteryAlert'])->name('battery-alert');
+    Route::get('/check-updates/{id}', [App\Http\Controllers\TabletController::class, 'checkUpdates'])->name('check-updates');
 });
 
 // Temporary Debug Route

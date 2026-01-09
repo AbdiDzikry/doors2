@@ -78,6 +78,12 @@ class Meeting extends Model
         return $this->morphToMany(ExternalParticipant::class, 'participant', 'meeting_participants');
     }
 
+    public function participants()
+    {
+        return $this->morphedByMany(User::class, 'participant', 'meeting_participants')
+                    ->withPivot(['id', 'status', 'is_pic', 'attended_at']);
+    }
+
     public function pantryOrders()
     {
         return $this->hasMany(PantryOrder::class);

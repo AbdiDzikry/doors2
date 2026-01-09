@@ -67,9 +67,16 @@
                             <span class="text-xs text-gray-500">{{ $participant->department }}</span>
                         </div>
                     </div>
-                    <button type="button" wire:click="removeParticipant({{ $participant->id }})" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" title="Remove">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <div class="flex items-center space-x-2">
+                         <button type="button" wire:click="togglePic({{ $participant->id }})" 
+                            class="text-xs font-medium px-2 py-1 rounded border transition-colors {{ in_array($participant->id, $picParticipants) ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'text-gray-500 border-gray-200 hover:bg-gray-50' }}"
+                            title="Set as Person In Charge">
+                            {{ in_array($participant->id, $picParticipants) ? 'PIC' : 'Set as PIC' }}
+                        </button>
+                        <button type="button" wire:click="removeParticipant({{ $participant->id }})" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" title="Remove">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
                 </div>
             @endforeach
         </div>

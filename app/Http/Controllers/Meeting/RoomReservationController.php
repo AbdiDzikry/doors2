@@ -130,13 +130,13 @@ class RoomReservationController extends Controller
                     ]));
                     $this->attachParticipantsAndPantryOrders($meeting, $request);
                     $this->sendMeetingInvitation($meeting); // Re-enabled email sending
-                    MeetingStatusUpdated::dispatch($meeting->room, $meeting); // Dispatch event
+                    event(new \App\Events\RoomStatusUpdated($meeting->room_id)); // Dispatch Tablet Refresh Event
                 }
             } else {
                 $meeting = Meeting::create($meetingData);
                 $this->attachParticipantsAndPantryOrders($meeting, $request);
                 $this->sendMeetingInvitation($meeting); // Re-enabled email sending
-                MeetingStatusUpdated::dispatch($meeting->room, $meeting); // Dispatch event
+                event(new \App\Events\RoomStatusUpdated($meeting->room_id)); // Dispatch Tablet Refresh Event
             }
 
             DB::commit();

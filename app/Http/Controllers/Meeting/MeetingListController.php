@@ -27,7 +27,7 @@ class MeetingListController extends Controller
         $sortBy = $request->input('sort_by', 'start_time');
         $sortDirection = $request->input('sort_direction', 'asc');
 
-        $filter = $request->input('filter', 'month');
+        $filter = $request->input('filter', 'day'); // Default to Today
         $startDateInput = $request->input('start_date');
         $endDateInput = $request->input('end_date');
 
@@ -124,6 +124,18 @@ class MeetingListController extends Controller
                     return [$getStatusWeight($meeting->calculated_status), $meeting->start_time->timestamp];
                 });
             }
+
+            // Pagination Logic (Manual Pagination because of Collection Sorting/Filtering)
+            $perPage = 10;
+            $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+            $currentItems = $meetings->slice(($currentPage - 1) * $perPage, $perPage)->all();
+            $meetings = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                $meetings->count(),
+                $perPage,
+                $currentPage,
+                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+            );
         }
 
         return view('meetings.list.index', compact('meetings', 'myMeetings', 'stats', 'filter', 'effectiveStartDate', 'effectiveEndDate', 'activeTab', 'sortBy', 'sortDirection'));
@@ -285,72 +297,15 @@ class MeetingListController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $data = $participants->map(function ($mp) use ($meeting) {
-            $name = $mp->participant ? $mp->participant->name : 'N/A';
-            $email = $mp->participant ? $mp->participant->email : 'N/A';
-            
-            // For internal users, get NPK and Department
-            $npk = 'N/A';
-            $department = 'N/A';
-            if ($mp->participant_type === \App\Models\User::class && $mp->participant) {
-                $npk = $mp->participant->npk ?? '-';
-                $department = $mp->participant->department ?? '-';
-            }
+        // Render View to String
+        $html = view('exports.attendance-list', [
+            'meeting' => $meeting,
+            'participants' => $participants
+        ])->render();
 
-            // Helper function to sanitize string for XML
-            $sanitize = function ($value) {
-                if ($value === null) {
-                    return '';
-                }
-                if (!is_string($value)) {
-                    $value = (string) $value;
-                }
-                // Ensure valid UTF-8 and remove invalid XML characters
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                // Remove ALL control characters including newlines/carriage returns
-                $value = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
-                // Normalize whitespace (replace multiple spaces with single space)
-                $value = preg_replace('/\s+/', ' ', $value);
-                // Trim whitespace from both ends
-                return trim($value);
-            };
-
-            // Format start_time to readable string before sanitization
-            $startTimeStr = $meeting->start_time ? \Carbon\Carbon::parse($meeting->start_time)->format('d-m-Y H:i') : '-';
-            $bookedBy = $meeting->user ? $sanitize($meeting->user->name) : '-';
-
-            return [
-                'Meeting Topic' => $sanitize($meeting->topic),
-                'Start Time' => $startTimeStr,  // Use formatted string, no sanitization needed
-                'Booked By' => $bookedBy,  // NEW COLUMN
-                'Participant Name' => $sanitize($name),
-                'Email' => $sanitize($email),
-                'Type' => $mp->participant_type === \App\Models\User::class ? 'Internal' : 'External',
-                'NPK' => $sanitize($npk),
-                'Department' => $sanitize($department),
-                'Status' => $mp->attended_at ? 'Hadir' : 'Belum Hadir',
-                'Attendance Time' => $mp->attended_at ? \Carbon\Carbon::parse($mp->attended_at)->format('d-m-Y H:i') : '-',
-            ];
-        });
-
-        // If no participants, create at least one row with meeting info
-        if ($data->isEmpty()) {
-            $bookedBy = $meeting->user ? $meeting->user->name : '-';
-            $data = collect([[
-                'Meeting Topic' => $meeting->topic ?? '',
-                'Start Time' => $meeting->start_time ? \Carbon\Carbon::parse($meeting->start_time)->format('d-m-Y H:i') : '-',
-                'Booked By' => $bookedBy,  // NEW COLUMN
-                'Participant Name' => 'No participants',
-                'Email' => '-',
-                'Type' => '-',
-                'NPK' => '-',
-                'Department' => '-',
-                'Status' => '-',
-                'Attendance Time' => '-',
-            ]]);
-        }
-
-        return (new \Rap2hpoutre\FastExcel\FastExcel($data))->download("Attendance_Report_{$meeting->id}.xlsx");
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', "attachment; filename=\"Daftar_Hadir_{$meeting->topic}.xls\"");
     }
 }
 

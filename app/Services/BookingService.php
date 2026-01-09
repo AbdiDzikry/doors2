@@ -60,7 +60,7 @@ class BookingService
      * @return void
      * @throws Exception
      */
-    public function createMeeting(array $data, array $internalParticipants, array $externalParticipants, array $pantryOrders)
+    public function createMeeting(array $data, array $internalParticipants, array $externalParticipants, array $pantryOrders, array $picParticipants = [])
     {
         $recurring = $data['recurring'] ?? false;
         $roomId = $data['room_id'];
@@ -70,9 +70,9 @@ class BookingService
         DB::beginTransaction();
         try {
             if ($recurring) {
-                $this->handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders);
+                $this->handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
             } else {
-                $this->handleSingleCreation($data, $internalParticipants, $externalParticipants, $pantryOrders);
+                $this->handleSingleCreation($data, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
             }
 
             DB::commit();
@@ -82,7 +82,7 @@ class BookingService
         }
     }
 
-    protected function handleSingleCreation($data, $internalParticipants, $externalParticipants, $pantryOrders)
+    protected function handleSingleCreation($data, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants)
     {
         $newStartTime = new \DateTime($data['start_time']);
         $newEndTime = (clone $newStartTime)->add(new \DateInterval('PT' . $data['duration'] . 'M'));
@@ -102,13 +102,13 @@ class BookingService
             'status' => 'scheduled',
         ]);
 
-        $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders);
+        $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
         $this->sendMeetingInvitation($meeting);
         \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
         \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
     }
 
-    protected function handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders)
+    protected function handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants)
     {
         $startDate = new \DateTime($data['start_time']);
         $endDate = new \DateTime($data['ends_at']);
@@ -149,14 +149,14 @@ class BookingService
                 'confirmation_status' => 'pending_confirmation',
             ]);
 
-            $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders);
+            $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
             $this->sendMeetingInvitation($meeting);
             \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
             \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
         }
     }
 
-    protected function attachParticipantsAndPantryOrders(Meeting $meeting, array $internalParticipants, array $externalParticipants, array $pantryOrders)
+    protected function attachParticipantsAndPantryOrders(Meeting $meeting, array $internalParticipants, array $externalParticipants, array $pantryOrders, array $picParticipants = [])
     {
         // Auto-add organizer as participant (if not already in the list)
         if (!in_array($meeting->user_id, $internalParticipants)) {
@@ -173,6 +173,7 @@ class BookingService
                 'meeting_id' => $meeting->id,
                 'participant_id' => $userId,
                 'participant_type' => User::class,
+                'is_pic' => in_array($userId, $picParticipants),
             ]);
         }
 
