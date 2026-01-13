@@ -58,7 +58,7 @@
                         <h4 class="text-xl font-semibold text-gray-800 mb-4">1. Meeting Details</h4>
                         
                         @if (!$selectedRoom)
-                            <div class="mb-4">
+                            <div class="mb-4" id="tour-room-selection">
                                 <label for="room_id" class="block text-sm font-medium text-gray-700 mb-1">Room <span class="text-red-500">*</span></label>
                                 <div class="relative" x-data="{ 
                                     open: false, 
@@ -111,7 +111,7 @@
                             @error('topic') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-datetime" x-data="{ 
                                 date: '{{ \Carbon\Carbon::parse($start_time)->format('Y-m-d') }}',
                                 hour: '{{ \Carbon\Carbon::parse($start_time)->format('H') }}',
                                 minute: '{{ \Carbon\Carbon::parse($start_time)->format('i') }}',
@@ -503,7 +503,7 @@
 
 
                     <!-- Participants Card -->
-                    <div class="bg-white rounded-lg shadow-md" x-data="{ activeTab: 'internal' }">
+                    <div class="bg-white rounded-lg shadow-md" id="tour-participants" x-data="{ activeTab: 'internal' }">
                         <div class="p-6">
                             <h4 class="text-xl font-semibold text-gray-800 mb-4">2. Add Participants</h4>
                             <div class="border-b border-gray-200">
@@ -635,7 +635,7 @@
 
                     <!-- Room Schedule Card -->
                     <!-- Pantry Card (Moved) -->
-                    <div class="bg-white rounded-lg shadow-md">
+                    <div class="bg-white rounded-lg shadow-md" id="tour-pantry">
                         <div class="p-6">
                             <h4 class="text-xl font-semibold text-gray-800 mb-4">Pantry Orders</h4>
                         </div>
@@ -661,7 +661,7 @@
                 </div>
             @endif
             <div class="flex justify-end">
-                <button type="button" wire:click.prevent="submitForm" wire:loading.attr="disabled" wire:target="submitForm" class="inline-flex items-center justify-center px-6 py-3 bg-green-600 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-150 text-lg relative">
+                <button type="button" id="tour-submit" wire:click.prevent="submitForm" wire:loading.attr="disabled" wire:target="submitForm" class="inline-flex items-center justify-center px-6 py-3 bg-green-600 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-150 text-lg relative">
                     <span wire:loading.remove wire:target="submitForm">Book Meeting</span>
                     <span wire:loading wire:target="submitForm" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -26,6 +26,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    @auth
+        @if(!auth()->user()->has_seen_tour)
+            <script>
+                window.shouldStartTour = true;
+            </script>
+        @endif
+    @endauth
+
     @livewireStyles
 
     @stack('styles')
@@ -66,7 +74,7 @@
 
 
 
-                                <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                                <x-sidebar-link id="nav-dashboard" :href="route('dashboard')" :active="request()->routeIs('dashboard')">
 
 
 
@@ -170,7 +178,7 @@
 
                     <div x-data="{ open: {{ request()->routeIs('meeting.*') ? 'true' : 'false' }} }" class="relative">
 
-                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('meeting.*')">
+                        <x-sidebar-link id="nav-meeting-mgmt" href="#" @click="open = !open" :active="request()->routeIs('meeting.*')">
 
                             <i class="fas fa-handshake mr-3"></i>
 
@@ -404,7 +412,7 @@
 
                             <x-slot name="trigger">
 
-                                <button class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
+                                <button id="nav-profile-dropdown" class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out">
 
                                     <div>{{ Auth::user()->name }}</div>
 

@@ -1,4 +1,6 @@
 import './bootstrap';
+import '../css/tour.css';
+import './tour';
 
 import Echo from 'laravel-echo';
 

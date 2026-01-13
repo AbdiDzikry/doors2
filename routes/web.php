@@ -29,6 +29,11 @@ Route::middleware('web')->group(function () {
     Route::post('/logout/sso', [App\Http\Controllers\Auth\SSOController::class, 'logout'])->name('sso.logout');
 });
 
+// User Tour Routes
+Route::post('/tour/mark-as-seen', [App\Http\Controllers\TourController::class, 'markAsSeen'])
+    ->name('tour.mark-seen')
+    ->middleware('auth');
+
 // Public booking page for users (no auth required)
 Route::prefix('user-booking')->name('user-booking.')->group(function () {
     Route::get('/', [UserBookingController::class, 'index'])->name('index');
@@ -66,6 +71,8 @@ Route::middleware(['auth', 'can:manage master data'])->name('master.')->prefix('
     Route::resource('external-participants', ExternalParticipantController::class);
     Route::resource('rooms', RoomController::class);
     Route::resource('priority-guests', PriorityGuestController::class);
+    Route::get('users/contact-template', [UserController::class, 'downloadContactTemplate'])->name('users.contact-template');
+    Route::post('users/import-contacts', [UserController::class, 'importContacts'])->name('users.import-contacts');
     Route::get('users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');
@@ -79,9 +86,7 @@ Route::middleware(['auth', 'can:manage pantry'])->name('master.')->prefix('maste
 });
 
 Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->group(function () {
-    Route::get('bookings/create', function() {
-        return redirect()->route('meeting.room-reservations.index');
-    });
+
     Route::resource('room-reservations', RoomReservationController::class);
     Route::resource('bookings', BookingController::class);
     Route::resource('meeting-lists', MeetingListController::class)->parameters([

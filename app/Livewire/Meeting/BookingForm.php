@@ -111,7 +111,7 @@ class BookingForm extends Component
         $this->occupiedSlots = $slots;
     }
 
-    public function mount($selectedRoomId = null)
+    public function mount($selectedRoomId = null, $start_time = null, $end_time = null)
     {
         $this->selectedRoomId = $selectedRoomId;
         $this->room_id = $selectedRoomId; // Pre-select room if provided
@@ -119,6 +119,53 @@ class BookingForm extends Component
         $this->rooms = Room::all();
         $this->priorityGuests = PriorityGuest::all();
         
+        // Handle Pre-filled Times from URL (e.g. Timeline View)
+        if ($start_time && $end_time) {
+            try {
+                $start = \Carbon\Carbon::parse($start_time);
+                $end = \Carbon\Carbon::parse($end_time);
+
+                // Set Start Time
+                $this->start_time = $start->format('Y-m-d\TH:i');
+                
+                // Calculate Duration
+                $diffInMinutes = $start->diffInMinutes($end);
+                $this->duration = $diffInMinutes > 0 ? $diffInMinutes : 60;
+                
+                // Set End Date (for Recurring defaults)
+                $this->ends_at = $end->format('Y-m-d');
+
+            } catch (\Exception $e) {
+                // Fallback if parsing fails
+                $this->setDefaultTime();
+            }
+        } else {
+            // Apply Default Logic if no params provided
+            $this->setDefaultTime();
+        }
+
+        // Fetch selected room and current meeting logic
+        $this->selectedRoom = Room::find($this->selectedRoomId);
+        $this->current_meeting = null;
+        if ($this->selectedRoom) {
+            $now = now();
+            $this->current_meeting = $this->selectedRoom->meetings()
+                ->where('start_time', '<=', $now)
+                ->where('end_time', '>=', $now)
+                ->where('status', '!=', 'cancelled')
+                ->first();
+        }
+        
+        $this->calculateOccupiedSlots();
+        
+        // Only adjust if NOT manually set via URL
+        if (!$start_time) {
+            $this->adjustStartTimeToAvailable();
+        }
+    }
+
+    private function setDefaultTime() 
+    {
         // Set default start time based on business hours (7 AM to 6 PM)
         $currentTime = now();
         $minute = $currentTime->minute;
@@ -142,22 +189,7 @@ class BookingForm extends Component
         }
 
         $this->start_time = $currentTime->format('Y-m-d\TH:i');
-        $this->ends_at = now()->addDays(7)->format('Y-m-d'); // Default end date for recurring
-
-        // Fetch selected room and current meeting logic
-        $this->selectedRoom = Room::find($this->selectedRoomId);
-        $this->current_meeting = null;
-        if ($this->selectedRoom) {
-            $now = now();
-            $this->current_meeting = $this->selectedRoom->meetings()
-                ->where('start_time', '<=', $now)
-                ->where('end_time', '>=', $now)
-                ->where('status', '!=', 'cancelled')
-                ->first();
-        }
-        
-        $this->calculateOccupiedSlots();
-        $this->adjustStartTimeToAvailable();
+        $this->ends_at = now()->addDays(7)->format('Y-m-d'); // Default end date
     }
 
     public function adjustStartTimeToAvailable()

@@ -13,6 +13,13 @@ class MeetingParticipant extends Model
         'meeting_id',
         'participant_id',
         'participant_type',
+        'name',
+        'email',
+        'type',
+        'participant_code',
+        'attend_status',
+        'check_in_time',
+        'check_out_time',
         'attended_at',
         'is_pic',
     ];

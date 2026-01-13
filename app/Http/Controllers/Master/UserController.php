@@ -47,7 +47,11 @@ class UserController extends Controller
 
         $roles = Role::all(); // For role filter dropdown
 
-        return view('master.users.index', compact('users', 'roles'));
+        // Fetch Sync Status
+        $syncStatus = \App\Models\Configuration::where('key', 'employee_sync_status')->value('value');
+        $syncLastRun = \App\Models\Configuration::where('key', 'employee_sync_last_run')->value('value');
+
+        return view('master.users.index', compact('users', 'roles', 'syncStatus', 'syncLastRun'));
     }
 
     /**
@@ -211,6 +215,104 @@ class UserController extends Controller
         }
 
         return redirect()->route('master.users.index')->with('success', 'Users imported successfully!');
+    }
+
+    public function downloadContactTemplate()
+    {
+        $headings = [
+            'No',
+            'Employee No.',
+            'Employee Name',
+            'email',
+            'Phone',
+        ];
+        // Export just the headers
+        $data = collect([$headings]);
+        return (new FastExcel($data))->download('update_contacts_template.xlsx');
+    }
+
+    public function importContacts(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            $count = 0;
+            $updated = 0;
+            
+            // Debugging: Log the start of import
+            \Illuminate\Support\Facades\Log::info('Starting Contact Import');
+
+            (new FastExcel)->import($request->file('file'), function ($row) use (&$count, &$updated) {
+                // Debugging: Log the raw row data
+                \Illuminate\Support\Facades\Log::info('Import Row: ' . json_encode($row));
+                
+                // Determine values based on keys OR generic indices
+                // Template: [0] No, [1] Employee No., [2] Employee Name, [3] email, [4] Phone
+                
+                $npk = $row['Employee No.'] ?? $row['employee no.'] ?? $row[1] ?? null;
+                $email = $row['email'] ?? $row['Email'] ?? $row[3] ?? null;
+                $phone = $row['Phone'] ?? $row['phone'] ?? $row[4] ?? null;
+
+                // 1. Skip if no NPK
+                if (!$npk) {
+                    return;
+                }
+                
+                // 2. Skip if this is actually the header row being read as data
+                if (strcasecmp($npk, 'Employee No.') === 0 || strcasecmp($npk, 'NPK') === 0) {
+                    return;
+                }
+
+                // Normalize Phone Number: 62 -> 0
+                if ($phone) {
+                    $phoneStr = (string)$phone;
+                    // Trim spaces
+                    $phoneStr = trim($phoneStr);               
+                    if (str_starts_with($phoneStr, '62')) {
+                        $phone = '0' . substr($phoneStr, 2);
+                    }
+                }
+
+                $user = User::where('npk', $npk)->first();
+
+                if ($user) {
+                    $updateData = [];
+                    // Only update if the file has data (allow null/empty to NOT overwrite existing data? OR overwrite with empty?)
+                    // Typically "Update" means if you provide value, we use it. If empty in excel, maybe keep existing?
+                    // Code below only updates if !empty.  
+                    if (!empty($email)) {
+                        // Check if email belongs to another user
+                        $emailOwner = User::where('email', $email)->where('id', '!=', $user->id)->first();
+                        if ($emailOwner) {
+                            \Illuminate\Support\Facades\Log::warning("Duplicate Email Skipped: {$email} is already used by {$emailOwner->name} (NPK: {$emailOwner->npk}). Keeping original for {$user->name}.");
+                        } else {
+                            $updateData['email'] = $email;
+                        }
+                    }
+                    
+                    if (!empty($phone)) $updateData['phone'] = $phone;
+
+                    if (!empty($updateData)) {
+                        $user->update($updateData);
+                        $updated++;
+                        \Illuminate\Support\Facades\Log::info("Updated User: {$user->name} (NPK: {$npk})");
+                    } else {
+                        \Illuminate\Support\Facades\Log::info("No changes for User: {$user->name} (NPK: {$npk})");
+                    }
+                } else {
+                    \Illuminate\Support\Facades\Log::warning("User not found for NPK: {$npk}");
+                }
+                $count++;
+            });
+
+            return redirect()->route('master.users.index')->with('success', "Contact info updated. {$updated} users updated.");
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Import Error: ' . $e->getMessage());
+            return redirect()->route('master.users.index')->with('error', 'Error importing contact file: ' . $e->getMessage());
+        }
     }
 
     

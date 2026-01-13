@@ -38,14 +38,14 @@
                     <p class="mt-2 text-sm text-gray-500">Manage and track all your scheduled room reservations.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                     <a href="{{ route('meeting.room-reservations.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
+                     <a href="{{ route('meeting.room-reservations.index') }}" id="tour-new-booking-btn" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
                         <i class="fas fa-plus mr-2"></i> New Booking
                     </a>
                 </div>
             </div>
 
             <!-- Modern Tabs -->
-            <div class="mb-8">
+            <div class="mb-8" id="tour-tabs">
                 <div class="border-b border-gray-200 overflow-x-auto no-scrollbar">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}"
@@ -69,7 +69,7 @@
             <div x-show="activeTab === 'meeting-list'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 
                 <!-- Filter Section -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4" id="tour-list-filter">
                     <form action="{{ route('meeting.meeting-lists.index') }}" method="GET" x-data="{ 
                         filter: '{{ request('filter', 'day') }}',
                         updateFilter() {
@@ -314,7 +314,7 @@
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" id="tour-list-table">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">

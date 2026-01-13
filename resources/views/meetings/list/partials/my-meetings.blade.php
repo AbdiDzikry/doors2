@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <!-- Stats Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5" id="tour-my-list-filter">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h2 class="text-lg font-bold text-gray-900">My Meeting Stats</h2>
             
@@ -189,7 +189,7 @@
             </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Total -->
             <div class="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-center justify-between">
                 <div>
@@ -223,21 +223,12 @@
                 </div>
             </div>
 
-            <!-- Cancelled -->
-            <div class="bg-red-50 rounded-lg p-4 border border-red-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-red-600 uppercase tracking-wider">Cancelled</p>
-                    <p class="text-2xl font-bold text-red-900 mt-1">{{ $stats['cancelled'] ?? 0 }}</p>
-                </div>
-                <div class="p-3 bg-white rounded-full shadow-sm">
-                    <i class="fas fa-times-circle text-red-500 text-xl"></i>
-                </div>
-            </div>
+            <!-- Cancelled Removed -->
         </div>
     </div>
 
     <!-- Table Section -->
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" id="tour-my-list-table">
         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
             <h3 class="text-md font-bold text-gray-900">My Schedule</h3>
         </div>

@@ -32,7 +32,7 @@
     </div>
 
     <!-- Filter Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8" x-data='{ 
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8" id="tour-analytics-filter" x-data='{ 
         filter: @json($filter, JSON_HEX_APOS),
         division: @json(request("division"), JSON_HEX_APOS),
         department: @json(request("department"), JSON_HEX_APOS),
@@ -388,7 +388,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <!-- Busy Hours -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300" id="tour-busy-hours">
             <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                 <div>
                     <h3 class="text-base font-bold text-gray-900">Busy Hours</h3>
@@ -404,7 +404,7 @@
         </div>
 
         <!-- Meeting Status -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300" id="tour-meeting-status">
             <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                 <div>
                     <h3 class="text-base font-bold text-gray-900">Status Distribution</h3>

@@ -38,47 +38,52 @@ class ReceptionistDashboardController extends Controller
                                     ->get()
                                     ->groupBy('meeting_id');
 
-        // Fetch historical pantry orders with filters
-        // Ensure meeting exists and is NOT cancelled for active items (already handled above), 
-        // but for history we allow delivered even if meeting ended.
-        $historicalPantryOrdersQuery = PantryOrder::whereHas('meeting', function($q) {
-                $q->where('status', '!=', 'cancelled');
-            })
-            ->with(['meeting.room', 'meeting.user', 'pantryItem']);
+        // Fetch historical meetings that have pantry orders, with filters
+        // Base Query: Meetings that have at least one pantry order (checking status if needed, but history usually implies any status)
+        $historicalMeetingsQuery = Meeting::whereHas('pantryOrders')
+                                        ->where('status', '!=', 'cancelled') // Exclude cancelled meetings
+                                        ->with(['room', 'user', 'pantryOrders.pantryItem']);
 
         // Filter by date range
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $startDate = \Carbon\Carbon::parse($request->input('start_date'))->startOfDay();
             $endDate = \Carbon\Carbon::parse($request->input('end_date'))->endOfDay();
-            $historicalPantryOrdersQuery->whereHas('meeting', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('start_time', [$startDate, $endDate]);
-            });
+            $historicalMeetingsQuery->whereBetween('start_time', [$startDate, $endDate]);
         }
 
         // Search by meeting topic or pantry item name
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $historicalPantryOrdersQuery->where(function ($q) use ($search) {
-                $q->whereHas('meeting', function ($q2) use ($search) {
-                    $q2->where('topic', 'like', '%' . $search . '%');
-                })->orWhereHas('pantryItem', function ($q2) use ($search) {
-                    $q2->where('name', 'like', '%' . $search . '%');
-                });
+            $historicalMeetingsQuery->where(function ($q) use ($search) {
+                $q->where('topic', 'like', '%' . $search . '%')
+                  ->orWhereHas('pantryOrders.pantryItem', function ($q2) use ($search) {
+                      $q2->where('name', 'like', '%' . $search . '%');
+                  });
             });
         }
 
-        // Apply Status Filter
+        // Apply Status Filter (Check if meeting has ANY order with this status)
         $statusFilter = $request->input('status_filter', 'delivered'); // Default to delivered
         if ($statusFilter !== 'all') {
-            $historicalPantryOrdersQuery->where('status', $statusFilter);
+            $historicalMeetingsQuery->whereHas('pantryOrders', function($q) use ($statusFilter) {
+                $q->where('status', $statusFilter);
+            });
+            // Also constrain the eager load if we only want to see matching orders? 
+            // Usually history shows the meeting context. Let's filter the orders displayed in view or constrain eager load.
+            // For now, let's load all orders for that meeting so the receptionist sees the full context, 
+            // OR strictly show only matching orders.
+            // Decision: Eager load only matching orders if filter is active, otherwise load all.
+            $historicalMeetingsQuery->with(['pantryOrders' => function($q) use ($statusFilter) {
+                 $q->where('status', $statusFilter);
+            }]);
         }
 
-        $historicalPantryOrders = $historicalPantryOrdersQuery->orderBy('created_at', 'desc')->paginate(10);
+        $historicalMeetings = $historicalMeetingsQuery->orderBy('start_time', 'desc')->paginate(10);
 
         $pendingPantryOrdersCount = PantryOrder::where('status', 'pending')->count();
         $todaysMeetings = \App\Models\Meeting::whereDate('start_time', today())->orderBy('start_time')->get();
 
-        return view('dashboards.receptionist', compact('activePantryOrdersGroupedByMeeting', 'historicalPantryOrders', 'pendingPantryOrdersCount', 'todaysMeetings'));
+        return view('dashboards.receptionist', compact('activePantryOrdersGroupedByMeeting', 'historicalMeetings', 'pendingPantryOrdersCount', 'todaysMeetings'));
     }
 
     /**

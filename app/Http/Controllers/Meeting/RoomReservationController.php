@@ -52,18 +52,33 @@ class RoomReservationController extends Controller
             }
         }
 
-        $rooms = $query->orderBy('name', 'asc')->with(['meetings' => function ($q) use ($now) {
-            $q->where('start_time', '<=', $now)
-              ->where('end_time', '>=', $now)
-              ->where('status', '!=', 'cancelled');
+        $view = $request->input('view', 'grid');
+        $date = $request->input('date', now()->format('Y-m-d'));
+
+        $rooms = $query->orderBy('name', 'asc')->with(['meetings' => function ($q) use ($now, $view, $date) {
+            if ($view === 'timeline') {
+                $q->whereDate('start_time', $date)
+                  ->where('status', '!=', 'cancelled')
+                  ->orderBy('start_time');
+            } else {
+                $q->where('start_time', '<=', $now)
+                  ->where('end_time', '>=', $now)
+                  ->where('status', '!=', 'cancelled');
+            }
         }])->get();
 
         $rooms->each(function ($room) {
             $room->is_in_use = $room->meetings->isNotEmpty();
-            $room->current_meeting = $room->meetings->first();
+            // specific logic for card view only to show current meeting
+            if ($room->meetings->isNotEmpty()) {
+                 // For grid view, we only loaded current meeting, so first is correct.
+                 // For timeline view, we loaded many, but we won't strictly use current_meeting for status display in the same way, 
+                 // effectively we can just grab the first one that is "now" if we really needed to, but for simplicity:
+                 $room->current_meeting = $room->meetings->first();
+            }
         });
 
-        return view('meetings.reservation.index', compact('rooms'));
+        return view('meetings.reservation.index', compact('rooms', 'view', 'date'));
     }
 
     /**

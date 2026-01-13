@@ -14,7 +14,21 @@
                         <p class="mt-1 text-sm text-gray-500">
                             Manage users and their roles within the system.
                             <span class="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] text-gray-500 border border-gray-200 rounded-full font-medium italic">
-                                <i class="fas fa-clock mr-1"></i>Auto-sync: daily
+                            <i class="fas fa-clock mr-1"></i>Auto-sync: daily
+                            @if(isset($syncStatus))
+                                <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold {{ $syncStatus === 'success' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200' }}">
+                                    @if($syncStatus === 'success')
+                                        <i class="fas fa-check-circle mr-1"></i>Success
+                                    @else
+                                        <i class="fas fa-exclamation-circle mr-1"></i>Failed
+                                    @endif
+                                </span>
+                                @if(isset($syncLastRun))
+                                    <span class="text-xs text-gray-400 ml-1" title="Last run at {{ $syncLastRun }}">
+                                        ({{ \Carbon\Carbon::parse($syncLastRun)->diffForHumans() }})
+                                    </span>
+                                @endif
+                            @endif
                             </span>
                         </p>
                     </div>
@@ -29,14 +43,14 @@
                             <button @click="showImportModal = true"
                                 class="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
                                 <i class="fas fa-file-import mr-2"></i>
-                                Import
+                                Import Users
                             </button>
                             <!-- Import Modal -->
                             <div x-show="showImportModal" x-cloak
                                 class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
                                 @keydown.escape.window="showImportModal = false">
                                 <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" @click.away="showImportModal = false">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Import Users</h3>
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Import New Users</h3>
                                     <form action="{{ route('master.users.import') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div>
@@ -53,6 +67,47 @@
                                             <button type="submit"
                                                 class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">
                                                 Import Data
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ showContactModal: false }">
+                            <button @click="showContactModal = true"
+                                class="flex items-center justify-center px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 rounded-lg hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                <i class="fas fa-address-book mr-2"></i>
+                                Update Contacts
+                            </button>
+                            <!-- Contact Update Modal -->
+                            <div x-show="showContactModal" x-cloak
+                                class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                                @keydown.escape.window="showContactModal = false">
+                                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md" @click.away="showContactModal = false">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Update Employee Contacts</h3>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        Update Email and Phone for existing users by matching Employee No. (NPK).
+                                        <a href="{{ route('master.users.contact-template') }}" class="text-indigo-600 hover:text-indigo-800 font-medium underline">
+                                            Download existing data template
+                                        </a>
+                                    </p>
+                                    <form action="{{ route('master.users.import-contacts') }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div>
+                                            <label for="contact_file" class="block text-sm font-medium text-gray-700">Choose file to import</label>
+                                            <input type="file" name="file" id="contact_file"
+                                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                required>
+                                        </div>
+                                        <div class="mt-6 flex justify-end space-x-3">
+                                            <button type="button" @click="showContactModal = false"
+                                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none">
+                                                Cancel
+                                            </button>
+                                            <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none">
+                                                Update Contacts
                                             </button>
                                         </div>
                                     </form>

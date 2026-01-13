@@ -77,13 +77,37 @@ class EmployeeApiService
                 }
             }
 
-            return [
+            $result = [
                 'synced' => $synced,
                 'errors' => $errors,
                 'status' => 'success'
             ];
+            
+            // Log success to DB configuration
+            \App\Models\Configuration::updateOrCreate(
+                ['key' => 'employee_sync_status'],
+                ['value' => 'success']
+            );
+            \App\Models\Configuration::updateOrCreate(
+                ['key' => 'employee_sync_last_run'],
+                ['value' => now()->toDateTimeString()]
+            );
+
+            return $result;
+
         } catch (\Exception $e) {
             Log::error('Full Sync Failed: ' . $e->getMessage());
+            
+            // Log failure to DB configuration
+            \App\Models\Configuration::updateOrCreate(
+                ['key' => 'employee_sync_status'],
+                ['value' => 'failed']
+            );
+            \App\Models\Configuration::updateOrCreate(
+                ['key' => 'employee_sync_last_run'],
+                ['value' => now()->toDateTimeString()]
+            );
+            
             return ['synced' => 0, 'errors' => 0, 'status' => 'failed'];
         }
     }
