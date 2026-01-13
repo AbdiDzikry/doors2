@@ -117,7 +117,10 @@
                 <div class="flex items-center gap-2">
                         @if ($meeting->calculated_status !== 'cancelled')
                         <a href="{{ route('meeting.meetings.attendance.export', $meeting->id) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
-                            <i class="fas fa-file-excel mr-2"></i> Download Absensi
+                            <i class="fas fa-file-excel mr-2"></i> Excel
+                        </a>
+                        <a href="{{ route('meeting.meetings.attendance.export-pdf', $meeting->id) }}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
+                            <i class="fas fa-file-pdf mr-2"></i> PDF
                         </a>
                         
                         @php

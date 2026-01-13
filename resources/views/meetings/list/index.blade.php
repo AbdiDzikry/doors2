@@ -38,7 +38,7 @@
                     <p class="mt-2 text-sm text-gray-500">Manage and track all your scheduled room reservations.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                     <a href="{{ route('meeting.bookings.create') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
+                     <a href="{{ route('meeting.room-reservations.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
                         <i class="fas fa-plus mr-2"></i> New Booking
                     </a>
                 </div>
@@ -60,12 +60,7 @@
                            <i class="fas fa-user-clock mr-2" :class="{ 'text-green-500': activeTab === 'my-meetings', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'my-meetings' }"></i>
                             My Meetings
                         </a>
-                        <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'my-recurring-meetings']) }}"
-                           class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 group flex items-center"
-                           :class="{ 'border-green-500 text-green-600': activeTab === 'my-recurring-meetings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'my-recurring-meetings' }">
-                           <i class="fas fa-sync-alt mr-2" :class="{ 'text-green-500': activeTab === 'my-recurring-meetings', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'my-recurring-meetings' }"></i>
-                            Recurring
-                        </a>
+
                     </nav>
                 </div>
             </div>
@@ -411,6 +406,12 @@
                                                 </a>
 
                                                 @if($meeting->calculated_status !== 'cancelled')
+                                                    <a href="{{ route('meeting.meetings.attendance.export-pdf', $meeting->id) }}" class="text-gray-400 hover:text-red-600 transition-colors" title="Download Absensi (PDF)">
+                                                        <i class="far fa-file-pdf text-lg"></i>
+                                                    </a>
+                                                @endif
+
+                                                @if($meeting->calculated_status !== 'cancelled')
                                                     @if(Auth::user()->hasAnyRole(['Admin', 'Super Admin']) || (Auth::id() === $meeting->user_id && !in_array($meeting->calculated_status, ['ongoing', 'completed'])))
                                                         <a href="{{ route('meeting.meeting-lists.edit', $meeting->id) }}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit Meeting">
                                                             <i class="far fa-edit text-lg"></i>
@@ -459,9 +460,7 @@
                @include('meetings.list.partials.my-meetings')
             </div>
 
-            <div x-show="activeTab === 'my-recurring-meetings'">
-                 @livewire('meeting.recurring-meetings-list')
-            </div>
+
 
         </div>
     </div>

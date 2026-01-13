@@ -314,8 +314,8 @@
                                     </a>
 
                                     @if($meeting->calculated_status !== 'cancelled')
-                                        <a href="{{ route('meeting.meetings.attendance.export', $meeting->id) }}" class="text-gray-400 hover:text-indigo-600 transition-colors" title="Download Absensi">
-                                            <i class="far fa-file-excel text-lg"></i>
+                                        <a href="{{ route('meeting.meetings.attendance.export-pdf', $meeting->id) }}" class="text-gray-400 hover:text-red-600 transition-colors" title="Download Absensi (PDF)">
+                                            <i class="far fa-file-pdf text-lg"></i>
                                         </a>
                                     @endif
 
@@ -352,6 +352,13 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        </div>
+        <!-- Pagination -->
+        <div class="mt-4 px-6 pb-4">
+             @if($myMeetings instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                {{ $myMeetings->links() }}
+             @endif
         </div>
     </div>
 </div>

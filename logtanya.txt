@@ -1,0 +1,27 @@
+hasil uat percobaan tadi
+=========================
+
+1. http://127.0.0.1:8000/meeting/meeting-lists/75
+http://127.0.0.1:8000/meeting/meetings/75/attendance/export-pdf
+saat saya mengakses halaman ini sebagai karyawan, malah menampilkan halaman meeting list.
+unauthorized action.
+
+2. http://127.0.0.1:8000/meeting/analytics
+saat akses halaman ini ada error
+SQLSTATE[23000]: Integrity constraint violation: 1052 Column 'status' in where clause is ambiguous (Connection: mysql, SQL: select `rooms`.`name`, count(meetings.id) as count from `meetings` inner join `rooms` on `meetings`.`room_id` = `rooms`.`id` where `meetings`.`start_time` between 2026-01-01 00:00:00 and 2026-01-31 23:59:59 and `status` != cancelled and (`meetings`.`user_id` = 5 or exists (select * from `meeting_participants` where `meetings`.`id` = `meeting_participants`.`meeting_id` and `participant_type` = App\Models\User and `participant_id` = 5)) group by `rooms`.`name`)
+
+3.  saat saya login resepsionis dia menampilkan error ini pada dashboard
+SQLSTATE[42S02]: Base table or view not found: 1146 Table 'doors.notifications' doesn't exist (Connection: mysql, SQL: select * from `notifications` where `notifications`.`notifiable_type` = App\Models\User and `notifications`.`notifiable_id` = 4 and `notifications`.`notifiable_id` is not null and `read_at` is null and `type` = App\Notifications\TabletBatteryLow order by `created_at` desc)
+dan juga kenapa resepsionis dapat mengakses url http://127.0.0.1:8000/meeting/meeting-lists?tab=my-meetings#
+
+4. saat logout selalu menampilkan 419 page expired. seharusnya itu kita langusng ke halaman login kembali. http://127.0.0.1:8000/logout
+
+5.verifikasi absen pakai npk yang buka pic dan organizer sudah bisa.
+tetapi seharusnya saat masukkan NPK itu langsung menyatakan hadir, bukan malah membuka halaman pop up untuk ceklist absensi, ini juga berlaku untuk organizer dan PIC. yang pop up checklist itu khusus untuk halaman website.
+ (dan juga padahal websocket sudah diaktifkan untuk local kenapa saat di jam meeting itu tidak otomatis update tampilan nya)
+
+6. lalu saat saya login sebagai tablet lalu menekan tombol back pada browser, dia malah masuk dhasboard https://dev-doors.dharmap.com/meeting/meeting-lists. jika tidak salah error ini juga terjadi ke semua halaman saat saya sudah login lalu menekan tombol back. 
+dan juga ini malah saat saya pernah login sebagai karyawan, lalu masuk menggunakan akun tablet, dan memencet tombol back pada browser itu malah mengarahkan ke akun karyawan lagi yg otomatis masuk, tidak ada konfirmasi login kembali, seharusnya ada.
+(ini terjadi pada saat di staging, saya belum tau di local apakah masih seperti ini atau tidak)
+
+7.verifikasi meeting batal sudah bisa dan hilang begitu 

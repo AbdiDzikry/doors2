@@ -22,7 +22,8 @@ class PantryQueue extends Component
         $activePantryOrders = PantryOrder::with(['meeting.room', 'meeting.user', 'pantryItem'])
             ->whereIn('status', ['pending', 'preparing'])
             ->whereHas('meeting', function ($query) {
-                $query->where('start_time', '>=', now()->startOfDay());
+                $query->where('status', '!=', 'cancelled')
+                      ->where('start_time', '>=', now()->startOfDay());
             })
             ->get();
 

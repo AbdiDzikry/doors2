@@ -223,77 +223,7 @@
                                             <tr x-show="expandedMeeting === {{ $meeting->id }}" x-transition.opacity class="bg-gray-50/50">
                                                 <td colspan="5" class="p-0 border-b border-gray-200">
                                                     <div class="p-6 m-4 bg-white rounded-xl shadow-sm border border-gray-200">
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                            <!-- Left: Participants List -->
-                                                            <div>
-                                                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
-                                                                    <i class="fas fa-users mr-2"></i> Daftar Peserta
-                                                                </h4>
-                                                                <ul class="border border-gray-100 rounded-lg overflow-hidden divide-y divide-gray-100 max-h-60 overflow-y-auto">
-                                                                    <!-- Organizer -->
-                                                                    <li class="px-4 py-3 text-sm flex justify-between items-center bg-blue-50/50">
-                                                                        <div class="flex items-center">
-                                                                            <span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
-                                                                            <span class="font-bold text-gray-800">{{ $meeting->user->name }} <span class="text-xs font-normal text-gray-500">(Organizer)</span></span>
-                                                                        </div>
-                                                                        @php
-                                                                            $organizerParticipant = $meeting->meetingParticipants->where('participant_id', $meeting->user_id)->where('participant_type', 'App\Models\User')->first();
-                                                                            $isOrganizerAttended = $organizerParticipant && $organizerParticipant->attended_at;
-                                                                        @endphp
-                                                                        <span class="text-xs px-2 py-1 rounded-full font-bold {{ $isOrganizerAttended ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                                                            {{ $isOrganizerAttended ? 'Hadir' : 'Belum Hadir' }}
-                                                                        </span>
-                                                                    </li>
-                                                                    
-                                                                    <!-- Other Participants -->
-                                                                    @foreach($meeting->meetingParticipants as $mp)
-                                                                        @if($mp->participant_id == $meeting->user_id && $mp->participant_type == 'App\Models\User') @continue @endif
-                                                                        <li class="px-4 py-3 text-sm flex justify-between items-center bg-white hover:bg-gray-50">
-                                                                            <span class="font-medium text-gray-700">
-                                                                                {{ $mp->participant ? $mp->participant->name : 'External Guest' }}
-                                                                                @if($mp->is_pic)
-                                                                                    <span class="text-xs font-normal text-blue-500 ml-1">(PIC)</span>
-                                                                                @endif
-                                                                            </span>
-                                                                            <span class="text-xs px-2 py-1 rounded-full font-bold {{ $mp->attended_at ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
-                                                                                {{ $mp->attended_at ? 'Hadir' : 'Belum Hadir' }}
-                                                                            </span>
-                                                                        </li>
-                                                                    @endforeach
-                                                                    
-                                                                    @if($meeting->meetingParticipants->count() == 0)
-                                                                        <li class="px-4 py-3 text-sm text-gray-500 italic text-center">Tidak ada peserta tambahan.</li>
-                                                                    @endif
-                                                                </ul>
-                                                            </div>
-
-                                                            <!-- Right: Action Form -->
-                                                            <div class="flex flex-col h-full justify-between">
-                                                            <div class="flex flex-col h-full justify-between">
-                                                                <div class="mb-4">
-                                                                    <div class="mb-4">
-                                                                        @livewire('tablet.meeting-attendance', ['meeting' => $meeting], key('attendance-'.$meeting->id))
-                                                                    </div>
-                                                                </div>
-
-                                                                @if($meeting->status == 'scheduled' || $meeting->status == 'ongoing')
-                                                                    <form method="POST" action="{{ route('tablet.cancel', $meeting->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan meeting ini?');" class="mt-auto pt-4 border-t border-gray-100">
-                                                                        @csrf
-                                                                        <div class="flex items-center justify-between">
-                                                                            <div class="text-xs text-gray-400">
-                                                                                Ingin membatalkan meeting? <br>Hanya Organizer / PIC yang dapat membatalkan.
-                                                                            </div>
-                                                                            <div class="flex gap-2">
-                                                                                 <input type="text" name="npk" required placeholder="NPK Organizer / PIC" class="w-32 border-gray-300 rounded-lg text-xs py-1 px-2">
-                                                                                 <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 font-bold py-1 px-3 rounded-lg text-xs border border-red-200 transition-colors">
-                                                                                    Batalkan
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    </form>
-                                                                @endif
-                                                            </div>
-                                                        </div>
+                                                        @livewire('tablet.meeting-attendance', ['meeting' => $meeting], key('attendance-'.$meeting->id))
                                                     </div>
                                                 </td>
                                             </tr>

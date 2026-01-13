@@ -63,6 +63,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $role = Role::firstOrCreate(['name' => 'Resepsionis']);
         $role->givePermissionTo('access pantry dashboard');
+        $role->givePermissionTo('manage pantry');
 
         $role = Role::firstOrCreate(['name' => 'Manager']);
         $role->givePermissionTo('manage rooms');

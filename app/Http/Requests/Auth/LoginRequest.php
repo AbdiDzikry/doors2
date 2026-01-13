@@ -32,14 +32,16 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Attempt to authenticate the request's credentials.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+
+        // Check if user exists locally. If not, trigger a sync on demand from API.
+        $npk = $this->string('npk');
+        if (! \App\Models\User::where('npk', $npk)->exists()) {
+             // Use our centralized service to sync
+             app(\App\Services\EmployeeApiService::class)->syncAll();
+        }
 
         if (! Auth::attempt($this->only('npk', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());

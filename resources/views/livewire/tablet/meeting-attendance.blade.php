@@ -26,94 +26,137 @@
         </div>
         
         <!-- Input Action -->
-        <div class="flex gap-2 w-full">
-            <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    <i class="fas fa-id-card"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Left: Participants List -->
+    <div>
+        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
+            <i class="fas fa-users mr-2"></i> Daftar Peserta
+        </h4>
+        <ul class="border border-gray-100 rounded-lg overflow-hidden divide-y divide-gray-100 max-h-60 overflow-y-auto">
+            <!-- Organizer -->
+            <li class="px-4 py-3 text-sm flex justify-between items-center bg-blue-50/50">
+                <div class="flex items-center">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
+                    <span class="font-bold text-gray-800">{{ $meeting->user->name }} <span class="text-xs font-normal text-gray-500">(Organizer)</span></span>
+                </div>
+                @php
+                    // Check if Organizer is also a participant (Pivot) OR check organizer_attended logic (if we had column on meeting)
+                    // Currently we rely on Pivot. Finding pivot for organizer:
+                    $organizerPivot = $participantsList->first(function($p) use ($meeting) {
+                        return $p->participant_type === 'App\Models\User' && $p->participant_id === $meeting->user_id; 
+                    });
+                    $isOrganizerAttended = $organizerPivot && $organizerPivot->attended_at;
+                @endphp
+                <span class="text-xs px-2 py-1 rounded-full font-bold {{ $isOrganizerAttended ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                    {{ $isOrganizerAttended ? 'Hadir' : 'Belum Hadir' }}
                 </span>
-                <input type="text" 
-                       wire:model="inputNpk" 
-                       wire:keydown.enter="verifyNpk"
-                       placeholder="NPK Organizer / PIC" 
-                       class="w-full border-gray-300 rounded-lg pl-9 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all disabled:bg-gray-100 disabled:text-gray-400"
-                       inputmode="numeric"
-                       @if($status !== 'open') disabled @endif>
-            </div>
+            </li>
             
-            <button wire:click="verifyNpk" 
-                    class="px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all flex items-center gap-2 
-                    {{ $status == 'open' 
-                        ? 'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white' 
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}"
-                    @if($status !== 'open') disabled @endif>
-                @if($status == 'open') 
-                    Kelola <i class="fas fa-arrow-right"></i>
-                @else
-                    <i class="fas fa-ban"></i>
-                @endif
-            </button>
-        </div>
-
-        @error('inputNpk') <div class="text-red-600 text-xs font-bold mt-2 flex items-center animate-pulse"><i class="fas fa-exclamation-circle mr-1"></i> {{ $message }}</div> @enderror
-        @if($errorMsg) <div class="text-red-600 text-xs font-bold mt-2 flex items-center animate-pulse"><i class="fas fa-exclamation-circle mr-1"></i> {{ $errorMsg }}</div> @endif
+            <!-- Other Participants -->
+            @foreach($participantsList as $mp)
+                @if($mp->participant_id == $meeting->user_id && $mp->participant_type == 'App\Models\User') @continue @endif
+                <li class="px-4 py-3 text-sm flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+                    <span class="font-medium text-gray-700">
+                        {{ $mp->name }}
+                        @if($mp->is_pic)
+                            <span class="text-xs font-normal text-blue-500 ml-1">(PIC)</span>
+                        @endif
+                    </span>
+                    <span class="text-xs px-2 py-1 rounded-full font-bold {{ $mp->attended_at ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                        {{ $mp->attended_at ? 'Hadir' : 'Belum Hadir' }}
+                    </span>
+                </li>
+            @endforeach
+            
+            @if($participantsList->count() == 0)
+                <li class="px-4 py-3 text-sm text-gray-500 italic text-center">Tidak ada peserta tambahan.</li>
+            @endif
+        </ul>
     </div>
 
-    <!-- State 2: Modal (Unlocked) -->
-    @if($showModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <!-- Backdrop -->
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="close"></div>
+    <!-- Right: Check-In Form -->
+    <div class="flex flex-col h-full justify-between">
+        @if ($status === 'waiting')
+            <div class="text-center py-8">
+                <i class="fas fa-clock text-4xl text-gray-300 mb-3 block"></i>
+                <p class="text-gray-500 font-bold">Absensi Belum Dibuka</p>
+                <p class="text-xs text-gray-400 mt-1">Akan dibuka saat meeting dimulai.</p>
+            </div>
+        @elseif ($status === 'closed')
+            <div class="text-center py-8">
+                <i class="fas fa-lock text-4xl text-gray-300 mb-3 block"></i>
+                <p class="text-gray-500 font-bold">Absensi Ditutup</p>
+                <p class="text-xs text-gray-400 mt-1">Meeting sudah selesai.</p>
+            </div>
+        @else
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                    Check-In Peserta
+                </label>
+                
+                <form wire:submit="verifyNpk" class="relative">
+                    <input type="text" 
+                        wire:model="inputNpk"
+                        class="w-full text-center text-xl font-bold tracking-widest border-2 border-gray-200 rounded-xl py-3 focus:ring-green-500 focus:border-green-500 transition-colors uppercase placeholder-gray-300"
+                        placeholder="NPK"
+                        autofocus
+                        inputmode="numeric"
+                    >
+                    <button type="submit" class="absolute right-2 top-2 bottom-2 bg-[#089244] hover:bg-[#067a39] text-white px-4 rounded-lg font-bold shadow-md transition-all">
+                        Check-In
+                    </button>
+                    <!-- Loading Indicator -->
+                    <div wire:loading wire:target="verifyNpk" class="absolute inset-y-0 right-14 flex items-center pr-2">
+                        <svg class="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </div>
+                </form>
 
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                @error('inputNpk') 
+                    <p class="text-red-500 text-xs mt-2 font-bold animate-pulse">{{ $message }}</p> 
+                @enderror
+                
+                @if($errorMsg)
+                    <p class="text-red-500 text-xs mt-2 font-bold">{{ $errorMsg }}</p>
+                @endif
+                
+                <p class="text-[10px] text-gray-400 mt-2 text-center">
+                    Masukkan NPK Anda untuk konfirmasi kehadiran.
+                </p>
+            </div>
+        @endif
 
-            <!-- Modal Panel -->
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <!-- Heroicon name: outline/check -->
-                            <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                Kelola Kehadiran Peserta
-                            </h3>
-                            <div class="mt-4 max-h-60 overflow-y-auto border rounded-lg p-2 bg-gray-50">
-                                @forelse($participantsList as $participant)
-                                    <label class="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded cursor-pointer border-b last:border-0 border-gray-100">
-                                        <input type="checkbox" 
-                                               wire:model.defer="attendanceData.{{ $participant->id }}" 
-                                               class="form-checkbox h-5 w-5 text-green-600 rounded focus:ring-green-500 border-gray-300 transition duration-150 ease-in-out">
-                                        <div class="flex-1">
-                                            <span class="text-gray-900 font-medium block">{{ $participant->name }}</span>
-                                            <span class="text-gray-500 text-xs">{{ $participant->department ?? 'External' }}</span>
-                                        </div>
-                                        @if($attendanceData[$participant->id] ?? false)
-                                            <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold">Hadir</span>
-                                        @endif
-                                    </label>
-                                @empty
-                                    <p class="text-gray-500 text-sm text-center py-4">Belum ada peserta terdaftar.</p>
-                                @endforelse
-                            </div>
-                        </div>
+        @if($meeting->status == 'scheduled' || $meeting->status == 'ongoing')
+            <form method="POST" action="{{ route('tablet.cancel', $meeting->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan meeting ini?');" class="mt-auto pt-4 border-t border-gray-100">
+                @csrf
+                <div class="flex items-center justify-between">
+                    <div class="text-xs text-gray-400">
+                        Ingin membatalkan meeting? <br>Hanya Organizer / PIC yang dapat membatalkan.
+                    </div>
+                    <div class="flex gap-2">
+                            <input type="text" name="npk" required placeholder="NPK Organizer / PIC" class="w-32 border-gray-300 rounded-lg text-xs py-1 px-2">
+                            <button type="submit" class="bg-red-50 text-red-600 hover:bg-red-100 font-bold py-1 px-3 rounded-lg text-xs border border-red-200 transition-colors">
+                            Batalkan
+                        </button>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" wire:click="saveAttendance" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Simpan Perubahan
-                    </button>
-                    <button type="button" wire:click="close" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Batal
-                    </button>
-                </div>
-            </div>
-        </div>
+            </form>
+        @endif
     </div>
-    @endif
+    
+    <!-- Toast Script (Optional if using global listener) -->
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+             Livewire.on('attendance-saved', (event) => {
+                 // Play sound or show toast
+                 // Assuming separate toast handler in layout, but we can do a quick visual cue here if needed.
+                 // The global layout usually handles flash messages or we use SweetAlert.
+             });
+        });
+    </script>
+</div>
+    </div>
+
+    <!-- Modal Removed -->
 
     <!-- Inline Alert Success -->
     <div x-data="{ show: false, message: '' }" 

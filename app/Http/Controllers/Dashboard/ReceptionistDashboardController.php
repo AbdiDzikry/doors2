@@ -27,17 +27,24 @@ class ReceptionistDashboardController extends Controller
         }
 
         // Fetch active (pending or preparing) pantry orders for today's meetings
+        // Filter: only meetings with status != 'cancelled'
         $activePantryOrdersGroupedByMeeting = PantryOrder::whereIn('pantry_orders.status', ['pending', 'preparing'])
-                                    ->with(['meeting.room', 'meeting.user', 'pantryItem']) // Eager load meeting.user (organizer)
+                                    ->with(['meeting.room', 'meeting.user', 'pantryItem'])
                                     ->join('meetings', 'pantry_orders.meeting_id', '=', 'meetings.id')
-                                    ->whereDate('meetings.start_time', today()) // Filter for today's meetings
+                                    ->where('meetings.status', '!=', 'cancelled') // Exclude cancelled
+                                    ->whereDate('meetings.start_time', today())
                                     ->orderBy('meetings.start_time')
                                     ->select('pantry_orders.*')
                                     ->get()
                                     ->groupBy('meeting_id');
 
         // Fetch historical pantry orders with filters
-        $historicalPantryOrdersQuery = PantryOrder::with(['meeting.room', 'pantryItem']);
+        // Ensure meeting exists and is NOT cancelled for active items (already handled above), 
+        // but for history we allow delivered even if meeting ended.
+        $historicalPantryOrdersQuery = PantryOrder::whereHas('meeting', function($q) {
+                $q->where('status', '!=', 'cancelled');
+            })
+            ->with(['meeting.room', 'meeting.user', 'pantryItem']);
 
         // Filter by date range
         if ($request->filled('start_date') && $request->filled('end_date')) {

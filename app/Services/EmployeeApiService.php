@@ -50,42 +50,83 @@ class EmployeeApiService
         }
     }
 
-    /**
-     * Sync a single employee data to the User model.
-     *
-     * @param array $apiData
-     * @return User
-     */
+    public function syncAll(bool $force = false): array
+    {
+        // Throttle full sync to once every 5 minutes during on-demand requests
+        $lockKey = 'employee_sync_lock';
+        if (!$force && \Illuminate\Support\Facades\Cache::has($lockKey)) {
+            Log::info('Employee sync skipped (Throttled).');
+            return ['synced' => 0, 'errors' => 0, 'status' => 'throttled'];
+        }
+
+        if (!$force) {
+            \Illuminate\Support\Facades\Cache::put($lockKey, true, now()->addMinutes(5));
+        }
+
+        try {
+            $employees = $this->fetchEmployees();
+            $synced = 0;
+            $errors = 0;
+
+            foreach ($employees as $employeeData) {
+                try {
+                    $this->syncEmployee($employeeData);
+                    $synced++;
+                } catch (\Exception $e) {
+                    $errors++;
+                }
+            }
+
+            return [
+                'synced' => $synced,
+                'errors' => $errors,
+                'status' => 'success'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Full Sync Failed: ' . $e->getMessage());
+            return ['synced' => 0, 'errors' => 0, 'status' => 'failed'];
+        }
+    }
+
     public function syncEmployee(array $apiData): User
     {
-        // Default password is NPK
-        $defaultPassword = $apiData['EMPLOYEE_NO'];
+        // Normalize keys to uppercase to handle potential case variance from API
+        $data = array_change_key_case($apiData, CASE_UPPER);
+
+        // Required key check
+        if (!isset($data['EMPLOYEE_NO'])) {
+             Log::error('Employee Sync Error: Missing EMPLOYEE_NO key', ['data' => $data]);
+             throw new \Exception('Missing EMPLOYEE_NO key in API data');
+        }
+
+        $npk = $data['EMPLOYEE_NO'];
+        $name = $data['EMPLOYEE_NAME'] ?? 'Unknown Employee';
 
         // Check if user exists first to decide on password
-        $user = User::where('npk', $apiData['EMPLOYEE_NO'])->first();
+        $user = User::where('npk', $npk)->first();
 
         if ($user) {
             // Update existing user (WITHOUT touching password)
             $user->update([
-                'name' => $apiData['EMPLOYEE_NAME'],
-                'division' => $apiData['DIVISION'] ?? null,
-                'department' => $apiData['DEPARTMENT'] ?? null,
-                'organization_unit' => $apiData['ORGANIZATION_UNIT'] ?? null,
-                'job_family' => $apiData['JOB_FAMILY'] ?? null,
-                'position' => $apiData['JOB_FAMILY'] ?? null, // Map JOB_FAMILY to position
+                'name' => $name,
+                'division' => $data['DIVISION'] ?? null,
+                'department' => $data['DEPARTMENT'] ?? null,
+                'organization_unit' => $data['ORGANIZATION_UNIT'] ?? null,
+                'job_family' => $data['JOB_FAMILY'] ?? null,
+                'position' => $data['JOB_FAMILY'] ?? null, // Map JOB_FAMILY to position
                 'last_synced_at' => now(),
             ]);
         } else {
             // Create new user (WITH default password = NPK)
             $user = User::create([
-                'npk' => $apiData['EMPLOYEE_NO'],
-                'name' => $apiData['EMPLOYEE_NAME'],
-                'password' => bcrypt($apiData['EMPLOYEE_NO']), // Default password is NPK
-                'division' => $apiData['DIVISION'] ?? null,
-                'department' => $apiData['DEPARTMENT'] ?? null,
-                'organization_unit' => $apiData['ORGANIZATION_UNIT'] ?? null,
-                'job_family' => $apiData['JOB_FAMILY'] ?? null,
-                'position' => $apiData['JOB_FAMILY'] ?? null, // Map JOB_FAMILY to position
+                'npk' => $npk,
+                'name' => $name,
+                'password' => bcrypt($npk), // Default password is NPK
+                'division' => $data['DIVISION'] ?? null,
+                'department' => $data['DEPARTMENT'] ?? null,
+                'organization_unit' => $data['ORGANIZATION_UNIT'] ?? null,
+                'job_family' => $data['JOB_FAMILY'] ?? null,
+                'position' => $data['JOB_FAMILY'] ?? null, // Map JOB_FAMILY to position
                 'last_synced_at' => now(),
             ]);
         }

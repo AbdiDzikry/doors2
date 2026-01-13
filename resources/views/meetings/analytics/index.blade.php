@@ -1,19 +1,33 @@
 @extends('layouts.master')
 
-@section('title', 'Meeting Analytics')
+@section('title', $isSuperAdmin ? 'Meeting Analytics' : 'My Analytics')
 
 @section('content')
 <div class="container-fluid px-6 py-8">
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Meeting Analytics</h1>
-            <p class="text-sm text-gray-500 mt-1">Insights into meeting room usage and department trends.</p>
+            <h1 class="text-2xl font-bold text-gray-900">{{ $isSuperAdmin ? 'Meeting Analytics' : 'My Analytics' }}</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                {{ $isSuperAdmin ? 'Insights into meeting room usage and department trends.' : 'Your personal meeting activity and participation insights.' }}
+            </p>
         </div>
         <div class="mt-4 md:mt-0">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
                 <i class="fas fa-chart-line mr-1.5"></i> Live Data
             </span>
+            <button type="button" 
+                onclick="Livewire.dispatch('openAnalyticsModal', { 
+                    filters: {
+                        startDate: '{{ $startDate->format('Y-m-d') }}',
+                        endDate: '{{ $endDate->format('Y-m-d') }}',
+                        division: '{{ request('division') }}',
+                        department: '{{ request('department') }}'
+                    }
+                })"
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors cursor-pointer">
+                <i class="fas fa-list mr-1.5"></i> View Details
+            </button>
         </div>
     </div>
 
@@ -471,6 +485,7 @@
 
     </div>
 </div>
+@livewire('analytics.meeting-details-modal')
 @endsection
 
 @push('scripts')

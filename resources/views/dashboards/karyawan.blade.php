@@ -38,7 +38,7 @@
                         </h2>
                     </div>
                     <div class="p-5 grid grid-cols-1 gap-3">
-                        <a href="{{ route('meeting.bookings.create') }}" class="w-full group flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 hover:border-green-200 transition-all duration-200 cursor-pointer text-green-900">
+                        <a href="{{ route('meeting.room-reservations.index') }}" class="w-full group flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 hover:border-green-200 transition-all duration-200 cursor-pointer text-green-900">
                             <div class="flex items-center">
                                 <span class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 shadow-sm group-hover:scale-110 transition-transform">
                                     <i class="fas fa-plus"></i>
@@ -136,7 +136,7 @@
                 <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden flex flex-col h-full">
                     <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                         <h2 class="text-lg font-bold text-gray-900">Upcoming Schedule</h2>
-                        <a href="{{ route('meeting.meeting-lists.index') }}" class="text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
+                        <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'my-meetings']) }}" class="text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
                             View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </a>
                     </div>

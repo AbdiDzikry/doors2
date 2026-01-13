@@ -8,13 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class Notifications extends Component
 {
-    #[Livewire\Attributes\On('echo:private-App.Models.User.{Auth::id()},.Illuminate\Notifications\Events\BroadcastNotificationCreated')] 
     public function getListeners()
     {
         return [
-            // If using Reverb/Echo, we can listen for events. 
-            // For now, we'll stick to polling for simplicity as per request constraints or just poll.
+            "echo-private:App.Models.User." . Auth::id() . ",.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated" => 'refreshNotifications',
+            // Or simple polling fallback
         ];
+    }
+    
+    public function refreshNotifications()
+    {
+        $this->render();
     }
 
     public function render()

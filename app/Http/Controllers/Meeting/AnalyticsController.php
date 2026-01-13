@@ -53,7 +53,8 @@ class AnalyticsController extends Controller
 
         // Base Query
         $query = Meeting::query();
-        $query->whereBetween('meetings.start_time', [$startDate, $endDate]);
+        $query->whereBetween('meetings.start_time', [$startDate, $endDate])
+              ->where('meetings.status', '!=', 'cancelled');
 
         // Role Scope
         if (!$isSuperAdmin) {

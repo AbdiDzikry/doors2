@@ -22,6 +22,13 @@ use App\Http\Controllers\SurveyController;
 
 Route::redirect('/', '/login');
 
+// SSO Routes
+Route::middleware('web')->group(function () {
+    Route::get('/login/sso', [App\Http\Controllers\Auth\SSOController::class, 'login'])->name('sso.login');
+    Route::get('/auth/sso/callback', [App\Http\Controllers\Auth\SSOController::class, 'callback'])->name('sso.callback');
+    Route::post('/logout/sso', [App\Http\Controllers\Auth\SSOController::class, 'logout'])->name('sso.logout');
+});
+
 // Public booking page for users (no auth required)
 Route::prefix('user-booking')->name('user-booking.')->group(function () {
     Route::get('/', [UserBookingController::class, 'index'])->name('index');
@@ -62,6 +69,7 @@ Route::middleware(['auth', 'can:manage master data'])->name('master.')->prefix('
     Route::get('users/template', [UserController::class, 'downloadTemplate'])->name('users.template');
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');
+    Route::post('users/sync', [UserController::class, 'syncFromApi'])->name('users.sync');
     Route::resource('users', UserController::class);
     Route::resource('recurring-meetings', RecurringMeetingController::class);
 });
@@ -71,6 +79,9 @@ Route::middleware(['auth', 'can:manage pantry'])->name('master.')->prefix('maste
 });
 
 Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->group(function () {
+    Route::get('bookings/create', function() {
+        return redirect()->route('meeting.room-reservations.index');
+    });
     Route::resource('room-reservations', RoomReservationController::class);
     Route::resource('bookings', BookingController::class);
     Route::resource('meeting-lists', MeetingListController::class)->parameters([
@@ -78,6 +89,7 @@ Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->gr
     ]);
     Route::post('/meetings/{meeting}/attendance', [App\Http\Controllers\Meeting\MeetingAttendanceController::class, 'store'])->name('meetings.attendance.store');
     Route::get('/meetings/{meeting}/attendance/export', [MeetingListController::class, 'exportAttendance'])->name('meetings.attendance.export');
+    Route::get('/meetings/{meeting}/attendance/export-pdf', [MeetingListController::class, 'exportAttendancePdf'])->name('meetings.attendance.export-pdf');
     Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 });
 
@@ -87,7 +99,7 @@ Route::name('settings.')->prefix('settings')->group(function () {
     Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role'])->middleware(['auth', 'can:manage roles and permissions']);
 });
 
-Route::middleware(['auth', 'role:Resepsionis'])->name('dashboard.')->prefix('dashboard')->group(function () {
+Route::middleware(['auth', 'can:access pantry dashboard'])->name('dashboard.')->prefix('dashboard')->group(function () {
     Route::get('/receptionist', [ReceptionistDashboardController::class, 'index'])->name('receptionist');
     Route::put('/receptionist/pantry-orders/{pantry_order}/update', [ReceptionistDashboardController::class, 'update'])->name('receptionist.pantry-orders.update');
     Route::put('/receptionist/meetings/{meeting}/pantry-status', [ReceptionistDashboardController::class, 'updatePantryForMeeting'])->name('receptionist.meetings.pantry-status');

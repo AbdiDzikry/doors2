@@ -123,8 +123,12 @@ class BookingForm extends Component
         $currentTime = now();
         $minute = $currentTime->minute;
         $remainder = $minute % 15;
+        
+        // Default to the next 15-minute slot to ensure it's in the future
         if ($remainder !== 0) {
             $currentTime->addMinutes(15 - $remainder)->second(0);
+        } else {
+            $currentTime->addMinutes(15)->second(0);
         }
 
         $hour = (int) $currentTime->format('H');
@@ -208,7 +212,7 @@ class BookingForm extends Component
         $this->validate([
             'room_id' => 'required|exists:rooms,id',
             'topic' => 'required|string|max:255',
-            'start_time' => 'required|date',
+            'start_time' => 'required|date|after_or_equal:today',
             'duration' => 'required|integer|min:1',
             'priority_guest_id' => 'nullable|exists:priority_guests,id',
             'recurring' => 'nullable|boolean',
@@ -217,6 +221,12 @@ class BookingForm extends Component
         ]);
 
         $newStartTime = new \DateTime($this->start_time);
+        
+        // Manual check for "now" to allow some buffer (1 minute) for submission delay
+        if ($newStartTime < now()->subMinute()) {
+            $this->addError('start_time', 'The meeting cannot be scheduled in the past.');
+            return;
+        }
         $newEndTime = (clone $newStartTime)->add(new \DateInterval('PT' . $this->duration . 'M'));
 
         // Check if meeting ends after 6:00 PM

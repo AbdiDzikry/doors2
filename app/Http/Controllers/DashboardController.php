@@ -22,13 +22,17 @@ class DashboardController extends Controller
             $data['totalRooms'] = Room::count();
             $data['roomsInUse'] = Meeting::where('start_time', '<=', now())
                                         ->where('end_time', '>=', now())
+                                        ->where('status', '!=', 'cancelled')
                                         ->count();
             $data['totalUsers'] = User::count();
-            $data['totalMeetingsToday'] = Meeting::whereDate('start_time', today())->count();
+            $data['totalMeetingsToday'] = Meeting::whereDate('start_time', today())
+                                                 ->where('status', '!=', 'cancelled')
+                                                 ->count();
             
             // Data for Chart: Meetings in the last 7 days per room
             $meetingsPerRoom = Room::withCount(['meetings' => function ($query) {
-                $query->where('start_time', '>=', now()->subDays(7));
+                $query->where('start_time', '>=', now()->subDays(7))
+                      ->where('status', '!=', 'cancelled');
             }])->get();
 
             $data['chartLabels'] = $meetingsPerRoom->pluck('name');
@@ -46,6 +50,7 @@ class DashboardController extends Controller
                 ->orWhere('user_id', $user->id);
             })
             ->where('start_time', '>=', now())
+            ->where('status', '!=', 'cancelled')
             ->orderBy('start_time', 'asc')
             ->with('room')
             ->get();

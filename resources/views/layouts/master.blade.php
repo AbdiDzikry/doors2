@@ -204,7 +204,7 @@
 
                                 <i class="fas fa-chart-line mr-3"></i>
 
-                                <span>Analytics</span>
+                                <span>{{ auth()->user()->hasRole('Super Admin') ? 'Analytics' : 'My Analytics' }}</span>
 
                             </x-sidebar-link>
 
@@ -434,19 +434,10 @@
 
 
 
-                                <form method="POST" action="{{ route('logout') }}">
-
-                                    @csrf
-
-                                    <x-dropdown-link :href="route('logout')"
-
-                                            onclick="event.preventDefault(); this.closest('form').submit();">
-
-                                        {{ __('Log Out') }}
-
-                                    </x-dropdown-link>
-
-                                </form>
+                                <!-- Authentication -->
+                                <x-dropdown-link :href="route('logout')">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
 
                             </x-slot>
 

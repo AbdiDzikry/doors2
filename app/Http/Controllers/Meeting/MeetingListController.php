@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Meeting;
 
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MeetingListController extends Controller
 {
@@ -41,28 +42,34 @@ class MeetingListController extends Controller
         [$effectiveStartDate, $effectiveEndDate] = $this->calculateDateRange($filter, $startDateInput, $endDateInput);
 
         if ($activeTab === 'my-meetings') {
-            $query = Meeting::where(function ($q) use ($user) {
+            $baseQuery = Meeting::where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
                   ->orWhereHas('meetingParticipants', function ($subQ) use ($user) {
                       $subQ->where('participant_type', \App\Models\User::class)
                            ->where('participant_id', $user->id);
                   });
-            });
-            $query->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
+            })->where('status', '!=', 'cancelled');
+            
+            $baseQuery->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
 
-            $myMeetings = $query->with('room')->get();
-
+            // Stats Calculation (Using DB queries instead of Collection filter)
+            $now = now();
             $stats = [
-                'total' => $myMeetings->count(),
-                'scheduled' => $myMeetings->where('calculated_status', 'scheduled')->count(),
-                'completed' => $myMeetings->where('calculated_status', 'completed')->count(),
-                'cancelled' => $myMeetings->where('calculated_status', 'cancelled')->count(),
+                'total' => (clone $baseQuery)->count(),
+                'scheduled' => (clone $baseQuery)->where('start_time', '>', $now)->count(),
+                'ongoing' => (clone $baseQuery)->where('start_time', '<=', $now)->where('end_time', '>=', $now)->count(),
+                'completed' => (clone $baseQuery)->where('end_time', '<', $now)->count(),
+                'cancelled' => 0 // As per requirement, cancelled are filtered out
             ];
 
-        } else if ($activeTab === 'my-recurring-meetings') {
-            // The Livewire component will handle its own data.
+            // Pagination
+            $myMeetings = $baseQuery->with('room')
+                                    ->orderBy('start_time', 'desc')
+                                    ->paginate(10)
+                                    ->withQueryString();
+
         } else {
-            $query = Meeting::query();
+            $query = Meeting::query()->where('status', '!=', 'cancelled');
             
             // Date Filter
             $query->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
@@ -284,18 +291,10 @@ class MeetingListController extends Controller
             abort(403, 'Meeting is cancelled.');
         }
 
-        // Authorization: Allow specific roles, meeting owner, OR participants
-        // Load participants first to check and then export
+        // Authorization: Removed restricted ownership/participant check to allow all authenticated users
+        // as per user request. Keep check for cancelled meeting if needed.
+
         $participants = $meeting->meetingParticipants()->with('participant')->get();
-
-        $isParticipant = $participants->contains(function ($p) {
-            return $p->participant_id == \Illuminate\Support\Facades\Auth::id() && 
-                   $p->participant_type == \App\Models\User::class;
-        });
-
-        if (Auth::id() !== $meeting->user_id && !$isParticipant && !Auth::user()->hasAnyRole(['Super Admin', 'Admin', 'Resepsionis'])) {
-            abort(403, 'Unauthorized action.');
-        }
 
         // Render View to String
         $html = view('exports.attendance-list', [
@@ -306,6 +305,30 @@ class MeetingListController extends Controller
         return response($html)
             ->header('Content-Type', 'application/vnd.ms-excel')
             ->header('Content-Disposition', "attachment; filename=\"Daftar_Hadir_{$meeting->topic}.xls\"");
+    }
+
+    public function exportAttendancePdf(Meeting $meeting)
+    {
+        if ($meeting->calculated_status === 'cancelled') {
+             abort(403, 'Meeting is cancelled.');
+        }
+
+        // Authorization: Removed restricted ownership/participant check to allow all authenticated users
+        // as per user request.
+
+        $participants = $meeting->meetingParticipants()->with('participant')->get();
+
+        // Load data
+        $data = [
+            'meeting' => $meeting,
+            'participants' => $participants
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('exports.attendance-pdf', $data);
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream("Daftar_Hadir_{$meeting->topic}.pdf");
     }
 }
 

@@ -12,51 +12,32 @@ class SyncEmployeesFromApi extends Command
      *
      * @var string
      */
-    protected $signature = 'sync:employees';
+    protected $signature = 'sync:employees {--debug : Output verbose debugging info} {--force : Bypass the 5-minute throttle}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Sync employee data from external API';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(EmployeeApiService $apiService)
     {
+        $debug = $this->option('debug');
+        $force = $this->option('force');
         $this->info('Starting employee sync...');
-
+        
         try {
-            $employees = $apiService->fetchEmployees();
-            $count = count($employees);
-            $this->info("Found {$count} employees. Processing...");
-
-            $bar = $this->output->createProgressBar($count);
-            $bar->start();
-
-            $synced = 0;
-            $errors = 0;
-
-            foreach ($employees as $employeeData) {
-                try {
-                    $apiService->syncEmployee($employeeData);
-                    $synced++;
-                } catch (\Exception $e) {
-                    $errors++;
-                    // Log specific error if needed, but keep bar moving
-                    // Log::error("Failed to sync NPK {$employeeData['EMPLOYEE_NO']}: " . $e->getMessage());
-                }
-                $bar->advance();
+            $result = $apiService->syncAll($force);
+            
+            if ($result['status'] === 'throttled') {
+                $this->warn('Sync skipped: Already performed recently (5min throttle).');
+                return Command::SUCCESS;
             }
 
-            $bar->finish();
-            $this->newLine();
-            $this->info("Sync completed. Synced: {$synced}, Errors: {$errors}");
+            $this->info("Sync completed. Synced: {$result['synced']}, Errors: {$result['errors']}");
 
         } catch (\Exception $e) {
-            $this->error('Sync failed: ' . $e->getMessage());
+            $this->error('Sync failed (Critical): ' . $e->getMessage());
+            if ($debug) {
+                $this->warn('Stack Trace:');
+                $this->line($e->getTraceAsString());
+            }
             return Command::FAILURE;
         }
 

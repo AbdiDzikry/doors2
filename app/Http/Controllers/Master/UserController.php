@@ -233,4 +233,17 @@ class UserController extends Controller
             return $row;
         });
     }
+
+    public function syncFromApi(\App\Services\EmployeeApiService $apiService)
+    {
+        $result = $apiService->syncAll(force: true);
+
+        if ($result['status'] === 'success') {
+            return redirect()->route('master.users.index')
+                ->with('success', "Sync completed. Synced: {$result['synced']}, Errors: {$result['errors']}");
+        }
+
+        return redirect()->route('master.users.index')
+            ->with('error', 'Sync failed. Please check logs.');
+    }
 }

@@ -124,6 +124,29 @@
                                 isHourFull(h) {
                                     return ['00', '15', '30', '45'].every(m => this.isTimeBlocked(h, m));
                                 },
+                                isPastTime(h, m) {
+                                    const today = new Date().toLocaleDateString('en-CA');
+                                    if (this.date !== today) return false;
+                                    
+                                    const now = new Date();
+                                    const currentHour = now.getHours();
+                                    const currentMinute = now.getMinutes();
+                                    
+                                    if (parseInt(h) < currentHour) return true;
+                                    if (parseInt(h) === currentHour && parseInt(m) < currentMinute) return true;
+                                    return false;
+                                },
+                                isHourInPast(h) {
+                                    const today = new Date().toLocaleDateString('en-CA');
+                                    if (this.date !== today) return false;
+                                    const now = new Date();
+                                    const currentHour = now.getHours();
+                                    if (parseInt(h) < currentHour) return true;
+                                    if (parseInt(h) === currentHour) {
+                                        return 45 < now.getMinutes();
+                                    }
+                                    return false;
+                                },
                                 updateStartTime() {
                                     const selectedMinute = Math.round(this.minute / 15) * 15;
                                     const formattedMinute = String(selectedMinute).padStart(2, '0');
@@ -217,18 +240,18 @@
                                             style="display: none;">
                                             @foreach (range(7, 18) as $h)
                                                 @php $val = str_pad($h, 2, '0', STR_PAD_LEFT); @endphp
-                                                <div @click="if(!isHourFull('{{ $val }}')) { hour = '{{ $val }}'; updateStartTime(); open = false; }"
+                                                <div @click="if(!isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}')) { hour = '{{ $val }}'; updateStartTime(); open = false; }"
                                                      class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                      :class="{ 
                                                         'text-green-900 bg-green-50': hour == '{{ $val }}', 
-                                                        'text-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}'),
-                                                        'text-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}')
+                                                        'text-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}'),
+                                                        'text-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')
                                                      }">
                                                     <span class="block truncate font-medium" :class="{ 'font-semibold': hour == '{{ $val }}' }">{{ $val }}</span>
                                                     <span x-show="hour == '{{ $val }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
                                                         <i class="fas fa-check text-xs"></i>
                                                     </span>
-                                                    <span x-show="isHourFull('{{ $val }}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-400">
+                                                    <span x-show="isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-400">
                                                         <i class="fas fa-ban text-xs"></i>
                                                     </span>
                                                 </div>
@@ -250,18 +273,18 @@
                                             class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-48 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
                                             style="display: none;">
                                             @foreach (['00', '15', '30', '45'] as $m)
-                                                <div @click="if(!isTimeBlocked(hour, '{{ $m }}')) { minute = '{{ $m }}'; updateStartTime(); open = false; }"
+                                                <div @click="if(!isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}')) { minute = '{{ $m }}'; updateStartTime(); open = false; }"
                                                      class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                      :class="{ 
                                                         'text-green-900 bg-green-50': minute == '{{ $m }}', 
-                                                        'text-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}'),
-                                                        'text-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}')
+                                                        'text-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}'),
+                                                        'text-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')
                                                      }">
                                                     <span class="block truncate font-medium" :class="{ 'font-semibold': minute == '{{ $m }}' }">{{ $m }}</span>
                                                     <span x-show="minute == '{{ $m }}'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
                                                         <i class="fas fa-check text-xs"></i>
                                                     </span>
-                                                    <span x-show="isTimeBlocked(hour, '{{ $m }}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-400">
+                                                    <span x-show="isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-400">
                                                         <i class="fas fa-ban text-xs"></i>
                                                     </span>
                                                 </div>

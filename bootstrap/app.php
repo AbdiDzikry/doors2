@@ -14,13 +14,22 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Register global web middleware for SSO auto-login
+        $middleware->web(append: [
+            \App\Http\Middleware\SSOTokenMiddleware::class,
+        ]);
+        
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'sso.token' => \App\Http\Middleware\SSOTokenMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })
     ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('sync:employees')->daily();
         $schedule->command('meeting:cancel-unconfirmed')->everyMinute();
+        $schedule->command('meetings:cancel-unattended')->everyFiveMinutes();
+        $schedule->command('app:update-room-status')->everyMinute();
     })->create();

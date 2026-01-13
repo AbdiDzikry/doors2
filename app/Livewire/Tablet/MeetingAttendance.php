@@ -40,95 +40,83 @@ class MeetingAttendance extends Component
 
     public function verifyNpk()
     {
-        $this->errorMsg = ''; // Reset error
-
-        // Double check time window on server side action
+        $this->errorMsg = '';
+        
         $status = $this->attendanceStatus;
         if ($status === 'waiting') {
-            $this->addError('inputNpk', 'Absensi belum dibuka. Tunggu hingga meeting dimulai.');
+            $this->addError('inputNpk', 'Absensi belum dibuka.');
             return;
         }
         if ($status === 'closed') {
-            $this->addError('inputNpk', 'Batas waktu absensi telah berakhir (30 menit setelah selesai).');
+            $this->addError('inputNpk', 'Waktu absensi habis.');
             return;
         }
 
-        // 1. Check if Organizer
-        $isOrganizer = $this->meeting->organizer && $this->meeting->organizer->npk === $this->inputNpk;
-
-        // 2. Check if PIC (Participant with is_pic = true)
-        $isPic = $this->meeting->participants()
+        // Find participant by NPK
+        // We use the relation to get the User model with Pivot
+        $participant = $this->meeting->participants()
                     ->where('npk', $this->inputNpk)
-                    ->where('is_pic', true)
-                    ->exists();
+                    ->first();
 
-        if ($isOrganizer || $isPic) {
-            $this->isVerified = true;
-            $this->showModal = true;
-            $this->loadParticipants();
+        // Also check if Organizer is trying to check in (and if they are in the participant list)
+        // If the organizer is not in the participant list, they technically can't "attend" via the pivot table.
+        // Assuming Organizer IS a participant usually.
+        
+        if ($participant) {
+            // Check-in logic
+            if (is_null($participant->pivot->attended_at)) {
+                $this->meeting->participants()->updateExistingPivot($participant->id, [
+                    'attended_at' => Carbon::now(),
+                    'status' => 'present'
+                ]);
+                $message = "Berhasil Check-in: " . $participant->name;
+            } else {
+                $message = "Anda sudah Check-in sebelumnya: " . $participant->name;
+            }
+
+            // Reset Input
+            $this->inputNpk = '';
+            
+            // Dispatch success event for SweetAlert or Toast
+            $this->dispatch('attendance-saved', $message);
+
         } else {
-            $this->addError('inputNpk', 'Akses Ditolak. NPK tidak terdaftar sebagai Organizer atau PIC.');
-            $this->errorMsg = 'Akses Ditolak. NPK tidak terdaftar sebagai Organizer atau PIC.';
-        }
-    }
-
-    public function loadParticipants()
-    {
-        // Get all participants
-        $participants = $this->meeting->participants()->get();
-
-        foreach ($participants as $p) {
-            // Check if attended_at is filled
-            $this->attendanceData[$p->id] = !is_null($p->pivot->attended_at);
-        }
-    }
-
-    public function saveAttendance()
-    {
-        foreach ($this->attendanceData as $participantId => $isPresent) {
-            $pivot = MeetingParticipant::where('meeting_id', $this->meeting->id)
-                        ->where('user_id', $participantId) 
-                        ->first();
-            
-            $participant = $this->meeting->participants()->find($participantId);
-            
-            if ($participant) {
-                if ($isPresent) {
-                    if (is_null($participant->pivot->attended_at)) {
-                        $this->meeting->participants()->updateExistingPivot($participantId, [
-                            'attended_at' => Carbon::now(),
-                            'status' => 'present' 
-                        ]);
-                    }
-                } else {
-                    $this->meeting->participants()->updateExistingPivot($participantId, [
-                        'attended_at' => null,
-                        'status' => 'invited' 
-                    ]);
-                }
+            // Check if it is Organizer but not in participant list
+            if ($this->meeting->organizer && $this->meeting->organizer->npk === $this->inputNpk) {
+                 // Organizer detected but not in list.
+                 $this->dispatch('attendance-saved', "Selamat Datang Organizer: " . $this->meeting->organizer->name);
+                 $this->inputNpk = '';
+            } else {
+                $this->addError('inputNpk', 'NPK tidak terdaftar di meeting ini.');
+                $this->errorMsg = 'NPK tidak terdaftar.';
             }
         }
-
-        $this->showModal = false;
-        $this->inputNpk = ''; // Reset security
-        $this->isVerified = false;
-
-        // Dispatch alert
-        $this->dispatch('attendance-saved', 'Data absensi berhasil disimpan!');
     }
 
-    public function close()
+    public function getParticipantsListProperty()
     {
-        $this->showModal = false;
-        $this->inputNpk = '';
-        $this->isVerified = false;
+        // Return collection with pivot data
+        return $this->meeting->meetingParticipants()
+            ->with('participant')
+            ->get()
+            ->map(function ($mp) {
+                // Determine Name and Dept
+                if ($mp->participant_type === 'App\Models\User') {
+                    $mp->name = $mp->participant->name ?? 'Unknown';
+                    $mp->dept = 'Internal';
+                } else {
+                    $mp->name = $mp->participant->name ?? $mp->participant->email ?? 'Guest';
+                    $mp->dept = 'External';
+                }
+                return $mp;
+            });
     }
 
     public function render()
     {
         return view('livewire.tablet.meeting-attendance', [
-            'participantsList' => $this->isVerified ? $this->meeting->participants()->get() : [],
-            'status' => $this->attendanceStatus // Pass computed property to view
+            'participantsList' => $this->participantsList,
+            'status' => $this->attendanceStatus
         ]);
     }
 }

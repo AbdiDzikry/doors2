@@ -11,7 +11,12 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
-                        <p class="mt-1 text-sm text-gray-500">Manage users and their roles within the system.</p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Manage users and their roles within the system.
+                            <span class="ml-2 px-2 py-0.5 bg-gray-100 text-[10px] text-gray-500 border border-gray-200 rounded-full font-medium italic">
+                                <i class="fas fa-clock mr-1"></i>Auto-sync: daily
+                            </span>
+                        </p>
                     </div>
                     <div class="flex-shrink-0 flex items-center space-x-2">
                         <a href="{{ route('master.users.create') }}"
@@ -60,6 +65,28 @@
                             <i class="fas fa-file-export mr-2"></i>
                             Export
                         </a>
+
+                        <form action="{{ route('master.users.sync') }}" method="POST" class="inline" 
+                            x-data="{ loading: false }" 
+                            @submit="if(confirm('Mulai sinkronisasi data karyawan dari API? Proses ini mungkin memakan waktu beberapa detik.')) { loading = true } else { event.preventDefault() }">
+                            @csrf
+                            <button type="submit" 
+                                :disabled="loading"
+                                class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <template x-if="!loading">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-sync-alt mr-2"></i>
+                                        Sync API
+                                    </div>
+                                </template>
+                                <template x-if="loading">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                                        Syncing...
+                                    </div>
+                                </template>
+                            </button>
+                        </form>
                         
                         <a href="{{ route('master.users.template') }}"
                             class="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
