@@ -40,21 +40,36 @@
                     </div>
                     <div class="mb-4">
                         <label for="division" class="block text-sm font-medium text-gray-700">Division</label>
-                        <input type="text" name="division" id="division" value="{{ old('division') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('division') border-red-500 @enderror">
+                        <select name="division" id="division" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('division') border-red-500 @enderror">
+                            <option value="">-- Select Division --</option>
+                            @foreach($divisions as $div)
+                                <option value="{{ $div }}" {{ old('division') == $div ? 'selected' : '' }}>{{ $div }}</option>
+                            @endforeach
+                        </select>
                         @error('division')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
-                        <input type="text" name="department" id="department" value="{{ old('department') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('department') border-red-500 @enderror">
+                        <select name="department" id="department" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('department') border-red-500 @enderror">
+                            <option value="">-- Select Department --</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept }}" {{ old('department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                            @endforeach
+                        </select>
                         @error('department')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
                         <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
-                        <input type="text" name="position" id="position" value="{{ old('position') }}" autocomplete="off" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('position') border-red-500 @enderror">
+                        <select name="position" id="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm @error('position') border-red-500 @enderror">
+                            <option value="">-- Select Position --</option>
+                            @foreach($positions as $pos)
+                                <option value="{{ $pos }}" {{ old('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                            @endforeach
+                        </select>
                         @error('position')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

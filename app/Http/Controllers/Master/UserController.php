@@ -61,7 +61,13 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view('master.users.create', compact('roles'));
+        
+        // Fetch specific data for dropdowns
+        $divisions = User::whereNotNull('division')->distinct()->orderBy('division')->pluck('division');
+        $departments = User::whereNotNull('department')->distinct()->orderBy('department')->pluck('department');
+        $positions = User::whereNotNull('position')->distinct()->orderBy('position')->pluck('position');
+
+        return view('master.users.create', compact('roles', 'divisions', 'departments', 'positions'));
     }
 
     /**

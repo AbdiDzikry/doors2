@@ -4,8 +4,13 @@
 
 @section('content')
 <div class="container mx-auto px-6 py-8">
-    <div class="bg-white rounded-lg shadow-xl p-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to DOORS</h1>
+    <div class="bg-white rounded-lg shadow-xl p-8 relative overflow-hidden">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Welcome to DOORS</h1>
+            </div>
+            <img src="{{ asset('logo_dharma.png') }}" alt="Dharma Polimetal" class="h-16 object-contain">
+        </div>
         <p class="text-gray-600">
             Hello, {{ Auth::user()->name }}. Your role has not been assigned a specific dashboard.
         </p>

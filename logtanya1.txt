@@ -1,1 +1,3 @@
 http://127.0.0.1:8000/master/users pada halaman ini bisakah anda berikan notifikasi jika  auto sync daily nya berhasil atau tidak. jika berhasil maka tunjukkan pada notifikasi nya di samping tulisan auto sync 
+
+dan coba buat 1 menit lagi lakukan auto sync sebagai test saja

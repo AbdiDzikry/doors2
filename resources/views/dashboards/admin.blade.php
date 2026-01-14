@@ -7,8 +7,13 @@
 
 @section('content')
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">Dashboard</h1>
-    <p class="text-gray-600 mb-8">Welcome back, {{ Auth::user()->name }}. Here's a snapshot of the system.</p>
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+            <p class="text-gray-600">Welcome back, {{ Auth::user()->name }}. Here's a snapshot of the system.</p>
+        </div>
+        <img src="{{ asset('logo_dharma.png') }}" alt="Dharma Polimetal" class="h-16 object-contain">
+    </div>
 
     <!-- Stat Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

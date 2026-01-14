@@ -13,6 +13,7 @@
             <p class="text-sm text-gray-500 mt-1">Manage meeting room pantry orders and logistics.</p>
         </div>
         <div class="mt-4 md:mt-0 flex items-center space-x-4">
+            <img src="{{ asset('logo_dharma.png') }}" alt="Dharma Polimetal" class="h-14 object-contain mr-4">
             <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 flex items-center">
                 <div class="p-2 bg-amber-50 text-amber-600 rounded-lg mr-3">
                     <i class="fas fa-clock"></i>

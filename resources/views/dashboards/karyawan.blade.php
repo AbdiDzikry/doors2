@@ -21,8 +21,7 @@
                 </p>
             </div>
             <div class="hidden lg:block relative">
-                <div class="absolute -right-3 -bottom-3 w-16 h-16 bg-green-50 rounded-full opacity-50 z-0"></div>
-                <i class="far fa-smile-beam text-4xl text-green-500 relative z-10"></i>
+                <img src="{{ asset('logo_dharma.png') }}" alt="Dharma Polimetal" class="h-14 object-contain relative z-10">
             </div>
         </div>
 
