@@ -3,218 +3,100 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\SSO\SSOService;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SSOController extends Controller
 {
-    protected $ssoService;
-    
-    public function __construct(SSOService $ssoService)
-    {
-        $this->ssoService = $ssoService;
-    }
-    
     /**
-     * Redirect user ke SSO untuk login
+     * Handle the SSO Login redirect.
+     * Route: GET /sso?token=...
      */
-    public function login()
+    public function login(Request $request)
     {
-        if (!config('sso.enabled')) {
-            return redirect()->route('login')
-                ->with('error', 'SSO is currently disabled. Please use manual login.');
-        }
+        $token = $request->query('token');
         
-        try {
-            $loginUrl = $this->ssoService->getLoginUrl();
-            return redirect()->away($loginUrl);
-        } catch (\Exception $e) {
-            \Log::error('SSO Redirect Failed: ' . $e->getMessage());
-            return redirect()->route('login')
-                ->with('error', 'Failed to connect to SSO. Please try again or use manual login.');
+        if (!$token) {
+            Log::warning('SSO Login Attempt failed: No token provided');
+            return redirect()->route('login')->withErrors(['msg' => 'Token SSO tidak ditemukan']);
         }
-    }
-    
-    /**
-     * Handle callback dari SSO
-     */
-    public function callback(Request $request)
-    {
-        if (!config('sso.enabled')) {
-            return redirect()->route('login')
-                ->with('error', 'SSO is disabled.');
-        }
-        
+
+        // 1. Validasi token ke API SSO (Sesuai Protokol PDF)
+        // URL: https://api-sso.dharmap.com/api/check-token
+        // Method: GET
+        // Param: token
         try {
-            // Direct Token Handling (IdP-Initiated)
-            $token = $request->input('sso_token') 
-                  ?? $request->input('token')
-                  ?? $request->input('code');
-
-            if ($token) {
-                 // Verify manually if token is present directly
-                 $verifyUrl = config('sso.token_verify_url');
-                 if ($verifyUrl) {
-                     $response = \Illuminate\Support\Facades\Http::withToken($token)->get($verifyUrl);
-                     if ($response->successful()) {
-                         $ssoUserData = $response->json();
-                         // Normalize
-                         $ssoUserData['npk'] = data_get($ssoUserData, config('sso.attributes.npk', 'npk'));
-                     }
-                 }
-            }
-
-            // Fallback to Service (SP-Initiated / OAuth Code Exchange)
-            if (empty($ssoUserData)) {
-                $ssoUserData = $this->ssoService->handleCallback($request);
-            }
+            $apiUrl = config('services.sso.verify_endpoint', 'https://api-sso.dharmap.com/api/check-token');
             
-            // Validate NPK
-            if (empty($ssoUserData['npk'])) {
-                throw new \Exception('NPK not found in SSO response');
-            }
-            
-            // Find or create user
-            $user = $this->findOrCreateUser($ssoUserData);
-            
-            // Update user data jika auto-update enabled
-            if (config('sso.auto_update')) {
-                $this->updateUserFromSSO($user, $ssoUserData);
-            }
-            
-            // Update last SSO login timestamp
-            $user->update([
-                'last_sso_login' => now(),
+            $response = Http::get($apiUrl, [
+                'token' => $token
             ]);
             
-            // Login user
-            Auth::login($user);
-            
-            // Redirect ke dashboard berdasarkan role
-            return $this->redirectBasedOnRole($user);
-            
+            if ($response->failed()) {
+                 Log::error('SSO API Failed', ['status' => $response->status(), 'body' => $response->body()]);
+                 return redirect()->route('login')->withErrors(['msg' => 'Gagal menghubungi server SSO']);
+            }
+
+            $data = $response->json();
         } catch (\Exception $e) {
-            \Log::error('SSO Callback Failed: ' . $e->getMessage());
-            return redirect()->route('login')
-                ->with('error', 'SSO login failed: ' . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Find or create user berdasarkan NPK
-     */
-    protected function findOrCreateUser($ssoUserData)
-    {
-        $user = User::where('npk', $ssoUserData['npk'])->first();
-        
-        if ($user) {
-            return $user;
+            Log::error('SSO Connection Error: ' . $e->getMessage());
+            return redirect()->route('login')->withErrors(['msg' => 'Terjadi kesalahan sistem saat validasi SSO']);
         }
         
-        // User tidak ada dan auto-provision disabled
-        if (!config('sso.auto_provision')) {
-            throw new \Exception('User not found and auto-provisioning is disabled. Please contact administrator.');
+        // 2. Cek Validitas Response
+        if (empty($data['user'])) {
+            Log::warning('SSO Token Invalid', ['response' => $data]);
+            return redirect()->route('login')->withErrors(['msg' => 'Token SSO tidak valid atau expired']);
         }
+
+        $ssoUser = $data['user'];
         
-        // Auto-create user
-        $user = User::create([
-            'npk' => $ssoUserData['npk'],
-            'name' => $ssoUserData['name'] ?? 'User ' . $ssoUserData['npk'],
-            'email' => $ssoUserData['email'] ?? $ssoUserData['npk'] . '@dharmap.com',
-            'password' => Hash::make(Str::random(32)), // Random password (tidak dipakai)
-            'department_id' => $this->findOrCreateDepartment($ssoUserData['department'] ?? null),
-            'job_title' => $ssoUserData['job_title'] ?? null,
-            'is_active' => true,
-            'sso_id' => $ssoUserData['npk'],
-            'sso_provider' => 'dharmap-sso',
-        ]);
+        // 3. Cari user by NPK (Primary Identifier)
+        $user = User::where('npk', $ssoUser['npk'])->first();
         
-        // Assign role berdasarkan department/job_title
-        $role = $this->ssoService->determineRole(
-            $ssoUserData['department'] ?? null,
-            $ssoUserData['job_title'] ?? null
-        );
-        
-        $user->assignRole($role);
-        
-        \Log::info('Auto-provisioned new user from SSO', [
-            'npk' => $user->npk,
-            'name' => $user->name,
-            'role' => $role,
-        ]);
-        
-        return $user;
-    }
-    
-    /**
-     * Update user data dari SSO
-     */
-    protected function updateUserFromSSO($user, $ssoUserData)
-    {
-        $user->update([
-            'name' => $ssoUserData['name'] ?? $user->name,
-            'email' => $ssoUserData['email'] ?? $user->email,
-            'department_id' => $this->findOrCreateDepartment($ssoUserData['department'] ?? null) ?? $user->department_id,
-            'job_title' => $ssoUserData['job_title'] ?? $user->job_title,
-        ]);
-    }
-    
-    /**
-     * Find or create department
-     */
-    protected function findOrCreateDepartment($departmentName)
-    {
-        if (empty($departmentName)) {
-            return null;
+        if (!$user) {
+            // 4. JIT Provisioning (Auto-Create New User)
+            try {
+                $user = User::create([
+                    'npk' => $ssoUser['npk'],
+                    'name' => $ssoUser['name'],
+                    'email' => $ssoUser['email'],
+                    // Password hash dari SSO (sebaiknya di-rehash atau buat random jika format tidak kompatibel)
+                    // Untuk keamanan di Doors, kita buat random password saja agar tidak tergantung hash luar.
+                    'password' => Hash::make(Str::random(32)), 
+                    'sso_id' => $ssoUser['id'] ?? null,
+                    'sso_provider' => 'dharmap-sso',
+                    'last_sso_login' => now(),
+                    'email_verified_at' => now(),
+                ]);
+
+                // Assign Default Role: Karyawan
+                $user->assignRole('karyawan');
+                
+            } catch (\Exception $e) {
+                Log::error('SSO User Creation Failed: ' . $e->getMessage());
+                return redirect()->route('login')->withErrors(['msg' => 'Gagal membuat user baru dari data SSO.']);
+            }
+        } else {
+            // 5. Update Existing User (Sync Data)
+            $user->update([
+                'sso_id' => $ssoUser['id'] ?? $user->sso_id,
+                'sso_provider' => 'dharmap-sso',
+                'last_sso_login' => now(),
+                // Optional: Sync name/email if desired
+                // 'name' => $ssoUser['name'], 
+            ]);
         }
-        
-        $department = \App\Models\Department::firstOrCreate(
-            ['name' => $departmentName],
-            ['name' => $departmentName]
-        );
-        
-        return $department->id;
-    }
-    
-    /**
-     * Redirect berdasarkan role
-     */
-    protected function redirectBasedOnRole($user)
-    {
-        if ($user->hasRole('Super Admin')) {
-            return redirect()->route('dashboard.superadmin');
-        }
-        
-        if ($user->hasRole('Admin')) {
-            return redirect()->route('dashboard.admin');
-        }
-        
-        if ($user->hasRole('Resepsionis')) {
-            return redirect()->route('dashboard.receptionist');
-        }
-        
-        return redirect()->route('dashboard.karyawan');
-    }
-    
-    /**
-     * Logout dari SSO
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        
-        // Redirect ke SSO logout jika enabled
-        if (config('sso.enabled')) {
-            $logoutUrl = $this->ssoService->getLogoutUrl();
-            return redirect()->away($logoutUrl);
-        }
-        
-        return redirect('/');
+
+        // 6. Force Login
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/dashboard');
     }
 }

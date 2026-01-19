@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
+
         // Register global web middleware for SSO auto-login
         $middleware->web(append: [
             \App\Http\Middleware\SSOTokenMiddleware::class,

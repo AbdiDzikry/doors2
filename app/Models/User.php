@@ -30,6 +30,9 @@ class User extends Authenticatable
         'organization_unit',
         'job_family',
         'last_synced_at',
+        'sso_id',
+        'sso_provider',
+        'last_sso_login',
     ];
 
     /**

@@ -23,10 +23,11 @@ use App\Http\Controllers\SurveyController;
 Route::redirect('/', '/login');
 
 // SSO Routes
+// SSO Routes
 Route::middleware('web')->group(function () {
-    Route::get('/login/sso', [App\Http\Controllers\Auth\SSOController::class, 'login'])->name('sso.login');
-    Route::get('/auth/sso/callback', [App\Http\Controllers\Auth\SSOController::class, 'callback'])->name('sso.callback');
-    Route::post('/logout/sso', [App\Http\Controllers\Auth\SSOController::class, 'logout'])->name('sso.logout');
+    Route::get('/sso', [App\Http\Controllers\Auth\SSOController::class, 'login'])->name('sso.login');
+    // Deprecated routes kept commented for reference if needed
+    // Route::get('/login/sso', [App\Http\Controllers\Auth\SSOController::class, 'login'])->name('sso.login.legacy');
 });
 
 // User Tour Routes

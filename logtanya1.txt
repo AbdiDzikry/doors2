@@ -1,3 +1,236 @@
-http://127.0.0.1:8000/master/users pada halaman ini bisakah anda berikan notifikasi jika  auto sync daily nya berhasil atau tidak. jika berhasil maka tunjukkan pada notifikasi nya di samping tulisan auto sync 
+Saya ingin integrasi SSO seperti website dibawah ini sebagai contoh , dan berikut ini contoh database saya yang sekarang.. apkaah memungkinkan untuk integrasi:
 
-dan coba buat 1 menit lagi lakukan auto sync sebagai test saja
+Database:
+
+
+Full texts
+id
+name
+npk
+department
+organization_unit
+job_family
+division
+position
+phone
+email
+sso_id
+sso_provider
+has_seen_tour
+last_sso_login
+email_verified_at
+password
+remember_token
+created_at
+updated_at
+last_synced_at
+	Edit Edit	Copy Copy	Delete Delete	5	Karyawan	123123	IT	NULL	NULL	Development	Staff	081200000004	karyawan@doors.com	NULL	dharmap-sso	0	NULL	NULL	$2y$12$cbl4T8.hDC8CXmonv33SJuA4NtDIY8Lz2J9GGD3Okp8...	NULL	2025-12-18 11:05:21	2026-01-05 14:30:28	NULL
+
+
+
+Document SSO_Integration:
+
+# Integrasi SSO - RequestIT
+
+## 📋 Overview
+Integrasi Single Sign-On (SSO) untuk aplikasi RequestIT dengan sso.dharmap.com
+
+## 🔄 Flow Integrasi
+
+1. User buka `requestit.dharmap.com/auth/login`
+2. Klik tombol **"Login dengan SSO"**
+3. Redirect ke: `sso.dharmap.com?redirect=https://requestit.dharmap.com/sso`
+4. User login di SSO (username + password)
+5. SSO generate token dan redirect ke: `requestit.dharmap.com/sso?token=xxx`
+6. RequestIT validasi token ke: `api-sso.dharmap.com/api/check-token?token=xxx`
+7. API SSO return data user (npk, username, name, email, password hash)
+8. RequestIT cek: apakah user dengan npk ini sudah ada?
+   - **Jika BELUM** → Auto-create user baru dengan `role_id = 1`
+   - **Jika SUDAH** → Langsung login
+9. Login user dan redirect ke `/dashboard`
+
+## 📁 File yang Dibuat/Dimodifikasi
+
+### 1. Controller Baru
+- **File**: `app/Http/Controllers/SSOController.php`
+- **Fungsi**: Handle callback dari SSO, validasi token, dan auto-create user
+
+### 2. Route
+- **File**: `routes/web.php`
+- **Route Baru**: `GET /sso` → `SSOController@login`
+
+### 3. View
+- **File**: `resources/views/auth/login.blade.php`
+- **Perubahan**: Menambahkan tombol "Login dengan SSO"
+
+## 🛠️ Implementasi Detail
+
+### SSOController.php
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+
+class SSOController extends Controller
+{
+    public function login(Request $request)
+    {
+        $token = $request->query('token');
+        
+        if (!$token) {
+            return redirect('/auth/login')->with('error', 'Token SSO tidak valid');
+        }
+
+        // Validasi token ke API SSO
+        $response = Http::get('https://api-sso.dharmap.com/api/check-token', [
+            'token' => $token
+        ]);
+
+        $data = $response->json();
+        
+        if (empty($data['user'])) {
+            return redirect('/auth/login')->with('error', 'Token SSO tidak valid atau expired');
+        }
+
+        $ssoUser = $data['user'];
+        
+        // Cari user by npk
+        $user = User::where('npk', $ssoUser['npk'])->first();
+        
+        if (!$user) {
+            // Auto-create user baru
+            $user = User::create([
+                'npk' => $ssoUser['npk'],
+                'username' => $ssoUser['username'],
+                'name' => $ssoUser['name'],
+                'email' => $ssoUser['email'],
+                'password' => $ssoUser['password'], // hash dari SSO
+                'role_id' => 1, // Default role user
+                'company_code' => '',
+                'departement' => '',
+                'user_status' => 'Staff',
+            ]);
+        }
+
+        // Login user
+        Auth::login($user);
+
+        return redirect('/dashboard');
+    }
+}
+```
+
+### Route (web.php)
+```php
+// SSO Login
+Route::get('/sso', [SSOController::class, 'login'])->name('sso.login');
+```
+
+### Login View
+Tombol SSO ditambahkan di atas form login biasa:
+```html
+<a href="https://sso.dharmap.com?redirect=https://requestit.dharmap.com/sso" 
+   class="btn-login" 
+   style="display: block; text-align: center; text-decoration: none; margin-bottom: 20px;">
+  <i class="fas fa-sign-in-alt"></i> Login dengan SSO
+</a>
+
+<div style="text-align: center; margin-bottom: 20px; color: #999; font-size: 14px;">
+  <span>atau</span>
+</div>
+```
+
+## ✅ Checklist Implementasi
+
+### Di Server requestit.dharmap.com:
+- [x] Buat file `SSOController.php`
+- [x] Tambah route `/sso` di `web.php`
+- [x] Update `$fillable` di Model User (sudah ada)
+- [x] Tambah tombol "Login dengan SSO" di halaman login
+- [ ] Test: akses `requestit.dharmap.com/sso?token=xxx` (gunakan token valid dari SSO)
+
+### Di Server sso.dharmap.com:
+- [ ] Login ke dashboard SSO
+- [ ] Registrasi aplikasi baru:
+  - Application Name: **RequestIT**
+  - Link Path: `https://requestit.dharmap.com/sso`
+  - Upload logo RequestIT
+  - Set email PIC dan day reminder
+
+## 🧪 Testing
+
+### 1. Test Manual
+```bash
+# 1. Buka browser
+https://requestit.dharmap.com/auth/login
+
+# 2. Klik tombol "Login dengan SSO"
+
+# 3. Login di SSO dengan user yang ada
+
+# 4. Seharusnya redirect ke requestit dan auto-login
+
+# 5. Cek database requestit
+# User baru tercreate dengan role_id = 1
+```
+
+### 2. Test dengan Token Langsung
+```bash
+# Gunakan token valid dari SSO
+https://requestit.dharmap.com/sso?token=VALID_TOKEN_HERE
+```
+
+### 3. Verifikasi Database
+```sql
+-- Cek user baru yang dibuat via SSO
+SELECT id, npk, username, name, email, role_id, created_at 
+FROM users 
+ORDER BY created_at DESC 
+LIMIT 5;
+```
+
+## 🔐 Security Notes
+
+1. **Token Validation**: Token divalidasi ke API SSO sebelum login
+2. **Auto-Create User**: User baru otomatis dibuat dengan role default (role_id = 1)
+3. **Password Hash**: Password hash langsung dari SSO, tidak di-hash ulang
+4. **NPK Unique**: NPK digunakan sebagai identifier unik untuk mencegah duplikasi
+
+## 📊 Role Management
+
+- **role_id = 1**: User biasa (default untuk SSO)
+- Admin dapat mengubah role user via dashboard RequestIT
+
+## 🚨 Error Handling
+
+1. **Token tidak ada**: Redirect ke login dengan pesan error
+2. **Token invalid/expired**: Redirect ke login dengan pesan error
+3. **API SSO down**: User akan mendapat error message
+
+## 📝 Notes
+
+- User yang dibuat via SSO akan memiliki:
+  - `company_code`: kosong (bisa diisi manual oleh admin)
+  - `departement`: kosong (bisa diisi manual oleh admin)
+  - `user_status`: 'Staff'
+  - `role_id`: 1 (User biasa)
+
+- Admin dapat update data user via menu Account Management
+
+## 🔗 Related URLs
+
+- SSO Login: `https://sso.dharmap.com`
+- SSO API: `https://api-sso.dharmap.com/api/check-token`
+- RequestIT Callback: `https://requestit.dharmap.com/sso`
+- RequestIT Login: `https://requestit.dharmap.com/auth/login`
+
+## 📞 Support
+
+Jika ada masalah dengan integrasi SSO, hubungi:
+- Tim IT Dharma Polimetal
+- Email: it@dharmap.com
