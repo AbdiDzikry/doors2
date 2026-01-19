@@ -40,4 +40,11 @@ return [
         'url' => env('EMPLOYEE_API_URL', 'https://msa-be.dharmagroup.co.id/api/data/company'),
     ],
 
+    'sso' => [
+        'base_url' => env('SSO_BASE_URL', 'https://api-sso.dharmap.com'),
+        // Construct Full URL to ensure Http::get() works with relative .env path
+        'verify_endpoint' => env('SSO_BASE_URL', 'https://api-sso.dharmap.com') . env('SSO_VERIFY_ENDPOINT', '/api/check-token'),
+        'app_id' => env('SSO_APP_ID', 'DOORS_APP'),
+    ],
+
 ];

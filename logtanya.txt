@@ -1,0 +1,7 @@
+// Database RequestIT  ←  API SSO
+'npk'         => $ssoUser['npk']           // ✓ sama
+'username'    => $ssoUser['username']      // ✓ sama  
+'name'        => $ssoUser['full_name']     // mapping: full_name → name
+'email'       => $ssoUser['email']         // ✓ sama
+'password'    => bcrypt($ssoUser['npk'])   // generate dari NPK
+'departement' => $ssoUser['department']    // mapping: department → departement

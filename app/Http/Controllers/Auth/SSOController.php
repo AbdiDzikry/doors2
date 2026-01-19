@@ -64,11 +64,10 @@ class SSOController extends Controller
             try {
                 $user = User::create([
                     'npk' => $ssoUser['npk'],
-                    'name' => $ssoUser['name'],
+                    'name' => $ssoUser['full_name'] ?? $ssoUser['name'], // Mapping: full_name -> name
                     'email' => $ssoUser['email'],
-                    // Password hash dari SSO (sebaiknya di-rehash atau buat random jika format tidak kompatibel)
-                    // Untuk keamanan di Doors, kita buat random password saja agar tidak tergantung hash luar.
-                    'password' => Hash::make(Str::random(32)), 
+                    'department' => $ssoUser['department'] ?? null,
+                    'password' => bcrypt($ssoUser['npk']), // Generate from NPK per Logic RequestIT
                     'sso_id' => $ssoUser['id'] ?? null,
                     'sso_provider' => 'dharmap-sso',
                     'last_sso_login' => now(),
