@@ -1093,5 +1093,29 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
         ];
 
         DB::table('meetings')->insert($meetings);
+
+        // BACKFILL: Insert Organizer as Participant (Required for Attendance/PDF)
+        $insertedMeetings = DB::table('meetings')
+            ->whereBetween('start_time', ['2026-01-15 00:00:00', '2026-03-31 23:59:59'])
+            ->get();
+
+        $participants = [];
+        foreach ($insertedMeetings as $meeting) {
+            $participants[] = [
+                'meeting_id' => $meeting->id,
+                'participant_type' => 'App\Models\User',
+                'participant_id' => $meeting->user_id,
+                'status' => $meeting->status === 'completed' ? 'attended' : 'confirmed',
+                'is_pic' => 1, // Set as PIC so they appear in reports
+                'checked_in_at' => $meeting->status === 'completed' ? $meeting->start_time : null,
+                'attended_at' => $meeting->status === 'completed' ? $meeting->start_time : null,
+                'created_at' => $meeting->created_at,
+                'updated_at' => $meeting->updated_at,
+            ];
+        }
+
+        if (!empty($participants)) {
+            DB::table('meeting_participants')->insert($participants);
+        }
     }
 }
