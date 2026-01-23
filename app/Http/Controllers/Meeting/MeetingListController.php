@@ -281,8 +281,7 @@ class MeetingListController extends Controller
             }
         });
 
-        return redirect()->route('meeting.meeting-lists.index')
-                        ->with('success','Meeting cancelled successfully and pantry stock restored.');
+        return back()->with('success','Meeting cancelled successfully and pantry stock restored.');
     }
 
     public function exportAttendance(Meeting $meeting)

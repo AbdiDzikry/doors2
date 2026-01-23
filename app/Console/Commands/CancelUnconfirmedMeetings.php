@@ -30,7 +30,7 @@ class CancelUnconfirmedMeetings extends Command
         $this->info('Checking for unconfirmed meetings to cancel...');
 
         $meetingsToCancel = Meeting::where('confirmation_status', 'pending_confirmation')
-            ->where('start_time', '<', Carbon::now())
+            ->where('start_time', '<', Carbon::now()->subMinutes(30)) // Grace period 30 mins
             ->where('status', '!=', 'cancelled')
             ->get();
 

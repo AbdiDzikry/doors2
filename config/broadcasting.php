@@ -39,14 +39,16 @@ return [
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
-            'options' => [
+            'options' => array_filter([
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'host' => env('PUSHER_HOST', '127.0.0.1'),
-                'port' => env('PUSHER_PORT', 8080),
-                'scheme' => env('PUSHER_SCHEME', 'http'),
+                'host' => env('PUSHER_HOST') ?: null,
+                'port' => env('PUSHER_PORT') ? (int) env('PUSHER_PORT') : null,
+                'scheme' => env('PUSHER_SCHEME') ?: null,
                 'encrypted' => true,
-                'useTLS' => env('PUSHER_SCHEME', 'http') === 'https',
-            ],
+                'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
+            ], function ($value) {
+                return !is_null($value) && $value !== '';
+            }),
             'client_options' => [ // Pusher library client options.
                 // 'timeout' => 30,
             ],

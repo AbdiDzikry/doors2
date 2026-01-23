@@ -62,4 +62,68 @@ Sistem ini menggunakan metode **Hybrid Sync**:
 3.  **Manual**: Tombol "Sync API" di dashboard User Management (Hanya Super Admin).
 
 ---
-*Dibuat oleh sulthan :)  - Doors App Project*
+
+# [NEW] Update Deployment: Migrasi ke Pusher (Jan 2026)
+
+Untuk mengaktifkan fitur Real-time Update pada tablet di Production, **SANGAT PENTING** untuk menjalankan langkah berikut. Tidak cukup hanya update `.env` saja.
+
+## 1. Update Source Code
+Pastikan kode terbaru sudah ditarik karena ada perubahan pada `resources/js/bootstrap.js` dan `config/broadcasting.php`.
+```bash
+git pull origin main
+```
+
+## 2. Update .env
+Tambahkan konfigurasi Pusher berikut. **HAPUS** atau **COMMENT** konfigurasi Reverb yang lama jika ada.
+
+```env
+BROADCAST_CONNECTION=pusher
+
+# Ganti dengan kredensial asli
+PUSHER_APP_ID=2104705
+PUSHER_APP_KEY=97fa7011df4675532d7f
+PUSHER_APP_SECRET=cf1171fd16b7f2dbb348
+PUSHER_APP_CLUSTER=ap1
+
+# Pastikan settingan ini KOSONG untuk Pusher Cloud
+PUSHER_HOST=
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+
+# Client Config
+VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+VITE_PUSHER_HOST="${PUSHER_HOST}"
+VITE_PUSHER_PORT="${PUSHER_PORT}"
+VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
+VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+```
+
+## 3. Build Ulang Assets (CRITICAL)
+Karena konfigurasi Pusher ditanam di file Javascript (`bootstrap.js`), Anda **HARUS** melakukan build ulang aset frontend agar perubahan `.env` terbaca oleh browser.
+```bash
+npm install
+npm run build
+```
+
+## 4. Clear Cache Config
+Karena ada perubahan logika di `config/broadcasting.php` untuk menangani host kosong:
+```bash
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+## 5. Restart Queue (Opsional)
+Jika menggunakan Supervisor untuk antrian, restart worker agar mengambil kode baru.
+```bash
+php artisan queue:restart
+```
+
+## 6. Setup Task Scheduler (Opsional)
+Fitur Tablet sudah memiliki **Auto-Refresh (Client Side)** setiap 2 menit, jadi Cron Job di server tidak lagi wajib untuk update status ruangan.
+Namun, jika Anda ingin menggunakan fitur maintenance otomatis lainnya, Anda tetap bisa menambahkan cron entry:
+
+```bash
+* * * * * cd /path/to/your/project && php artisan schedule:run >> /dev/null 2>&1
+```
+

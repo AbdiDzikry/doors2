@@ -8,7 +8,7 @@ use Livewire\Attributes\On;
 
 class PantryQueue extends Component
 {
-    #[On('echo:pantry-orders,.pantry.order.updated')]
+    #[On('echo:pantry-orders,.pantry.order.updated,.pantry.order.created')]
     public function refreshQueue()
     {
         // This method handles the event. Livewire automatically re-renders the component

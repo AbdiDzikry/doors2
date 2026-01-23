@@ -1,7 +1,5 @@
-// Database RequestIT  ←  API SSO
-'npk'         => $ssoUser['npk']           // ✓ sama
-'username'    => $ssoUser['username']      // ✓ sama  
-'name'        => $ssoUser['full_name']     // mapping: full_name → name
-'email'       => $ssoUser['email']         // ✓ sama
-'password'    => bcrypt($ssoUser['npk'])   // generate dari NPK
-'departement' => $ssoUser['department']    // mapping: department → departement
+Ruang Raung	2026-03-04	2026-03-04 13:00:00	2026-03-04 16:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-06	2026-03-06 07:30:00	2026-03-06 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-11	2026-03-11 13:00:00	2026-03-11 16:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-13	2026-03-13 07:30:00	2026-03-13 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-27	2026-03-27 08:00:00	2026-03-27 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1

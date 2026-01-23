@@ -190,12 +190,13 @@ class RoomReservationController extends Controller
         if ($request->has('pantry_orders')) {
             foreach ($request->pantry_orders as $order) {
                 if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
-                    PantryOrder::create([
+                    $newOrder = PantryOrder::create([
                         'meeting_id' => $meeting->id,
                         'pantry_item_id' => $order['pantry_item_id'],
                         'quantity' => $order['quantity'],
                         'status' => 'pending',
                     ]);
+                    event(new \App\Events\PantryOrderCreated($newOrder));
                 }
             }
         }

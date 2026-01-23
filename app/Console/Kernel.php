@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('meeting:cancel-unconfirmed')->everyMinute();
         $schedule->command('meetings:cancel-unattended')->everyFiveMinutes();
+        $schedule->command('app:update-room-status')->everyMinute();
     }
 
     /**

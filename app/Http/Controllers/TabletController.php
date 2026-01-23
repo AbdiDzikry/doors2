@@ -166,6 +166,7 @@ class TabletController extends Controller
                 'end_time' => $endTime,
                 'status' => 'scheduled',
                 'type' => 'offline',
+                'confirmation_status' => 'confirmed', // Auto-confirm walk-in/tablet bookings
             ]);
             
             // Add organizer as participant

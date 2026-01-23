@@ -726,6 +726,17 @@
                     }, 60000);
                 });
             }
+
+            // --- USER REQUEST: Auto Refresh every 2 Minutes ---
+            // This ensures status updates (Red/Green) without relying on Server Cron Jobs
+            setInterval(() => {
+                if (!isUserActive && !isModalOpen()) {
+                    console.log('⏰ Auto-refreshing (2 min interval)...');
+                    window.performSmartRefresh();
+                } else {
+                    console.log('⏰ Auto-refresh skipped (User Active/Modal Open).');
+                }
+            }, 120000); // 2 Minutes
         });
     </script>
     @endpush

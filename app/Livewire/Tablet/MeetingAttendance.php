@@ -40,6 +40,7 @@ class MeetingAttendance extends Component
 
     public function verifyNpk()
     {
+        $this->resetValidation(); // Clear stuck errors
         $this->errorMsg = '';
         
         $status = $this->attendanceStatus;
@@ -88,7 +89,7 @@ class MeetingAttendance extends Component
                  $this->inputNpk = '';
             } else {
                 $this->addError('inputNpk', 'NPK tidak terdaftar di meeting ini.');
-                $this->errorMsg = 'NPK tidak terdaftar.';
+                // $this->errorMsg = 'NPK tidak terdaftar.'; // Removed to prevent duplicate alerts
             }
         }
     }

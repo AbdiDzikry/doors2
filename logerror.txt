@@ -1,33 +1,4 @@
-oke kita lanjut ke tahapan perbaikan yang sudah ada dulu
+oke ada 1 lagi request saya, ini ada @meeting_lists.csv yaitu data hasil dari database aplikasi doors lama.
+tujuan kita itu adalah migrasi data mulai dari tahun 2026 agar pemesanan meeting dari aplikasi yang lama itu masuk ke aplikasi baru. apakah bisa anda cek dahulu
 
-saat ini banyak yang harus diperbaiki mulai dari
-
-1. logika jika meeting batal itu tidak perlu dihitung lagi.
-jadi di analitik meeting batal tidak perlu masuk datanya,
-lalu pada bagian meeting list tidak perlu dihitung juga,
-intinya meeting yang di canceled itu tidak pernah ada
-
-2. pada saat login sebagai karyawan di bagian Dashboard
-ada upnext yang menampilkan meeting yang akan datang,
-tapi saat ini itu dia menampilkan meeting yang tercanceled.
-seharusnya itu hanya menampilkan meeting yang akan datang
-dan meeting yang sedang berlangsung.
-
-3. pada bagian report absensi kan saat ini masih memakai excel.
-bagaimana kalau memakai pdf tetapi kop surat nya harus sesuai dengan surat resmi.
-seperti yang saya berikan sebelumnya.
-
-4. pada bagian analitik untuk semua role itu ada detail analitik nya.
-bisa berupa pop up atau modal, itu anda tolong pikirkan baiknya bagaimana
-
-5. saat saya akses ke respesionis masih ada error, tolong troubleshoot itu
-
-6. logika pada tampilan tablet diubah kembali menjadi sebelumnya.
-jadi semua partisipan bisa absen, tidak perlu PIC yang mengabsenkan.
-PIC yang mengabsenkan hanya untuk di bagian web agar tidak ada yang titip absen gitu.
-
-7. untuk recurring meeting itu sebaiknya digabung saja dengan my meeting.
- jadi di my meeting tambah pagination yang menampilkan per 10 data.
-
- 8. kita padahal memiliki API data karyawan, tetapi saat di staging data baru tidak masuk.
-padahal saya cek di postman ada data baru yang masuk.
+tanyakan saja kepada saya jika ada data yang kurang jangan langsung eksekusi
