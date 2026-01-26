@@ -215,9 +215,78 @@ class BookingForm extends Component
         $this->calculateOccupiedSlots();
     }
 
-    // Include existing private function setDefaultTime... and adjustStartTimeToAvailable... (they are outside the replaced block)
+    private function setDefaultTime() 
+    {
+        // Set default start time based on business hours (7 AM to 6 PM)
+        $currentTime = now();
+        $minute = $currentTime->minute;
+        $remainder = $minute % 15;
+        
+        // Default to the next 15-minute slot to ensure it's in the future
+        if ($remainder !== 0) {
+            $currentTime->addMinutes(15 - $remainder)->second(0);
+        } else {
+            $currentTime->addMinutes(15)->second(0);
+        }
 
-    // Include render...
+        $hour = (int) $currentTime->format('H');
+
+        if ($hour < 7) {
+            // If before 7 AM, set default to 7:00 AM today
+            $currentTime->hour(7)->minute(0);
+        } elseif ($hour >= 18) {
+            // If 6 PM or later, set default to 7:00 AM tomorrow
+            $currentTime->addDay()->hour(7)->minute(0);
+        }
+
+        $this->start_time = $currentTime->format('Y-m-d\TH:i');
+        $this->ends_at = now()->addDays(7)->format('Y-m-d'); // Default end date
+    }
+
+    public function adjustStartTimeToAvailable()
+    {
+        if (empty($this->occupiedSlots)) {
+            return;
+        }
+
+        $currentTime = \Carbon\Carbon::parse($this->start_time);
+        
+        $limitTime = $currentTime->copy()->hour(18)->minute(0);
+        $attempts = 0;
+        
+        while ($attempts < 50 && $currentTime->lt($limitTime)) {
+            $minutes = $currentTime->hour * 60 + $currentTime->minute;
+            $isBlocked = false;
+
+            foreach ($this->occupiedSlots as $slot) {
+                if ($minutes >= $slot['start_minutes'] && $minutes < $slot['end_minutes']) {
+                    $isBlocked = true;
+                    // Jump to end of this booked slot
+                    $startOfNextSlot = $slot['end_minutes'];
+                    $h = floor($startOfNextSlot / 60);
+                    $m = $startOfNextSlot % 60;
+                    $currentTime->hour($h)->minute($m);
+                    break;
+                }
+            }
+
+            if (!$isBlocked) {
+                $this->start_time = $currentTime->format('Y-m-d\TH:i');
+                return;
+            }
+            
+            $attempts++;
+        }
+    }
+
+    public function render()
+    {
+        return view('livewire.meeting.booking-form', [
+            'rooms' => $this->rooms,
+            'priorityGuests' => $this->priorityGuests,
+            'defaultMeetingDurationValue' => $this->defaultMeetingDurationValue,
+        ]);
+    }
 
     public function submitForm(BookingService $bookingService)
     {
