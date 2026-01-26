@@ -215,7 +215,7 @@ class BookingForm extends Component
         $this->calculateOccupiedSlots();
     }
 
-    private function setDefaultTime() 
+    public function setDefaultTime() 
     {
         // Set default start time based on business hours (7 AM to 6 PM)
         $currentTime = now();
