@@ -13,7 +13,6 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
      */
     public function run(): void
     {
-        // Safety: Delete existing meetings in this range to avoid duplicates
         DB::table('meetings')
             ->whereBetween('start_time', ['2026-01-15 00:00:00', '2026-03-31 23:59:59'])
             ->delete();
@@ -862,9 +861,9 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
                 'description' => null,
                 'start_time' => '2026-01-26 10:30:00',
                 'end_time' => '2026-01-26 11:30:00',
-                'status' => 'scheduled',
+                'status' => 'cancelled',
                 'created_at' => '2026-01-23 08:01:10',
-                'updated_at' => '2026-01-23 08:01:10',
+                'updated_at' => '2026-01-26 09:08:42',
             ],
             [
                 'user_id' => 475,
@@ -1266,7 +1265,7 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
 
         DB::table('meetings')->insert($meetings);
 
-        // BACKFILL: Insert Organizer as Participant (Required for Attendance/PDF)
+        // BACKFILL: Insert Organizer as Participant
         $insertedMeetings = DB::table('meetings')
             ->whereBetween('start_time', ['2026-01-15 00:00:00', '2026-03-31 23:59:59'])
             ->get();
@@ -1278,7 +1277,7 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
                 'participant_type' => 'App\Models\User',
                 'participant_id' => $meeting->user_id,
                 'status' => $meeting->status === 'completed' ? 'attended' : 'confirmed',
-                'is_pic' => 1, // Set as PIC so they appear in reports
+                'is_pic' => 1,
                 'checked_in_at' => $meeting->status === 'completed' ? $meeting->start_time : null,
                 'attended_at' => $meeting->status === 'completed' ? $meeting->start_time : null,
                 'created_at' => $meeting->created_at,

@@ -102,6 +102,9 @@ class ImportLegacyMeetings extends Command
                 if ($picName === 'M. Ridwan Hadiwinata') {
                     $picName = 'Muhammad Ridwan Hadiwinata';
                 }
+                if (stripos($picName, 'ALFONSINE') !== false) {
+                     $picName = 'ALFONSINE CLAUDIA TETILAKSITA EKARISTI';
+                }
                 
                 $user = null;
 
