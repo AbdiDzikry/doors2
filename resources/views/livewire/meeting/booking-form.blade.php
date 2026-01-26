@@ -638,9 +638,98 @@
                         
                         <div class="border-t mt-4 pt-4">
                             <h4 class="text-xl font-semibold text-gray-800 mb-4">Booker Info</h4>
-                            <p class="text-sm text-gray-700"><span class="font-medium">Name:</span> {{ Auth::user()->name }}</p>
-                            <p class="text-sm text-gray-700"><span class="font-medium">NPK:</span> {{ Auth::user()->npk ?? 'N/A' }}</p>
-                            <p class="text-sm text-gray-700"><span class="font-medium">Department:</span> {{ Auth::user()->department ?? 'N/A' }}</p>
+                            
+                            @if($isEditMode && Auth::user()->hasRole('Super Admin'))
+                                {{-- Super Admin can change organizer in edit mode --}}
+                                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <p class="text-xs text-yellow-800 mb-2">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        <strong>Super Admin:</strong> You can change the meeting organizer below
+                                    </p>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="organizer_user_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Meeting Organizer <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative" x-data="{ 
+                                        open: false, 
+                                        selected: @entangle('organizer_user_id'),
+                                        selectedName: '{{ $allUsers->firstWhere('id', $organizer_user_id)?->name ?? Auth::user()->name }}',
+                                        searchQuery: '',
+                                        get filteredUsers() {
+                                            if (!this.searchQuery) return @js($allUsers->toArray());
+                                            const query = this.searchQuery.toLowerCase();
+                                            return @js($allUsers->toArray()).filter(user => 
+                                                user.name.toLowerCase().includes(query) || 
+                                                (user.npk && user.npk.toLowerCase().includes(query)) ||
+                                                (user.department && user.department.toLowerCase().includes(query))
+                                            );
+                                        }
+                                    }" @click.away="open = false">
+                                        <button type="button" @click="open = !open" 
+                                            class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                            <span class="block truncate" x-text="selectedName"></span>
+                                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            </span>
+                                        </button>
+
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-xl text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm border border-green-500/30"
+                                            style="display: none;">
+                                            
+                                            {{-- Search Input --}}
+                                            <div class="sticky top-0 bg-white p-2 border-b border-gray-200 rounded-t-xl">
+                                                <div class="relative">
+                                                    <input 
+                                                        type="text" 
+                                                        x-model="searchQuery"
+                                                        @click.stop
+                                                        placeholder="Search by name, NPK, or department..."
+                                                        class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                                    >
+                                                    <i class="fas fa-search absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            {{-- User List --}}
+                                            <div class="max-h-60 overflow-auto py-1">
+                                                <template x-for="user in filteredUsers" :key="user.id">
+                                                    <div @click="selected = user.id; selectedName = user.name; open = false; searchQuery = ''; $wire.set('organizer_user_id', user.id)"
+                                                         class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                         :class="{ 'text-green-900 bg-green-50': selected == user.id, 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected != user.id }">
+                                                        <div>
+                                                            <span class="block truncate font-medium" :class="{ 'font-semibold': selected == user.id }" x-text="user.name"></span>
+                                                            <span class="block text-xs text-gray-500">
+                                                                NPK: <span x-text="user.npk || 'N/A'"></span> | <span x-text="user.department || 'N/A'"></span>
+                                                            </span>
+                                                        </div>
+                                                        <span x-show="selected == user.id" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                            <i class="fas fa-check text-xs"></i>
+                                                        </span>
+                                                    </div>
+                                                </template>
+                                                
+                                                {{-- No Results Message --}}
+                                                <div x-show="filteredUsers.length === 0" class="py-4 text-center text-sm text-gray-500">
+                                                    <i class="fas fa-search text-gray-400 mb-2"></i>
+                                                    <p>No users found matching "<span x-text="searchQuery"></span>"</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <p class="text-sm text-gray-700"><span class="font-medium">Current Organizer NPK:</span> {{ $allUsers->firstWhere('id', $organizer_user_id)?->npk ?? 'N/A' }}</p>
+                                <p class="text-sm text-gray-700"><span class="font-medium">Department:</span> {{ $allUsers->firstWhere('id', $organizer_user_id)?->department ?? 'N/A' }}</p>
+                            @else
+                                {{-- Regular user or create mode: show current user info --}}
+                                <p class="text-sm text-gray-700"><span class="font-medium">Name:</span> {{ Auth::user()->name }}</p>
+                                <p class="text-sm text-gray-700"><span class="font-medium">NPK:</span> {{ Auth::user()->npk ?? 'N/A' }}</p>
+                                <p class="text-sm text-gray-700"><span class="font-medium">Department:</span> {{ Auth::user()->department ?? 'N/A' }}</p>
+                            @endif
                         </div>
                     </div>
 

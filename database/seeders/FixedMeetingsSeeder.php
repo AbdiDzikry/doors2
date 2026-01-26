@@ -7,8 +7,58 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class LegacyMeetingsJanMar2026Seeder extends Seeder
+class FixedMeetingsSeeder extends Seeder
 {
+
+    // NPK mapping from old database
+    private $npkMapping = array (
+  1004 => '11230531',
+  681 => '11220019',
+  705 => '11220079',
+  1179 => '11240175',
+  352 => '11164043',
+  1255 => '11250355',
+  479 => '11185354',
+  993 => '11230499',
+  1610 => '31125379',
+  517 => '11206120',
+  450 => '11174947',
+  344 => '11153962',
+  1305 => '11940472',
+  518 => '11206122',
+  682 => '11220022',
+  471 => '11185297',
+  365 => '11164138',
+  672 => '11210580',
+  1016 => '11230580',
+  786 => '11220821',
+  488 => '11195585',
+  531 => '11210064',
+  1121 => '11240076',
+  1335 => '99143739',
+  976 => '11230399',
+  1186 => '11240195',
+  1871 => '31125576',
+  743 => '11220177',
+  373 => '11164217',
+  494 => '11195719',
+);
+    private $superAdminNpk = 'admin123';
+    
+    private function getUserIdFromOldId($oldUserId) {
+        $npk = $this->npkMapping[$oldUserId] ?? null;
+        if (!$npk) {
+            $superAdmin = DB::table('users')->where('npk', $this->superAdminNpk)->first();
+            return $superAdmin ? $superAdmin->id : 1;
+        }
+        $user = DB::table('users')->where('npk', $npk)->first();
+        if (!$user) {
+            $superAdmin = DB::table('users')->where('npk', $this->superAdminNpk)->first();
+            return $superAdmin ? $superAdmin->id : 1;
+        }
+        return $user->id;
+    }
+
     /**
      * Run the database seeds.
      */
@@ -19,6 +69,227 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
             ->delete();
 
         $meetings = [
+            [
+                'user_id' => 1337,
+                'room_id' => 4,
+                'topic' => 'meeting IPP infra',
+                'start_time' => '2026-01-27 13:30:00',
+                'end_time' => '2026-01-27 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 2033,
+                'room_id' => 27,
+                'topic' => 'proses rpa yg di jalankan di adm',
+                'start_time' => '2026-01-27 10:00:00',
+                'end_time' => '2026-01-27 12:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 1652,
+                'room_id' => 3,
+                'topic' => 'Internal SAP Meeting',
+                'start_time' => '2026-01-27 07:00:00',
+                'end_time' => '2026-01-27 12:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 535,
+                'room_id' => 4,
+                'topic' => 'Meeting Marketing 4W',
+                'start_time' => '2026-01-27 07:00:00',
+                'end_time' => '2026-01-27 11:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 454,
+                'room_id' => 24,
+                'topic' => 'Meeting dengan PT. HMMI & POSCO IJPC',
+                'start_time' => '2026-01-27 10:00:00',
+                'end_time' => '2026-01-27 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 454,
+                'room_id' => 25,
+                'topic' => 'meeting dengan supplier baru (PIC Emanuel)',
+                'start_time' => '2026-01-27 09:00:00',
+                'end_time' => '2026-01-27 12:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 521,
+                'room_id' => 9,
+                'topic' => 'Eksternal',
+                'start_time' => '2026-01-27 14:30:00',
+                'end_time' => '2026-01-27 17:30:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 522,
+                'room_id' => 1,
+                'topic' => 'Review Sosialisasi STO vendor tahun 2026',
+                'start_time' => '2026-01-27 09:30:00',
+                'end_time' => '2026-01-27 12:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 1368,
+                'room_id' => 5,
+                'topic' => 'Meeting Weekly RPA',
+                'start_time' => '2026-01-27 10:00:00',
+                'end_time' => '2026-01-27 11:30:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 1071,
+                'room_id' => 7,
+                'topic' => 'Metting project',
+                'start_time' => '2026-01-27 07:00:00',
+                'end_time' => '2026-01-27 13:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 980,
+                'room_id' => 27,
+                'topic' => 'Weekly CR SR Meeting',
+                'start_time' => '2026-01-28 14:00:00',
+                'end_time' => '2026-01-28 17:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 1259,
+                'room_id' => 4,
+                'topic' => 'PSP',
+                'start_time' => '2026-01-28 10:00:00',
+                'end_time' => '2026-01-28 11:30:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 521,
+                'room_id' => 8,
+                'topic' => 'Eksternal',
+                'start_time' => '2026-01-28 10:00:00',
+                'end_time' => '2026-01-28 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 521,
+                'room_id' => 9,
+                'topic' => 'Eksternal',
+                'start_time' => '2026-01-28 13:00:00',
+                'end_time' => '2026-01-28 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 521,
+                'room_id' => 1,
+                'topic' => 'EKSTERNAL',
+                'start_time' => '2026-01-28 13:30:00',
+                'end_time' => '2026-01-28 17:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 478,
+                'room_id' => 7,
+                'topic' => 'Meeting Internal',
+                'start_time' => '2026-01-28 08:00:00',
+                'end_time' => '2026-01-28 12:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 535,
+                'room_id' => 7,
+                'topic' => 'Meeting with HMC & Ge-stamp',
+                'start_time' => '2026-01-29 10:00:00',
+                'end_time' => '2026-01-29 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 454,
+                'room_id' => 25,
+                'topic' => 'Meeting dengan DAEHO (PIC: NUEL)',
+                'start_time' => '2026-01-29 13:00:00',
+                'end_time' => '2026-01-29 16:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 521,
+                'room_id' => 9,
+                'topic' => 'Eksternal',
+                'start_time' => '2026-01-29 08:00:00',
+                'end_time' => '2026-01-29 15:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+            [
+                'user_id' => 781,
+                'room_id' => 8,
+                'topic' => 'Training Ms.Excel Intermediate',
+                'start_time' => '2026-01-29 07:00:00',
+                'end_time' => '2026-01-29 17:00:00',
+                'status' => 'scheduled',
+                'created_at' => '2026-01-27 04:46:36',
+                'updated_at' => '2026-01-27 04:46:36',
+                'is_new' => true,
+            ],
+
             [
                 'user_id' => 1004,
                 'room_id' => 7,
@@ -1171,10 +1442,22 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
             ],
         ];
 
-        // Process meetings and convert old user_id to NPK-based lookup
+        
+
+        
+        // Process meetings and insert
         foreach ($meetings as $meeting) {
-            $oldUserId = $meeting['user_id'];
-            $meeting['user_id'] = $this->getUserIdFromOldId($oldUserId);
+            if (isset($meeting['is_new']) && $meeting['is_new']) {
+                unset($meeting['is_new']);
+                // user_id is already correct
+            } else {
+                $oldUserId = $meeting['user_id'];
+                $meeting['user_id'] = $this->getUserIdFromOldId($oldUserId);
+            }
+            
+            if (!isset($meeting['created_at'])) $meeting['created_at'] = now();
+            if (!isset($meeting['updated_at'])) $meeting['updated_at'] = now();
+            
             DB::table('meetings')->insert($meeting);
         }
 

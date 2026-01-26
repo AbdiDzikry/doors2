@@ -50,6 +50,10 @@ class BookingForm extends Component
 
     public $occupiedSlots = [];
 
+    // Organizer (for Super Admin to change organizer in edit mode)
+    public $organizer_user_id;
+    public $allUsers = []; // List of all users for organizer dropdown
+
     // ... (keep existing methods up to updateInternalParticipants)
 
     #[On('internal-participants-updated')]
@@ -209,9 +213,18 @@ class BookingForm extends Component
             $this->pantryOrders = []; // Ensure array
         }
         
+        // Load current organizer
+        $this->organizer_user_id = $meeting->user_id;
+        
         // Load Resources
         $this->rooms = Room::all();
         $this->priorityGuests = PriorityGuest::all();
+        
+        // Load all users for organizer dropdown (Super Admin only)
+        if (auth()->user()->hasRole('Super Admin')) {
+            $this->allUsers = User::orderBy('name')->get();
+        }
+        
         $this->calculateOccupiedSlots();
     }
 
@@ -354,6 +367,36 @@ class BookingForm extends Component
 
             if ($this->isEditMode) {
                  $meeting = Meeting::find($this->meetingId);
+                 $oldOrganizerId = $meeting->user_id;
+                 
+                 // Check if Super Admin is changing organizer
+                 if (auth()->user()->hasRole('Super Admin') && $this->organizer_user_id && $this->organizer_user_id != $meeting->user_id) {
+                     // Remove old organizer from participants list
+                     $this->internalParticipants = array_values(
+                         array_filter($this->internalParticipants, function($participantId) use ($oldOrganizerId) {
+                             return $participantId != $oldOrganizerId;
+                         })
+                     );
+                     
+                     // Also remove from PIC participants if exists
+                     $this->picParticipants = array_values(
+                         array_filter($this->picParticipants, function($participantId) use ($oldOrganizerId) {
+                             return $participantId != $oldOrganizerId;
+                         })
+                     );
+                     
+                     // Update organizer
+                     $meeting->user_id = $this->organizer_user_id;
+                     $meeting->save();
+                     
+                     // Delete old organizer from meeting_participants table
+                     DB::table('meeting_participants')
+                         ->where('meeting_id', $meeting->id)
+                         ->where('participant_type', User::class)
+                         ->where('participant_id', $oldOrganizerId)
+                         ->delete();
+                 }
+                 
                  $bookingService->updateMeeting(
                     $meeting,
                     $data,
