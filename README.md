@@ -171,3 +171,31 @@ For deploying the application to a production environment, consider the followin
 *   **Web Server Configuration:** Configure your web server (Nginx, Apache) to point to the `public` directory of the Laravel application.
 *   **Security:** Implement appropriate security measures, including HTTPS, strong passwords, and regular security audits.
 *   **Backup Strategy:** Establish a regular database backup strategy.
+
+## Troubleshooting & Resolution Log (Knowledge Base)
+
+This section documents critical data issues encountered during development and their technical solutions, serving as a reference for future debugging.
+
+### 1. User ID Mismatch (SSO vs Local)
+*   **Issue:** Meetings were assigned to wrong users (often falling back to Super Admin) because legacy seeders used hardcoded integer IDs (e.g., `user_id = 450`) that didn't match the fresh database IDs generated during SSO/LDAP sync.
+*   **Resolution:**
+    *   Implemented **NPK-based Lookup**: The seeder now maps uses NPK (Employee ID) instead of plain IDs.
+    *   Logic: `Log Name` -> `NPK` -> `Current DB ID`.
+
+### 2. Overlapping Schedules (Double Booking)
+*   **Issue:** Merging "Legacy Data" (Jan-Mar) with "New Log Data" (Jan-Apr) caused scheduling conflicts where two meetings existed for the same room at the same time.
+*   **Resolution:**
+    *   **Conflict Resolution Policy:** The system prioritizes **New Log Data**.
+    *   If a legacy meeting overlaps with a new log entry, the legacy meeting is automatically **dropped**.
+
+### 3. Ghost Users (Super Admin Assignments)
+*   **Issue:** Several meetings appeared assigned to "Super Admin" because the original organizer (e.g., "Angelly", "Tri Witanto") was missing from the local database or had a name typo.
+*   **Resolution:**
+    *   **Clean Policy:** Any legacy meeting that cannot be resolved to a valid specific user is now **discarded** rather than defaulting to Super Admin.
+    *   Manual corrections were applied for specific VIP users to ensure their NPKs map correctly.
+
+### 4. Room Mapping Mismatches
+*   **Issue:** Log files used informal names (e.g., "Ruang Kencana") which sometimes failed to match official database names (e.g., "Kencana Meeting Room"), risking assignment to default rooms.
+*   **Resolution:**
+    *   Implemented fuzzy string matching in the generator script.
+    *   Verified mappings using `quadral_check.php` to ensure 100% accuracy between Log Name and Database Room ID.
