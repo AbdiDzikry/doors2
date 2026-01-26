@@ -32,6 +32,38 @@ Doors is a comprehensive meeting room and pantry management system designed to s
 *   **Recurring Meetings:** Support for scheduling meetings that repeat on a defined schedule.
 *   **Automatic Calendar Invitations:** Generation and sending of `.ics` calendar invitation files to meeting participants.
 
+## Maintenance & Data Verification (New)
+
+We have implemented a rigorous data integrity system to ensure meeting schedules are accurate and conflict-free.
+
+### 1. Seeding Data
+The `FixedMeetingsSeeder` class is the **single source of truth** for meeting schedules. It intelligently merges:
+- **Legacy Data:** Historical meetings from Jan-Mar 2026.
+- **New Logs:** Latest meeting data from verified logs (up to April 2026).
+
+**Key Policies:**
+- **Conflict Resolution:** If a new verified meeting conflicts with legacy data, the legacy data is automatically dropped.
+- **Clean Policy:** Any legacy meeting that cannot be mapped to a valid User ID (e.g., fallback to Super Admin) is automatically removed to keep the database clean.
+
+To re-populate the database with verified data:
+```bash
+php artisan db:seed --class=FixedMeetingsSeeder
+```
+
+### 2. Verification Tools
+Included in the root directory are custom verification scripts to audit database integrity. Running these is recommended after any major data import.
+
+*   **Triple Check (`php triple_check.php`)**:
+    1.  **Overlaps:** detects double bookings in the same room.
+    2.  **Super Admin Fallbacks:** flagged if a meeting is assigned to Super Admin (missing user).
+    3.  **Conflict Check:** verifies that the database state is consistent.
+
+*   **Quadral Check (`php quadral_check.php`)**:
+    1.  **Room Mapping:** Verifies that Log Room Names map correctly to Database Room IDs (100% Match).
+    2.  **Time Logic:** Ensures Start Time is strictly before End Time.
+    3.  **User Integrity:** Checks for valid user email formats.
+    4.  **Consistency:** Cross-references database records against the unified log file.
+
 ## Installation Guide
 
 To set up the Doors application locally, follow these steps:
