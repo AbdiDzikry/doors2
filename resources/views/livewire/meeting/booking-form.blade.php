@@ -29,7 +29,9 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     Back to Room Selection
                 </a>
-                <h3 class="text-gray-800 text-3xl font-bold">Create Booking</h3>
+                <h3 class="text-gray-800 text-3xl font-bold">
+                    {{ $isEditMode ? 'Edit Meeting' : 'Create Booking' }}
+                </h3>
                 @if ($selectedRoom)
                     <div class="flex items-center">
                         <p class="text-sm text-gray-600">You are booking for room: <span class="font-semibold">{{ $selectedRoom->name }}</span></p>
@@ -125,10 +127,14 @@
                                     return ['00', '15', '30', '45'].every(m => this.isTimeBlocked(h, m));
                                 },
                                 isPastTime(h, m) {
-                                    const today = new Date().toLocaleDateString('en-CA');
+                                    const now = new Date();
+                                    const year = now.getFullYear();
+                                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                                    const day = String(now.getDate()).padStart(2, '0');
+                                    const today = `${year}-${month}-${day}`;
+
                                     if (this.date !== today) return false;
                                     
-                                    const now = new Date();
                                     const currentHour = now.getHours();
                                     const currentMinute = now.getMinutes();
                                     
@@ -137,9 +143,14 @@
                                     return false;
                                 },
                                 isHourInPast(h) {
-                                    const today = new Date().toLocaleDateString('en-CA');
-                                    if (this.date !== today) return false;
                                     const now = new Date();
+                                    const year = now.getFullYear();
+                                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                                    const day = String(now.getDate()).padStart(2, '0');
+                                    const today = `${year}-${month}-${day}`;
+                                    
+                                    if (this.date !== today) return false;
+                                    
                                     const currentHour = now.getHours();
                                     if (parseInt(h) < currentHour) return true;
                                     if (parseInt(h) === currentHour) {
@@ -662,7 +673,9 @@
             @endif
             <div class="flex justify-end">
                 <button type="button" id="tour-submit" wire:click.prevent="submitForm" wire:loading.attr="disabled" wire:target="submitForm" class="inline-flex items-center justify-center px-6 py-3 bg-green-600 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-150 text-lg relative">
-                    <span wire:loading.remove wire:target="submitForm">Book Meeting</span>
+                    <span wire:loading.remove wire:target="submitForm">
+                        {{ $isEditMode ? 'Update Meeting' : 'Book Meeting' }}
+                    </span>
                     <span wire:loading wire:target="submitForm" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -226,6 +226,147 @@ class BookingService
         }
     }
 
+    public function updateMeeting(Meeting $meeting, array $data, array $internalParticipants, array $externalParticipants, array $pantryOrders, array $picParticipants = [])
+    {
+        DB::beginTransaction();
+        try {
+            $startTime = new \DateTime($data['start_time']);
+            $endTime = (clone $startTime)->add(new \DateInterval('PT' . $data['duration'] . 'M'));
+
+            // Check availability (exclude current meeting)
+            if (!$this->isRoomAvailable($startTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s'), $data['room_id'], $meeting->id)) {
+                // Formatting for readable error (re-using matching logic)
+                 throw new Exception('The selected room is not available at the chosen time (Time Collision).');
+            }
+
+            // Update Basic Info
+            $meeting->update([
+                'room_id' => $data['room_id'],
+                'topic' => $data['topic'],
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'priority_guest_id' => $data['priority_guest_id'] ?? null,
+                // Status logic: if formerly completed/cancelled, what happens? 
+                // Usually editing implies re-scheduling or fixing details.
+                // For now we keep existing status or reset to scheduled if it was cancelled?
+                // Let's assume just updating details doesn't auto-change status unless explicitly handled.
+                // But if time changes, we might want to ensure it's valid.
+            ]);
+
+            // Sync Participants
+            // 1. Detach all (or smart sync). Simple detach+create is easier but loses check-in status.
+            // Better: Sync Internal
+            
+            // Get current participants
+            $currentInternalMap = $meeting->meetingParticipants()
+                ->where('participant_type', User::class)
+                ->get()
+                ->keyBy('participant_id');
+
+            // Process Internal Re-sync
+            // We want to KEEP check-in status if the person is still invited.
+            $keepParticipantIds = [];
+            
+            // Always ensure Organizer is kept/added
+            if (!in_array($meeting->user_id, $internalParticipants)) {
+                $internalParticipants[] = $meeting->user_id;
+            }
+
+            foreach ($internalParticipants as $userId) {
+                if ($currentInternalMap->has($userId)) {
+                    // Update existing (e.g. PIC status might change)
+                    $mp = $currentInternalMap->get($userId);
+                    $mp->update(['is_pic' => in_array($userId, $picParticipants)]);
+                    $keepParticipantIds[] = $mp->id;
+                } else {
+                    // Create new
+                    $mp = MeetingParticipant::create([
+                        'meeting_id' => $meeting->id,
+                        'participant_id' => $userId,
+                        'participant_type' => User::class,
+                        'is_pic' => in_array($userId, $picParticipants),
+                        'status' => 'confirmed' // Default for new additions
+                    ]);
+                    $keepParticipantIds[] = $mp->id;
+                }
+            }
+
+            // External Participants (Simple Sync: Delete & Re-add is usually fine as they don't have check-in accounts mostly, 
+            // but if they do (future feature), smart sync is better. For now simple sync for external IDs is tricky 
+            // because `externalParticipants` array from form usually contains IDs of `ExternalParticipant` models.
+            
+            $currentExternalMap = $meeting->meetingParticipants()
+                ->where('participant_type', ExternalParticipant::class)
+                ->get()
+                ->keyBy('participant_id');
+
+            foreach ($externalParticipants as $extId) {
+                if ($currentExternalMap->has($extId)) {
+                    $keepParticipantIds[] = $currentExternalMap->get($extId)->id;
+                } else {
+                    $mp = MeetingParticipant::create([
+                        'meeting_id' => $meeting->id,
+                        'participant_id' => $extId,
+                        'participant_type' => ExternalParticipant::class,
+                        'status' => 'confirmed'
+                    ]);
+                    $keepParticipantIds[] = $mp->id;
+                }
+            }
+
+            // Remove participants not in the new list
+            $meeting->meetingParticipants()->whereNotIn('id', $keepParticipantIds)->delete();
+
+
+            // Sync Pantry Orders
+            // Complex because of stock.
+            // Strategy: 
+            // 1. Restore stock of REMOVED orders.
+            // 2. Deduct stock of NEW orders.
+            // 3. Update changed quantities.
+            
+            // Simplified: Detach all & Restore Stock -> Create new & Deduct Stock.
+            // Efficient enough for typical meeting edits.
+            
+            // A. Restore Stock from current orders
+            foreach ($meeting->pantryOrders as $oldOrder) {
+                $this->inventoryService->restoreStock($oldOrder->pantry_item_id, $oldOrder->quantity);
+            }
+            // B. Delete old orders
+            $meeting->pantryOrders()->delete();
+
+            // C. Create new & Deduct
+            // Filter empty
+            $validOrders = [];
+            foreach ($pantryOrders as $order) {
+                if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
+                    $validOrders[] = $order;
+                     PantryOrder::create([
+                        'meeting_id' => $meeting->id,
+                        'pantry_item_id' => $order['pantry_item_id'],
+                        'quantity' => $order['quantity'],
+                        'status' => 'pending',
+                        'custom_items' => $order['custom_items'] ?? null,
+                    ]);
+                }
+            }
+            $this->inventoryService->deductStock($validOrders);
+
+
+            // Notify
+            // $this->sendMeetingInvitation($meeting); // Optional: Only if time changed? Or always?
+            // For now specific "Update" email might be better, or just silent update. 
+            // Let's dispatch events for Tablet/Dashboard refresh.
+            \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+            \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     protected function getRecurringInterval(string $pattern): string
     {
         return match ($pattern) {

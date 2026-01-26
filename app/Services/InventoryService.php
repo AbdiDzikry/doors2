@@ -40,17 +40,21 @@ class InventoryService
     public function refundStockForMeeting(Meeting $meeting)
     {
         foreach ($meeting->pantryOrders as $order) {
-            if ($order->pantryItem) {
-                // Determine if we should refund? 
-                // Generally if status is pending, prepared, delivered... 
-                // If it's already consumed/done, maybe not? 
-                // For now, let's assume if the meeting is cancelled, we refund everything 
-                // UNLESS the order status implies it's too late? 
-                // Usually "cancelled meeting" means items are returned.
-                
-                // Only increment if we have the item record
-                PantryItem::where('id', $order->pantry_item_id)->increment('stock', $order->quantity);
-            }
+            $this->restoreStock($order->pantry_item_id, $order->quantity);
+        }
+    }
+
+    /**
+     * Restore stock for a specific item.
+     * 
+     * @param int $pantryItemId
+     * @param int $quantity
+     * @return void
+     */
+    public function restoreStock($pantryItemId, $quantity)
+    {
+        if ($pantryItemId && $quantity > 0) {
+            PantryItem::where('id', $pantryItemId)->increment('stock', $quantity);
         }
     }
 }

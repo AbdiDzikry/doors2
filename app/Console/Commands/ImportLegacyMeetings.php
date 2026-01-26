@@ -227,6 +227,17 @@ class ImportLegacyMeetings extends Command
                         'confirmation_status' => 'confirmed', 
                     ]);
 
+                    // 4b. Add Organizer as Participant (CRITICAL FIX)
+                    \App\Models\MeetingParticipant::create([
+                        'meeting_id' => $meeting->id,
+                        'participant_id' => $user->id,
+                        'participant_type' => \App\Models\User::class,
+                        'is_pic' => true,
+                        'status' => $meeting->status === 'completed' ? 'attended' : 'confirmed',
+                        'checked_in_at' => $meeting->status === 'completed' ? $startTime : null,
+                        'attended_at' => $meeting->status === 'completed' ? $startTime : null,
+                    ]);
+
                     // 5. Map Pantry Orders
                     // Column 'pantries' seems empty in samples, but 'pantry_ids' or just JSON string in a column?
                     // Sample: "[{""id"":""6189fbb9ff1aef0eee4201a6"",""name"":""Air Mineral"",""qty"":""7"",""description"":""air mineral"",""status"":0}]"

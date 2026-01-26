@@ -124,7 +124,7 @@
                     </td>
                     <td class="sig-box">
                         @if($participant->attended_at)
-                            <div style="text-align: center; font-style: italic; color: #555; margin-top: 15px;">Already Assigned</div>
+                            <div style="text-align: center; font-style: italic; color: #555; margin-top: 15px;">Already Signed</div>
                         @else
                             <span class="sig-number">{{ $index + 1 }}</span>
                         @endif
