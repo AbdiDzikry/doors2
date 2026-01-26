@@ -1442,18 +1442,34 @@ class FixedMeetingsSeeder extends Seeder
             ],
         ];
 
-        
+        // Process meetings and insert
+        foreach ($meetings as $meeting) {
+            // Remove is_new flag for new meetings
+            if (isset($meeting['is_new'])) {
+                unset($meeting['is_new']);
+            } else {
+                // Convert old ID for legacy meetings
+                $oldUserId = $meeting['user_id'];
+                $meeting['user_id'] = $this->getUserIdFromOldId($oldUserId);
+            }
+            
+            // Ensure timestamps
+            if (!isset($meeting['created_at'])) $meeting['created_at'] = now();
+            if (!isset($meeting['updated_at'])) $meeting['updated_at'] = now();
+            
+            DB::table('meetings')->insert($meeting);
+        }
 
         // BACKFILL: Insert Organizer as Participant
         $insertedMeetings = DB::table('meetings')
-            ->whereBetween('start_time', ['2026-01-15 00:00:00', '2026-03-31 23:59:59'])
+            ->whereBetween('start_time', ['2026-01-15 00:00:00', '2026-04-14 23:59:59']) // Extended to April
             ->get();
 
         $participants = [];
         foreach ($insertedMeetings as $meeting) {
             $participants[] = [
                 'meeting_id' => $meeting->id,
-                'participant_type' => 'App\Models\User',
+                'participant_type' => 'App\\Models\\User',
                 'participant_id' => $meeting->user_id,
                 'status' => $meeting->status === 'completed' ? 'attended' : 'confirmed',
                 'is_pic' => 1,
