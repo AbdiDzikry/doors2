@@ -55,6 +55,24 @@ foreach ($meetings as $meeting) {
     $valString = implode(', ', $vals);
     
     $sql .= "INSERT INTO meetings ($colString) VALUES ($valString);\n";
+
+    // Participant (Organizer)
+    $partCols = ['meeting_id', 'participant_type', 'participant_id', 'status', 'is_pic', 'checked_in_at', 'attended_at', 'created_at', 'updated_at'];
+    $partVals = [
+        $meeting->id,
+        "'App\\\Models\\\User'", // Escape backslashes for SQL
+        $meeting->user_id,
+        $meeting->status === 'completed' ? "'attended'" : "'confirmed'",
+        1,
+        $meeting->status === 'completed' ? "'{$meeting->start_time}'" : "NULL",
+        $meeting->status === 'completed' ? "'{$meeting->start_time}'" : "NULL",
+        "'{$meeting->created_at}'",
+        "'{$meeting->updated_at}'"
+    ];
+    $partColString = implode(', ', $partCols);
+    $partValString = implode(', ', $partVals);
+
+    $sql .= "INSERT INTO meeting_participants ($partColString) VALUES ($partValString);\n"; 
 }
 
 $sql .= "\nCOMMIT;\n";
