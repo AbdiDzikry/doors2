@@ -32,7 +32,7 @@ Fitur ini akan membersihkan data lama (Jan-Mar) dan memasukkan 58 data meeting y
 
 - [ ] **Pull Code Terbaru**:
   ```bash
-  git pull origin main
+  git pull origin master
   ```
 - [ ] **Jalankan Seeder** (Recommended Method):
   ```bash
