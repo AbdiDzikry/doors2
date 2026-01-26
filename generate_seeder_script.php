@@ -27,7 +27,6 @@ foreach ($meetings as $meeting) {
     $data .= "                'room_id' => " . ($meeting->room_id ?? 'null') . ",\n";
     $topic = str_replace("'", "\'", $meeting->topic);
     $data .= "                'topic' => '" . $topic . "',\n";
-    $data .= "                'description' => null,\n";
     $data .= "                'start_time' => '" . $meeting->start_time . "',\n";
     $data .= "                'end_time' => '" . $meeting->end_time . "',\n";
     $data .= "                'status' => '" . $meeting->status . "',\n";

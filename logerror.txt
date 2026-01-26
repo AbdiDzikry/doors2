@@ -1,5 +1,51 @@
-Ruang Kencana	2026-01-27	2026-01-27 13:30:00	2026-01-27 16:00:00	meeting IPP infra	meeting IPP infra	Andreas Calvin Gotandra	1
-Ruang Kencana	2026-01-27	2026-01-27 07:00:00	2026-01-27 11:00:00	Meeting Marketing 4W	Meeting Marketing 4W	IGNATIUS BENNY SAPUTRO	1
-Ruang Rinjani	2026-01-27	2026-01-27 10:00:00	2026-01-27 16:00:00	Meeting dengan PT. HMMI & POSCO IJPC	Meeting dengan PT. HMMI & POSCO. PIC : Juniafit	ISMA SEPTIANI	1
-Ruang Semeru	2026-01-27	2026-01-27 13:00:00	2026-01-27 17:00:00	Meeting Internal	Meeting Divisi	MARZUKI BUDI UTOMO	1
-Ruang Merbabu	2026-01-27	2026-01-27 10:00:00	2026-01-27 11:30:00	Meeting Weekly RPA	Meeting Weekly RPA	Ricky	1
+php artisan make:migration add_description_to_meetings_table --table=meetings
+Edit the migration:
+
+public function up(): void
+{
+    Schema::table('meetings', function (Blueprint $table) {
+        $table->text('description')->nullable()->after('topic'); // adjust "after" as desired
+    });
+}
+
+public function down(): void
+{
+    Schema::table('meetings', function (Blueprint $table) {
+        $table->dropColumn('description');
+    });
+}
+Then run:
+
+php artisan migrate
+php artisan db:seed --class=LegacyMeetingsJanMar2026Seeder
+Option B: Remove description from the seeder insert payload
+If your current schema intentionally does not include description, then your seeder must not try to insert it.
+
+In database/seeders/LegacyMeetingsJanMar2026Seeder.php (near the line shown in the trace: ~1288), remove description from the insert array and from each row data structure.
+
+If you’re doing something like:
+
+DB::table('meetings')->insert([
+  [
+    'topic' => '...',
+    'description' => $desc,
+    ...
+  ],
+]);
+Delete the 'description' => ... part.
+
+Option C: Your schema uses a different column name (e.g., notes, detail)
+If the old DB had description but the new one uses a renamed column, map it:
+
+change seeder key from description → notes (or whatever exists), or
+
+add an accessor field and keep database consistent with Option A.
+
+Quick confirmation commands (to avoid guessing)
+Run these on the server to confirm the real schema:
+
+php artisan tinker
+>>> Schema::hasColumn('meetings','description');
+or directly:
+
+mysql -e "DESCRIBE meetings;" your_database_name
