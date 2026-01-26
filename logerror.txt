@@ -1,4 +1,5 @@
-oke ada 1 lagi request saya, ini ada @meeting_lists.csv yaitu data hasil dari database aplikasi doors lama.
-tujuan kita itu adalah migrasi data mulai dari tahun 2026 agar pemesanan meeting dari aplikasi yang lama itu masuk ke aplikasi baru. apakah bisa anda cek dahulu
-
-tanyakan saja kepada saya jika ada data yang kurang jangan langsung eksekusi
+Ruang Kencana	2026-01-27	2026-01-27 13:30:00	2026-01-27 16:00:00	meeting IPP infra	meeting IPP infra	Andreas Calvin Gotandra	1
+Ruang Kencana	2026-01-27	2026-01-27 07:00:00	2026-01-27 11:00:00	Meeting Marketing 4W	Meeting Marketing 4W	IGNATIUS BENNY SAPUTRO	1
+Ruang Rinjani	2026-01-27	2026-01-27 10:00:00	2026-01-27 16:00:00	Meeting dengan PT. HMMI & POSCO IJPC	Meeting dengan PT. HMMI & POSCO. PIC : Juniafit	ISMA SEPTIANI	1
+Ruang Semeru	2026-01-27	2026-01-27 13:00:00	2026-01-27 17:00:00	Meeting Internal	Meeting Divisi	MARZUKI BUDI UTOMO	1
+Ruang Merbabu	2026-01-27	2026-01-27 10:00:00	2026-01-27 11:30:00	Meeting Weekly RPA	Meeting Weekly RPA	Ricky	1
