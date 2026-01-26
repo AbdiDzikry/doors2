@@ -15,6 +15,11 @@ Fitur ini menggantikan Reverb untuk auto-refresh yang lebih stabil.
   PUSHER_APP_SECRET=...
   PUSHER_APP_CLUSTER=...
   ```
+- [x] **Data Migration Phase 2** (Meeting Jan 27 onwards)
+  - [x] Input Data (`logerror.txt` / Manual CSV) (Done)
+  - [x] Run Import Script (Done)
+  - [x] Verify & Repair Participants (`fix_participants.php`) (Done)
+  - [x] Sync SQL Artifacts (Done)
 - [ ] **Install & Build** Dependencies:
   ```bash
   composer install
