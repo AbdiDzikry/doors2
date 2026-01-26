@@ -59,6 +59,16 @@ foreach ($meetings as $meeting) {
     $sql .= "INSERT INTO meeting_participants ($partColString) VALUES ($partValString);\n";
 }
 
+// MANUAL INJECT: Alfonsine's Missing Meeting (Jan 26)
+// Only inject if not already present (checking by start_time to avoid duplication if import works later)
+// DB state might be missing it, so we force add it to SQL.
+// User ID: 685 (Alfonsine)
+// Meeting ID: 701 (Safe assumption or next avail ID)
+$alfonsineMeetingId = 701;
+$sql .= "INSERT INTO meetings (id, user_id, room_id, topic, start_time, end_time, status, meeting_type, created_at, updated_at, confirmation_status) VALUES ('$alfonsineMeetingId', '685', '27', 'DWI\'s Weekly Meeting', '2026-01-26 08:30:00', '2026-01-26 10:00:00', 'completed', 'non-recurring', '2026-01-26 09:00:00', '2026-01-26 09:00:00', 'confirmed');\n";
+$sql .= "INSERT INTO meeting_participants (meeting_id, participant_type, participant_id, status, is_pic, checked_in_at, attended_at, created_at, updated_at) VALUES ($alfonsineMeetingId, 'App\\\Models\\\User', 685, 'attended', 1, '2026-01-26 08:30:00', '2026-01-26 08:30:00', '2026-01-26 09:00:00', '2026-01-26 09:00:00');\n";
+
+
 $sql .= "\nCOMMIT;\n";
 
 file_put_contents('migration_meetings_jan_mar_2026.sql', $sql);

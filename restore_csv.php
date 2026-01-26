@@ -31,14 +31,21 @@ $roomMap = [
 ];
 
 foreach ($lines as $line) {
-    // Expected format: Room | Date | Start | End | Topic | Type | PIC | Status (Optional)
-    // Delimiter seems to be TAB or multiple spaces? Assuming TAB based on previous interactions, but let's check.
-    // Actually the user pastes raw text which usually is tab separated from Excel/Sheets.
+    // Debug
+    echo "Processing format check: " . substr($line, 0, 50) . "...\n";
     
+    // Expected format: Room | Date | Start | End | Topic | Type | PIC | Status (Optional)
+    // Try TAB first
     $parts = explode("\t", $line);
     
-    // Fallback if not tab-separated (just in case)
+    // If not enough parts, try splitting by 4+ spaces (common in copy-paste)
     if (count($parts) < 6) {
+        $parts = preg_split('/\s{2,}/', $line);
+    }
+    
+    if (count($parts) < 6) {
+        // Last resort: try single space? No, that breaks names. 
+        // Skip invalid lines
         continue; 
     }
 
