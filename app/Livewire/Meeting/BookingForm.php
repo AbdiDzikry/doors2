@@ -297,8 +297,8 @@ class BookingForm extends Component
             'duration' => 'required|integer|min:1',
             'priority_guest_id' => 'nullable|exists:priority_guests,id',
             'recurring' => 'nullable|boolean',
-            'frequency' => 'required_if:recurring,true|string', // Recurring edit not fully supported yet?
-            'ends_at' => 'required_if:recurring,true|date|after:start_time',
+            'frequency' => 'required_if:recurring,true|string',
+            'ends_at' => 'exclude_unless:recurring,true|required|date|after:start_time',
         ]);
 
         $newStartTime = new \DateTime($this->start_time);
