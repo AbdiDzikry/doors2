@@ -800,6 +800,17 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
                 'updated_at' => '2026-01-26 08:43:56',
             ],
             [
+                'user_id' => 685,
+                'room_id' => 27,
+                'topic' => 'DWI\'s Weekly Meeting',
+                'description' => null,
+                'start_time' => '2026-01-26 08:30:00',
+                'end_time' => '2026-01-26 10:00:00',
+                'status' => 'completed',
+                'created_at' => '2026-01-26 09:25:40',
+                'updated_at' => '2026-01-26 09:25:40',
+            ],
+            [
                 'user_id' => 1008,
                 'room_id' => 5,
                 'topic' => 'Join Check SIM',
