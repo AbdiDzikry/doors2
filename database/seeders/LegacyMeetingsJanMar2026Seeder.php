@@ -905,9 +905,9 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
                 'description' => null,
                 'start_time' => '2026-01-27 10:00:00',
                 'end_time' => '2026-01-27 11:30:00',
-                'status' => 'cancelled',
+                'status' => 'scheduled',
                 'created_at' => '2026-01-23 08:04:08',
-                'updated_at' => '2026-01-23 08:23:16',
+                'updated_at' => '2026-01-26 09:59:28',
             ],
             [
                 'user_id' => 454,
