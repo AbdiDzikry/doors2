@@ -76,8 +76,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 13:30:00',
                 'end_time' => '2026-01-27 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -87,8 +87,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 10:00:00',
                 'end_time' => '2026-01-27 12:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -98,8 +98,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 07:00:00',
                 'end_time' => '2026-01-27 12:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -109,8 +109,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 07:00:00',
                 'end_time' => '2026-01-27 11:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -120,8 +120,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 10:00:00',
                 'end_time' => '2026-01-27 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -131,8 +131,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 09:00:00',
                 'end_time' => '2026-01-27 12:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -142,8 +142,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 14:30:00',
                 'end_time' => '2026-01-27 17:30:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -153,8 +153,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 09:30:00',
                 'end_time' => '2026-01-27 12:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -164,8 +164,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 10:00:00',
                 'end_time' => '2026-01-27 11:30:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -175,8 +175,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-27 07:00:00',
                 'end_time' => '2026-01-27 13:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -186,8 +186,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 14:00:00',
                 'end_time' => '2026-01-28 17:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -197,8 +197,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 10:00:00',
                 'end_time' => '2026-01-28 11:30:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -208,8 +208,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 10:00:00',
                 'end_time' => '2026-01-28 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -219,8 +219,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 13:00:00',
                 'end_time' => '2026-01-28 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -230,8 +230,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 13:30:00',
                 'end_time' => '2026-01-28 17:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -241,8 +241,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-28 08:00:00',
                 'end_time' => '2026-01-28 12:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -252,8 +252,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-29 10:00:00',
                 'end_time' => '2026-01-29 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -263,8 +263,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-29 13:00:00',
                 'end_time' => '2026-01-29 16:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -274,8 +274,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-29 08:00:00',
                 'end_time' => '2026-01-29 15:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
             [
@@ -285,8 +285,8 @@ class FixedMeetingsSeeder extends Seeder
                 'start_time' => '2026-01-29 07:00:00',
                 'end_time' => '2026-01-29 17:00:00',
                 'status' => 'scheduled',
-                'created_at' => '2026-01-27 04:46:36',
-                'updated_at' => '2026-01-27 04:46:36',
+                'created_at' => '2026-01-27 04:58:44',
+                'updated_at' => '2026-01-27 04:58:44',
                 'is_new' => true,
             ],
 
@@ -1443,23 +1443,6 @@ class FixedMeetingsSeeder extends Seeder
         ];
 
         
-
-        
-        // Process meetings and insert
-        foreach ($meetings as $meeting) {
-            if (isset($meeting['is_new']) && $meeting['is_new']) {
-                unset($meeting['is_new']);
-                // user_id is already correct
-            } else {
-                $oldUserId = $meeting['user_id'];
-                $meeting['user_id'] = $this->getUserIdFromOldId($oldUserId);
-            }
-            
-            if (!isset($meeting['created_at'])) $meeting['created_at'] = now();
-            if (!isset($meeting['updated_at'])) $meeting['updated_at'] = now();
-            
-            DB::table('meetings')->insert($meeting);
-        }
 
         // BACKFILL: Insert Organizer as Participant
         $insertedMeetings = DB::table('meetings')
