@@ -28,6 +28,15 @@ class CancelUnattendedMeetings extends Command
      */
     public function handle()
     {
+        // Check if auto-cancel is enabled
+        $autoCancelEnabled = \App\Models\Configuration::where('key', 'auto_cancel_unattended_meetings')
+            ->value('value');
+        
+        if ($autoCancelEnabled !== '1') {
+            $this->info('Auto-cancel is disabled. Skipping...');
+            return 0;
+        }
+
         // New Logic (Per User Request): 
         // Cancel if meeting has started > 30 mins ago (now > start_time + 30)
         // AND no attendance recorded.

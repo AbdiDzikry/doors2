@@ -101,7 +101,10 @@ Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->gr
 
 // Settings routes requiring specific permissions
 Route::name('settings.')->prefix('settings')->group(function () {
-    Route::resource('configurations', ConfigurationController::class)->middleware(['auth', 'can:manage configurations']);
+    Route::middleware(['auth', 'can:manage configurations'])->group(function () {
+        Route::put('configurations/bulk', [ConfigurationController::class, 'updateBulk'])->name('configurations.update-bulk');
+        Route::resource('configurations', ConfigurationController::class);
+    });
     Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role'])->middleware(['auth', 'can:manage roles and permissions']);
 });
 

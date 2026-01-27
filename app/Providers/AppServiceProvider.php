@@ -25,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment(['production', 'staging'])) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        // Register observers
+        \App\Models\Meeting::observe(\App\Observers\MeetingObserver::class);
     }
+
 }

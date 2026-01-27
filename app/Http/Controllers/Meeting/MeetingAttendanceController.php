@@ -21,19 +21,6 @@ class MeetingAttendanceController extends Controller
             return back()->with('error', 'Meeting is cancelled. Cannot record attendance.');
         }
 
-        // Time Window Check (Start Time to End Time + 30 mins)
-        $now = now();
-        $startTime = \Carbon\Carbon::parse($meeting->start_time);
-        $endTimePlus30 = \Carbon\Carbon::parse($meeting->end_time)->addMinutes(30);
-
-        if ($now->lt($startTime)) {
-            return back()->with('error', 'Attendance cannot be recorded before the meeting starts.');
-        }
-
-        if ($now->gt($endTimePlus30)) {
-            return back()->with('error', 'Attendance window closed (30 minutes after meeting ended).');
-        }
-
         // Permission Check: Only Admin, Organizer, or PIC can mark attendance
         $currentUser = auth()->user();
         $isOrganizer = $meeting->user_id === $currentUser->id;
@@ -47,6 +34,23 @@ class MeetingAttendanceController extends Controller
         if (!$isSuperAdmin && !$isOrganizer && !$isPic) {
              return back()->with('error', 'Unauthorized. Only the Organizer, Admin, or PIC can record attendance.');
         }
+
+        // Time Window Check (Start Time to End Time + 30 mins)
+        // Super Admin can bypass this check
+        if (!$isSuperAdmin) {
+            $now = now();
+            $startTime = \Carbon\Carbon::parse($meeting->start_time);
+            $endTimePlus30 = \Carbon\Carbon::parse($meeting->end_time)->addMinutes(30);
+
+            if ($now->lt($startTime)) {
+                return back()->with('error', 'Attendance cannot be recorded before the meeting starts.');
+            }
+
+            if ($now->gt($endTimePlus30)) {
+                return back()->with('error', 'Attendance window closed (30 minutes after meeting ended).');
+            }
+        }
+
 
         // Retrieve submitted participant IDs (those checked as present)
         $presentIds = $request->input('participant_ids', []);

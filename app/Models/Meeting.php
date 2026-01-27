@@ -100,6 +100,12 @@ class Meeting extends Model
         return $this->belongsTo(RecurringMeeting::class);
     }
 
+    public function priorityGuest()
+    {
+        return $this->belongsTo(PriorityGuest::class);
+    }
+
+
     public function scopeFilterByDate($query, $filter, $startDateInput = null, $endDateInput = null)
     {
         $carbonStartDate = $startDateInput ? \Carbon\Carbon::parse($startDateInput) : today();

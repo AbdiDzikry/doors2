@@ -61,6 +61,35 @@
                         <p class="mt-1 text-gray-900">{{ $meeting->user?->name ?? 'N/A' }} ({{ $meeting->user?->email ?? 'N/A' }})</p>
                     </div>
 
+                    @if ($meeting->priorityGuest)
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Priority Guest</h3>
+                        @php
+                            $badgeClasses = match($meeting->priorityGuest->name) {
+                                'CEO' => 'bg-purple-100 text-purple-800 border-purple-300',
+                                'VIP Client' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                                'Executive' => 'bg-blue-100 text-blue-800 border-blue-300',
+                                default => 'bg-gray-100 text-gray-800 border-gray-300',
+                            };
+                            
+                            $icon = match($meeting->priorityGuest->name) {
+                                'CEO' => 'fa-crown',
+                                'VIP Client' => 'fa-star',
+                                'Executive' => 'fa-briefcase',
+                                default => 'fa-user-tie',
+                            };
+                        @endphp
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold border-2 {{ $badgeClasses }} mt-1">
+                            <i class="fas {{ $icon }} mr-2"></i>
+                            {{ $meeting->priorityGuest->name }}
+                        </span>
+                        <p class="text-xs text-gray-500 mt-1.5 flex items-center">
+                            <i class="fas fa-info-circle mr-1 text-green-600"></i>
+                            <span class="text-green-700 font-medium">All participants auto-marked as attended</span>
+                        </p>
+                    </div>
+                    @endif
+
                     @if ($meeting->recurringMeeting)
                     <div class="md:col-span-2 mt-4 pt-4 border-t border-gray-200">
                          <h3 class="text-sm font-medium text-gray-500">Recurring Meeting</h3>
@@ -225,6 +254,20 @@
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                                         <h3 class="text-lg leading-6 font-medium text-gray-900">Manage Attendance</h3>
                                         <div class="mt-4">
+                                            @if($meeting->priority_guest_id)
+                                            <div class="bg-purple-50 border-l-4 border-purple-400 p-3 mb-4">
+                                                <div class="flex">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-crown text-purple-500"></i>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <p class="text-sm text-purple-700 font-medium">
+                                                            <strong>VIP Meeting:</strong> All participants automatically marked as attended.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endif
                                             <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
                                                 <div class="flex">
                                                     <div class="flex-shrink-0">

@@ -24,6 +24,7 @@ class ConfigurationController extends Controller
         return view('settings.configuration.index', compact('configurations'));
     }
 
+
     /**
      * Show the form for creating a new resource.
      */
@@ -90,5 +91,34 @@ class ConfigurationController extends Controller
 
         return redirect()->route('settings.configurations.index')
                         ->with('success','Configuration deleted successfully');
+    }
+
+    /**
+     * Update multiple configurations at once
+     */
+    public function updateBulk(Request $request)
+    {
+        $configurations = $request->input('configurations', []);
+
+        foreach ($configurations as $key => $value) {
+            Configuration::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
+        }
+
+        // Set unchecked toggles to 0
+        $allToggleKeys = ['auto_cancel_unattended_meetings'];
+        foreach ($allToggleKeys as $toggleKey) {
+            if (!isset($configurations[$toggleKey])) {
+                Configuration::updateOrCreate(
+                    ['key' => $toggleKey],
+                    ['value' => '0']
+                );
+            }
+        }
+
+        return redirect()->route('settings.configurations.index')
+                        ->with('success', 'Settings updated successfully');
     }
 }

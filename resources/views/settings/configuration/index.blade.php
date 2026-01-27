@@ -42,6 +42,58 @@
             </div>
         @endif
 
+        {{-- Quick Settings Section --}}
+        <div class="bg-white shadow-md rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-100 pb-2">
+                <i class="fas fa-toggle-on mr-2 text-blue-600"></i>
+                Quick Settings
+            </h2>
+
+            <form action="{{ route('settings.configurations.update-bulk') }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                @php
+                    $autoCancelConfig = $configurations->firstWhere('key', 'auto_cancel_unattended_meetings');
+                    $isEnabled = $autoCancelConfig && $autoCancelConfig->value === '1';
+                @endphp
+
+                <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <div class="flex-shrink-0 mt-1">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   name="configurations[auto_cancel_unattended_meetings]" 
+                                   value="1" 
+                                   {{ $isEnabled ? 'checked' : '' }}
+                                   class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-base font-semibold text-gray-800 mb-1">
+                            Auto-cancel unattended meetings
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Automatically cancel meetings <strong>30 minutes</strong> after start time if no one checks in.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition flex items-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Quick Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- All Configurations Table --}}
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+            <i class="fas fa-cog mr-2 text-gray-600"></i>
+            All Configurations
+        </h2>
+
         <div class="mb-6 flex justify-between items-center">
             <form action="{{ route('settings.configurations.index') }}" method="GET" class="flex items-center space-x-2">
                 <input type="text" name="search" placeholder="Search by Key..." value="{{ request('search') }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm">
