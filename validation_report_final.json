@@ -1,0 +1,171 @@
+{
+    "total": 20,
+    "valid": 5,
+    "already_correct": 13,
+    "wrong_organizer": 0,
+    "conflicts": 0,
+    "errors": 2,
+    "details": [
+        {
+            "line": 1,
+            "status": "ALREADY_CORRECT",
+            "topic": "meeting IPP infra",
+            "organizer": "Andreas Calvin Gotandra",
+            "organizer_npk": "99153804",
+            "room": "Ruang Kencana"
+        },
+        {
+            "line": 2,
+            "status": "ALREADY_CORRECT",
+            "topic": "proses rpa yg di jalankan di adm",
+            "organizer": "Eka Wulandari",
+            "organizer_npk": null,
+            "room": "Ruang Raung"
+        },
+        {
+            "line": 3,
+            "status": "ERROR",
+            "message": "User tidak ditemukan: Fajar Faqih",
+            "topic": "Internal SAP Meeting"
+        },
+        {
+            "line": 4,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting Marketing 4W",
+            "organizer": "IGNATIUS BENNY SAPUTRO",
+            "organizer_npk": "11210090",
+            "room": "Ruang Kencana"
+        },
+        {
+            "line": 5,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting dengan PT. HMMI & POSCO IJPC",
+            "organizer": "ISMA SEPTIANI",
+            "organizer_npk": "11175004",
+            "room": "Ruang Rinjani"
+        },
+        {
+            "line": 6,
+            "status": "ALREADY_CORRECT",
+            "topic": "meeting dengan supplier baru (PIC Emanuel)",
+            "organizer": "ISMA SEPTIANI",
+            "organizer_npk": "11175004",
+            "room": "Ruang Merapi"
+        },
+        {
+            "line": 7,
+            "status": "VALID",
+            "topic": "Eksternal",
+            "organizer": "Jihan",
+            "organizer_npk": "11210002",
+            "room": "Ruang Ciremai",
+            "time": "2026-01-27 14:30:00 - 2026-01-27 17:30:00"
+        },
+        {
+            "line": 8,
+            "status": "ERROR",
+            "message": "User tidak ditemukan: Muhammad Alpin Dwizahra",
+            "topic": "Review Sosialisasi STO vendor tahun 2026"
+        },
+        {
+            "line": 9,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting Weekly RPA",
+            "organizer": "Ricky",
+            "organizer_npk": "11250438",
+            "room": "Ruang Merbabu"
+        },
+        {
+            "line": 10,
+            "status": "VALID",
+            "topic": "Metting project",
+            "organizer": "Tri Witanto Aldian",
+            "organizer_npk": "11230711",
+            "room": "Ruang Semeru",
+            "time": "2026-01-27 07:00:00 - 2026-01-27 13:00:00"
+        },
+        {
+            "line": 11,
+            "status": "ALREADY_CORRECT",
+            "topic": "Weekly CR SR Meeting",
+            "organizer": "Dearsy Ayuningdari",
+            "organizer_npk": "11230425",
+            "room": "Ruang Raung"
+        },
+        {
+            "line": 12,
+            "status": "ALREADY_CORRECT",
+            "topic": "PSP",
+            "organizer": "Esi Lacosta",
+            "organizer_npk": "11250359",
+            "room": "Ruang Kencana"
+        },
+        {
+            "line": 13,
+            "status": "ALREADY_CORRECT",
+            "topic": "Eksternal",
+            "organizer": "Jihan",
+            "organizer_npk": "11210002",
+            "room": "Ruang Auditorium"
+        },
+        {
+            "line": 14,
+            "status": "VALID",
+            "topic": "Eksternal",
+            "organizer": "Jihan",
+            "organizer_npk": "11210002",
+            "room": "Ruang Ciremai",
+            "time": "2026-01-28 13:00:00 - 2026-01-28 16:00:00"
+        },
+        {
+            "line": 15,
+            "status": "VALID",
+            "topic": "EKSTERNAL",
+            "organizer": "Jihan",
+            "organizer_npk": "11210002",
+            "room": "Ruang Galunggung",
+            "time": "2026-01-28 13:30:00 - 2026-01-28 17:00:00"
+        },
+        {
+            "line": 16,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting Internal",
+            "organizer": "MARZUKI BUDI UTOMO",
+            "organizer_npk": "11185353",
+            "room": "Ruang Semeru"
+        },
+        {
+            "line": 17,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting with HMC & Ge-stamp",
+            "organizer": "IGNATIUS BENNY SAPUTRO",
+            "organizer_npk": "11210090",
+            "room": "Ruang Semeru"
+        },
+        {
+            "line": 18,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting dengan DAEHO (PIC: NUEL)",
+            "organizer": "ISMA SEPTIANI",
+            "organizer_npk": "11175004",
+            "room": "Ruang Merapi"
+        },
+        {
+            "line": 19,
+            "status": "VALID",
+            "topic": "Eksternal",
+            "organizer": "Jihan",
+            "organizer_npk": "11210002",
+            "room": "Ruang Ciremai",
+            "time": "2026-01-29 08:00:00 - 2026-01-29 15:00:00"
+        },
+        {
+            "line": 20,
+            "status": "ALREADY_CORRECT",
+            "topic": "Training Ms.Excel Intermediate",
+            "organizer": "Wisnu",
+            "organizer_npk": "11210287",
+            "room": "Ruang Auditorium"
+        }
+    ]
+}

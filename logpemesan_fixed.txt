@@ -1,0 +1,23 @@
+Ruang Kencana	2026-01-27	2026-01-27 13:30:00	2026-01-27 16:00:00	meeting IPP infra	meeting IPP infra	Andreas Calvin Gotandra	1
+Ruang Raung	2026-01-27	2026-01-27 10:00:00	2026-01-27 12:00:00	proses rpa yg di jalankan di adm	Untuk memperlancar proses rpa yg di jalankan di adm. Izin mengundang bapak-ibu utk meeting weekly evaluasi RPA: - hari: selasa 27 januari 2026 - ⁠jam: 10:00-11:40	Eka Wulandari	1
+Ruang Arjuno	2026-01-27	2026-01-27 07:00:00	2026-01-27 12:00:00	Internal SAP Meeting	Meeting E-Invoice-SAP Enhancement, Partial Payment with Termin	Fajar Faqih	1
+Ruang Kencana	2026-01-27	2026-01-27 07:00:00	2026-01-27 11:00:00	Meeting Marketing 4W	Meeting Marketing 4W	IGNATIUS BENNY SAPUTRO	1
+Ruang Rinjani	2026-01-27	2026-01-27 10:00:00	2026-01-27 16:00:00	Meeting dengan PT. HMMI & POSCO IJPC	Meeting dengan PT. HMMI & POSCO. PIC : Juniafit	ISMA SEPTIANI	1
+Ruang Merapi	2026-01-27	2026-01-27 09:00:00	2026-01-27 12:00:00	meeting dengan supplier baru (PIC Emanuel)	meeting dengan supplier baru (PIC Emanuel)	ISMA SEPTIANI	1
+Ruang Ciremai	2026-01-27	2026-01-27 14:30:00	2026-01-27 17:30:00	Eksternal	Meeting Vendor Pak Ali	Jihan	1
+Ruang Galunggung	2026-01-27	2026-01-27 09:30:00	2026-01-27 12:00:00	Review Sosialisasi STO vendor tahun 2026	Review Sosialisasi STO vendor tahun 2026	Muhammad Alpin Dwizahra	1
+Ruang Merbabu	2026-01-27	2026-01-27 10:00:00	2026-01-27 11:30:00	Meeting Weekly RPA	Meeting Weekly RPA	Ricky	1
+Ruang Semeru	2026-01-27	2026-01-27 07:00:00	2026-01-27 13:00:00	Metting project	Metting project	Tri Witanto Aldian
+
+Ruang Raung	2026-01-28	2026-01-28 14:00:00	2026-01-28 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Kencana	2026-01-28	2026-01-28 10:00:00	2026-01-28 11:30:00	PSP	PSP	Esi Lacosta	1
+Ruang Auditorium	2026-01-28	2026-01-28 10:00:00	2026-01-28 16:00:00	Eksternal	Kick Off STO Rawmaterial Jasa Vendor 2026	Jihan	1
+Ruang Ciremai	2026-01-28	2026-01-28 13:00:00	2026-01-28 16:00:00	Eksternal	Meeting Activity Plan Vendor EBT ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Galunggung	2026-01-28	2026-01-28 13:30:00	2026-01-28 17:00:00	EKSTERNAL	Meeting Pak Ali dan Pak Edu	Jihan	1
+Ruang Semeru	2026-01-28	2026-01-28 08:00:00	2026-01-28 12:00:00	Meeting Internal	Meeting Quality	MARZUKI BUDI UTOMO	1||
+
+Ruang Semeru	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Meeting with HMC & Ge-stamp	Meeting with HMC & Ge-stamp	IGNATIUS BENNY SAPUTRO	1
+Ruang Merapi	2026-01-29	2026-01-29 13:00:00	2026-01-29 16:00:00	Meeting dengan DAEHO (PIC: NUEL)	Meeting dengan DAEHO (PIC: NUEL)	ISMA SEPTIANI	1
+Ruang Ciremai	2026-01-29	2026-01-29 08:00:00	2026-01-29 15:00:00	Eksternal	Meeting Activity Plan Vendor KMI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Auditorium	2026-01-29	2026-01-29 07:00:00	2026-01-29 17:00:00	Training Ms.Excel Intermediate	Training Ms.Excel Intermediate	Wisnu	1
+

@@ -1,0 +1,79 @@
+{
+    "total": 10,
+    "valid": 2,
+    "already_correct": 6,
+    "wrong_organizer": 0,
+    "conflicts": 0,
+    "errors": 2,
+    "details": [
+        {
+            "line": 1,
+            "status": "ALREADY_CORRECT",
+            "topic": "meeting IPP infra",
+            "organizer": "Andreas Calvin Gotandra",
+            "room": "Ruang Kencana"
+        },
+        {
+            "line": 2,
+            "status": "ALREADY_CORRECT",
+            "topic": "proses rpa yg di jalankan di adm",
+            "organizer": "Eka Wulandari",
+            "room": "Ruang Raung"
+        },
+        {
+            "line": 3,
+            "status": "ERROR",
+            "message": "Ruangan tidak ditemukan: Ruang Arjuna"
+        },
+        {
+            "line": 4,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting Marketing 4W",
+            "organizer": "IGNATIUS BENNY SAPUTRO",
+            "room": "Ruang Kencana"
+        },
+        {
+            "line": 5,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting dengan PT. HMMI & POSCO IJPC",
+            "organizer": "ISMA SEPTIANI",
+            "room": "Ruang Rinjani"
+        },
+        {
+            "line": 6,
+            "status": "ALREADY_CORRECT",
+            "topic": "meeting dengan supplier baru (PIC Emanuel)",
+            "organizer": "ISMA SEPTIANI",
+            "room": "Ruang Merapi"
+        },
+        {
+            "line": 7,
+            "status": "VALID",
+            "topic": "Eksternal",
+            "organizer": "Jihan",
+            "room": "Ruang Ciremai",
+            "time": "2026-01-27 14:30:00 - 2026-01-27 17:30:00"
+        },
+        {
+            "line": 8,
+            "status": "ERROR",
+            "message": "User tidak ditemukan: Muhammad Alpin Dwizahra",
+            "topic": "Review Sosialisasi STO vendor tahun 2026"
+        },
+        {
+            "line": 9,
+            "status": "ALREADY_CORRECT",
+            "topic": "Meeting Weekly RPA",
+            "organizer": "Ricky",
+            "room": "Ruang Merbabu"
+        },
+        {
+            "line": 10,
+            "status": "VALID",
+            "topic": "Metting project",
+            "organizer": "Tri Witanto Aldian",
+            "room": "Ruang Semeru",
+            "time": "2026-01-27 07:00:00 - 2026-01-27 13:00:00"
+        }
+    ]
+}

@@ -82,7 +82,8 @@ class MeetingListController extends Controller
                             $qr->where('name', 'like', '%' . $search . '%');
                         })
                         ->orWhereHas('user', function ($qu) use ($search) {
-                            $qu->where('name', 'like', '%' . $search . '%');
+                            $qu->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('npk', 'like', '%' . $search . '%');
                         });
                 });
             }

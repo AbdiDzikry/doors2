@@ -1,0 +1,50 @@
+Ruang Kencana	2026-01-27	2026-01-27 13:30:00	2026-01-27 16:00:00	meeting IPP infra	meeting IPP infra	Andreas Calvin Gotandra	1
+Ruang Raung	2026-01-27	2026-01-27 10:00:00	2026-01-27 12:00:00	proses rpa yg di jalankan di adm	Untuk memperlancar proses rpa yg di jalankan di adm. Izin mengundang bapak-ibu utk meeting weekly evaluasi RPA: - hari: selasa 27 januari 2026 - ⁠jam: 10:00-11:40	Eka Wulandari	1
+Ruang Arjuno	2026-01-27	2026-01-27 07:00:00	2026-01-27 12:00:00	Internal SAP Meeting	Meeting E-Invoice-SAP Enhancement, Partial Payment with Termin	Fajar Khun Faqih	1
+Ruang Kencana	2026-01-27	2026-01-27 07:00:00	2026-01-27 11:00:00	Meeting Marketing 4W	Meeting Marketing 4W	IGNATIUS BENNY SAPUTRO	1
+Ruang Rinjani	2026-01-27	2026-01-27 10:00:00	2026-01-27 16:00:00	Meeting dengan PT. HMMI & POSCO IJPC	Meeting dengan PT. HMMI & POSCO. PIC : Juniafit	ISMA SEPTIANI	1
+Ruang Merapi	2026-01-27	2026-01-27 09:00:00	2026-01-27 12:00:00	meeting dengan supplier baru (PIC Emanuel)	meeting dengan supplier baru (PIC Emanuel)	ISMA SEPTIANI	1
+Ruang Ciremai	2026-01-27	2026-01-27 14:30:00	2026-01-27 17:30:00	Eksternal	Meeting Vendor Pak Ali	Jihan	1
+Ruang Galunggung	2026-01-27	2026-01-27 09:30:00	2026-01-27 12:00:00	Review Sosialisasi STO vendor tahun 2026	Review Sosialisasi STO vendor tahun 2026	Muhamad Alpin Dwizahra	1
+Ruang Merbabu	2026-01-27	2026-01-27 10:00:00	2026-01-27 11:30:00	Meeting Weekly RPA	Meeting Weekly RPA	Ricky	1
+Ruang Semeru	2026-01-27	2026-01-27 07:00:00	2026-01-27 13:00:00	Meeting project	Meeting project	Tri Witanto Aldian
+Ruang Raung	2026-01-28	2026-01-28 14:00:00	2026-01-28 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Kencana	2026-01-28	2026-01-28 10:00:00	2026-01-28 11:30:00	PSP	PSP	Esi Lacosta	1
+Ruang Auditorium	2026-01-28	2026-01-28 10:00:00	2026-01-28 16:00:00	Eksternal	Kick Off STO Rawmaterial Jasa Vendor 2026	Jihan	1
+Ruang Ciremai	2026-01-28	2026-01-28 13:00:00	2026-01-28 16:00:00	Eksternal	Meeting Activity Plan Vendor EBT ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Galunggung	2026-01-28	2026-01-28 13:30:00	2026-01-28 17:00:00	EKSTERNAL	Meeting Pak Ali dan Pak Edu	Jihan	1
+Ruang Semeru	2026-01-28	2026-01-28 08:00:00	2026-01-28 12:00:00	Meeting Internal	Meeting Quality	MARZUKI BUDI UTOMO	1||
+Ruang Semeru	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Meeting with HMC & Ge-stamp	Meeting with HMC & Ge-stamp	IGNATIUS BENNY SAPUTRO	1
+Ruang Merapi	2026-01-29	2026-01-29 13:00:00	2026-01-29 16:00:00	Meeting dengan DAEHO (PIC: NUEL)	Meeting dengan DAEHO (PIC: NUEL)	ISMA SEPTIANI	1
+Ruang Ciremai	2026-01-29	2026-01-29 08:00:00	2026-01-29 15:00:00	Eksternal	Meeting Activity Plan Vendor KMI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Auditorium	2026-01-29	2026-01-29 07:00:00	2026-01-29 17:00:00	Training Ms.Excel Intermediate	Training Ms.Excel Intermediate	Wisnu	1
+Ruang Kencana	2026-01-30	2026-01-30 09:00:00	2026-01-30 11:00:00	Internal	Review Final Report KA Q4-25	Angelly Rantika Putri	1
+Ruang Raung	2026-01-30	2026-01-30 08:00:00	2026-01-30 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Ciremai	2026-01-30	2026-01-30 08:00:00	2026-01-30 16:00:00	Eksternal	Meeting Activity Plan Vendor KSM ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Raung	2026-02-02	2026-02-02 13:30:00	2026-02-02 17:30:00	Internal	Review DEM	ESLIANTI WILANDARI NOMARSA PATMA	1
+Ruang Ciremai	2026-02-02	2026-02-02 08:00:00	2026-02-02 15:00:00	Eksternal	Meeting Activity Plan Vendor NBS ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Ciremai	2026-02-03	2026-02-03 12:30:00	2026-02-03 17:00:00	Eskternal	Meeting Activity Plan Vendor HEI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan
+Ruang Raung	2026-02-04	2026-02-04 14:00:00	2026-02-04 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Ciremai	2026-02-04	2026-02-04 08:00:00	2026-02-04 17:00:00	ESKTERNAL	Meeting Activity Plan Vendor AMI & MPI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Ciremai	2026-02-05	2026-02-05 08:00:00	2026-02-05 17:00:00	ESKTERNAL	Meeting Activity Plan Vendor MMM & ANP ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Auditorium	2026-02-05	2026-02-05 09:00:00	2026-02-05 12:00:00	Konsultan ESG	Final Report project ESG DPM	YULIYATI ABDULLAH	1
+Ruang Raung	2026-02-06	2026-02-06 08:00:00	2026-02-06 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Merbabu	2026-02-06	2026-02-06 08:00:00	2026-02-06 12:00:00	Internal	Review Triputra	ESLIANTI WILANDARI NOMARSA PATMA	1
+Ruang Auditorium	2026-02-06	2026-02-06 08:30:00	2026-02-06 11:30:00	DONOR DARAH	DONOR DARAH	INDRA RAMAYANA LUMBAN GAOL	1
+Ruang Kencana	2026-02-09	2026-02-09 08:00:00	2026-02-09 09:30:00	PSP	PSP	Esi Lacosta	1
+Ruang Auditorium	2026-02-10	2026-02-10 07:00:00	2026-02-12 18:00:00	training	Training Mentoring	Dhenisa Titis Eksa Putri	1
+Ruang Raung	2026-02-11	2026-02-11 14:00:00	2026-02-11 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-02-13	2026-02-13 08:00:00	2026-02-13 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Semeru	2026-02-13	2026-02-13 08:30:00	2026-02-13 12:00:00	HPM Visit	HPM Visit	Farda Firjanabila	1
+Ruang Raung	2026-02-18	2026-02-18 14:00:00	2026-02-18 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-02-20	2026-02-20 08:00:00	2026-02-20 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Merbabu	2026-02-20	2026-02-20 08:00:00	2026-02-20 14:00:00	Internal	Review Triputra	ESLIANTI WILANDARI NOMARSA PATMA	1
+Ruang Raung	2026-02-25	2026-02-25 13:00:00	2026-02-25 16:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-02-27	2026-02-27 08:00:00	2026-02-27 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-04	2026-03-04 13:00:00	2026-03-04 16:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-06	2026-03-06 07:30:00	2026-03-06 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-11	2026-03-11 13:00:00	2026-03-11 16:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-13	2026-03-13 07:30:00	2026-03-13 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-03-27	2026-03-27 08:00:00	2026-03-27 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
+Ruang Raung	2026-04-01	2026-04-01 14:00:00	2026-04-01 17:00:00	Weekly CR SR Meeting	Weekly CR SR Meeting	Dearsy Ayuningdari	1
+Ruang Raung	2026-04-10	2026-04-10 08:00:00	2026-04-10 12:00:00	Weekly Meeting Koordinasi FA & IT	Weekly Meeting Koordinasi FA & IT	Dearsy Ayuningdari	1
