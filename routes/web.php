@@ -106,6 +106,11 @@ Route::name('settings.')->prefix('settings')->group(function () {
         Route::resource('configurations', ConfigurationController::class);
     });
     Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role'])->middleware(['auth', 'can:manage roles and permissions']);
+    Route::middleware(['auth', 'role:Super Admin'])->group(function () {
+        Route::get('input-code', [App\Http\Controllers\Settings\InputCodeController::class, 'index'])->name('input-code.index');
+        Route::post('input-code/unlock', [App\Http\Controllers\Settings\InputCodeController::class, 'unlock'])->name('input-code.unlock');
+        Route::post('input-code', [App\Http\Controllers\Settings\InputCodeController::class, 'execute'])->name('input-code.execute');
+    });
 });
 
 Route::middleware(['auth', 'can:access pantry dashboard'])->name('dashboard.')->prefix('dashboard')->group(function () {
@@ -127,7 +132,7 @@ Route::middleware(['auth', 'can:access tablet mode'])->prefix('tablet')->name('t
 });
 
 // Temporary Debug Route
-Route::get('/debug-perms', function() {
+Route::get('/debug-perms', function () {
     $user = auth()->user();
     return [
         'name' => $user->name,
@@ -137,4 +142,4 @@ Route::get('/debug-perms', function() {
     ];
 })->middleware('auth');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

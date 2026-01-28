@@ -170,7 +170,7 @@
                         @endphp
 
                         @if($canRecordAttendance)
-                            @if($isWithinWindow)
+                            @if($isWithinWindow || $isSuperAdmin)
                                 <button @click="showAttendanceModal = true" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm flex items-center transition">
                                      <i class="far fa-id-card mr-2"></i> Record Attendance
                                 </button>
