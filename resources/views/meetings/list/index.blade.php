@@ -81,125 +81,175 @@
                     }">
                         <input type="hidden" name="tab" value="meeting-list">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                            <!-- Date Range -->
-                            <div class="md:col-span-5 grid grid-cols-2 gap-3" x-show="filter === 'custom'" x-cloak x-transition>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Start Date</label>
-                                    <div class="relative group" x-data="datePicker({ value: '{{ request('start_date') }}' })">
-                                        <input type="hidden" name="start_date" x-model="value" id="start_date">
-                                        
-                                        <button type="button" @click="open = !open" 
-                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
-                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
-                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                                <i class="fas fa-calendar-alt text-xs"></i>
-                                            </span>
-                                        </button>
+                            <!-- Date Range Picker (Unified) -->
+                            <div class="md:col-span-5" x-show="filter === 'custom'" x-cloak x-transition>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Date Range</label>
+                                <div class="relative" x-data="{
+                                    startDate: '{{ request('start_date') }}',
+                                    endDate: '{{ request('end_date') }}',
+                                    month: '',
+                                    year: '',
+                                    no_of_days: [],
+                                    blankdays: [],
+                                    days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                                    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                                    open: false,
+                                    
+                                    init() {
+                                        let today = new Date();
+                                        // Initialize with start date month if exists, else today
+                                        if (this.startDate) {
+                                            let start = new Date(this.startDate);
+                                            this.month = start.getMonth();
+                                            this.year = start.getFullYear();
+                                        } else {
+                                            this.month = today.getMonth();
+                                            this.year = today.getFullYear();
+                                        }
+                                        this.getNoOfDays();
+                                    },
 
-                                        <!-- Calendar Dropdown -->
-                                        <div x-show="open" @click.away="open = false" 
-                                            class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30"
-                                            style="display: none;">
-                                            <div class="flex items-center justify-between mb-4">
-                                                <div>
-                                                    <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
-                                                    <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
-                                                </div>
-                                                <div class="flex items-center space-x-2">
-                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
-                                                        <i class="fas fa-arrow-up text-gray-600"></i>
-                                                    </button>
-                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
-                                                        <i class="fas fa-arrow-down text-gray-600"></i>
-                                                    </button>
-                                                </div>
+                                    isToday(date) {
+                                        const d = new Date(this.year, this.month, date);
+                                        const today = new Date();
+                                        return d.toDateString() === today.toDateString();
+                                    },
+
+                                    // Check if date is strictly the start or end date
+                                    isSelected(date) {
+                                        const d = new Date(this.year, this.month, date).getTime();
+                                        const start = this.startDate ? new Date(this.startDate).getTime() : 0;
+                                        const end = this.endDate ? new Date(this.endDate).getTime() : 0;
+                                        return d === start || d === end;
+                                    },
+
+                                    // Check if date is between start and end
+                                    isInRange(date) {
+                                        if (!this.startDate || !this.endDate) return false;
+                                        const d = new Date(this.year, this.month, date).getTime();
+                                        const start = new Date(this.startDate).getTime();
+                                        const end = new Date(this.endDate).getTime();
+                                        return d > start && d < end;
+                                    },
+
+                                    getDateValue(date) {
+                                        let selectedDate = new Date(this.year, this.month, date);
+                                        // Adjust for timezone offset to prevent day shift when formatting
+                                        selectedDate.setMinutes(selectedDate.getMinutes() - selectedDate.getTimezoneOffset());
+                                        let formatted = selectedDate.toISOString().slice(0, 10);
+
+                                        if (!this.startDate || (this.startDate && this.endDate)) {
+                                            // Start new selection
+                                            this.startDate = formatted;
+                                            this.endDate = '';
+                                        } else {
+                                            // We have start, verify end
+                                            if (new Date(formatted) < new Date(this.startDate)) {
+                                                // New date is before start, so it becomes new start
+                                                this.startDate = formatted;
+                                            } else {
+                                                // Valid end date
+                                                this.endDate = formatted;
+                                                this.open = false; // Close on complete selection
+                                            }
+                                        }
+                                    },
+
+                                    getNoOfDays() {
+                                        let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+                                        let dayOfWeek = new Date(this.year, this.month).getDay();
+                                        this.blankdays = Array(dayOfWeek).fill(null);
+                                        this.no_of_days = Array.from({length: daysInMonth}, (_, i) => i + 1);
+                                    },
+
+                                    nextMonth() {
+                                        this.month++;
+                                        if (this.month > 11) { this.month = 0; this.year++; }
+                                        this.getNoOfDays();
+                                    },
+                                    prevMonth() {
+                                        this.month--;
+                                        if (this.month < 0) { this.month = 11; this.year--; }
+                                        this.getNoOfDays();
+                                    },
+
+                                    formattedRange() {
+                                        if (!this.startDate) return 'Select Date Range';
+                                        if (this.startDate && !this.endDate) return this.formatDateDisplay(this.startDate) + ' - ...';
+                                        return this.formatDateDisplay(this.startDate) + ' - ' + this.formatDateDisplay(this.endDate);
+                                    },
+
+                                    formatDateDisplay(dateStr) {
+                                        if(!dateStr) return '';
+                                        let d = new Date(dateStr);
+                                        return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
+                                    }
+                                }" x-init="init()" @click.away="open = false">
+                                    
+                                    <input type="hidden" name="start_date" x-model="startDate">
+                                    <input type="hidden" name="end_date" x-model="endDate">
+                                    
+                                    <button type="button" @click="open = !open" 
+                                        class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
+                                        :class="{ 'border-green-500 ring-1 ring-green-500': open }">
+                                        <span class="block truncate" x-text="formattedRange()"></span>
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                            <i class="fas fa-calendar-alt text-xs"></i>
+                                        </span>
+                                    </button>
+
+                                    <!-- Calendar Dropdown -->
+                                    <div x-show="open" 
+                                        class="absolute z-50 mt-1 w-72 bg-white shadow-xl rounded-xl p-4 text-sm border border-green-500/30 ring-1 ring-black ring-opacity-5"
+                                        style="display: none;" 
+                                        x-transition:enter="transition ease-out duration-100"
+                                        x-transition:enter-start="transform opacity-0 scale-95"
+                                        x-transition:enter-end="transform opacity-100 scale-100">
+                                        
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div>
+                                                <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
                                             </div>
-                                            <div class="grid grid-cols-7 mb-2">
-                                                <template x-for="(day, index) in days" :key="index">
-                                                    <div class="px-0.5">
-                                                        <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                            <div class="grid grid-cols-7">
-                                                <template x-for="blank in blankdays">
-                                                    <div class="text-center border p-1 border-transparent text-sm"></div>
-                                                </template>
-                                                <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
-                                                    <div class="px-0.5 mb-1">
-                                                        <div @click="getDateValue(date)"
-                                                            x-text="date"
-                                                            class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
-                                                            :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
-                                                        ></div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                            <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
-                                                <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
-                                                <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                            <div class="flex items-center space-x-1">
+                                                <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors" @click="prevMonth">
+                                                    <i class="fas fa-chevron-left text-xs"></i>
+                                                </button>
+                                                <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors" @click="nextMonth">
+                                                    <i class="fas fa-chevron-right text-xs"></i>
+                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">End Date</label>
-                                    <div class="relative group" x-data="datePicker({ value: '{{ request('end_date') }}' })">
-                                        <input type="hidden" name="end_date" x-model="value" id="end_date">
-                                        
-                                        <button type="button" @click="open = !open" 
-                                            class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
-                                            :class="{ 'border-green-500 ring-1 ring-green-500': open }">
-                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
-                                                <i class="fas fa-calendar-alt text-xs"></i>
-                                            </span>
-                                        </button>
 
-                                        <!-- Calendar Dropdown -->
-                                        <div x-show="open" @click.away="open = false" 
-                                            class="absolute z-10 mt-1 w-64 bg-white shadow-lg rounded-xl p-4 text-sm border border-green-500/30"
-                                            style="display: none;">
-                                            <div class="flex items-center justify-between mb-4">
-                                                <div>
-                                                    <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
-                                                    <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
+                                        <div class="grid grid-cols-7 mb-2">
+                                            <template x-for="day in days">
+                                                <div x-text="day" class="text-xs font-semibold text-center text-gray-400 uppercase tracking-wide"></div>
+                                            </template>
+                                        </div>
+
+                                        <div class="grid grid-cols-7 gap-y-1">
+                                            <template x-for="blank in blankdays">
+                                                <div class="h-8"></div>
+                                            </template>
+                                            <template x-for="date in no_of_days" :key="date">
+                                                <div class="relative h-8 px-0.5">
+                                                    <div @click="getDateValue(date)"
+                                                        x-text="date"
+                                                        class="w-full h-full flex items-center justify-center cursor-pointer text-xs rounded-md transition-all duration-100 border border-transparent"
+                                                        :class="{ 
+                                                            'bg-green-600 text-white font-bold shadow-sm': isSelected(date), 
+                                                            'bg-green-100 text-green-800': isInRange(date),
+                                                            'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-200': !isSelected(date) && !isInRange(date),
+                                                            'ring-1 ring-green-500': isToday(date) && !isSelected(date) && !isInRange(date)
+                                                        }"
+                                                    ></div>
                                                 </div>
-                                                <div class="flex items-center space-x-2">
-                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="prevMonth">
-                                                        <i class="fas fa-arrow-up text-gray-600"></i>
-                                                    </button>
-                                                    <button type="button" class="transition-colors hover:bg-gray-100 rounded-lg p-1" @click="nextMonth">
-                                                        <i class="fas fa-arrow-down text-gray-600"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="grid grid-cols-7 mb-2">
-                                                <template x-for="(day, index) in days" :key="index">
-                                                    <div class="px-0.5">
-                                                        <div x-text="day" class="text-xs font-medium text-center text-gray-800"></div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                            <div class="grid grid-cols-7">
-                                                <template x-for="blank in blankdays">
-                                                    <div class="text-center border p-1 border-transparent text-sm"></div>
-                                                </template>
-                                                <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
-                                                    <div class="px-0.5 mb-1">
-                                                        <div @click="getDateValue(date)"
-                                                            x-text="date"
-                                                            class="cursor-pointer text-center text-sm rounded-lg leading-7 transition-colors duration-150 ease-in-out"
-                                                            :class="{ 'bg-green-500 text-white': isSelected(date), 'text-gray-700 hover:bg-green-100': !isSelected(date), 'bg-green-100': isToday(date) && !isSelected(date) }"
-                                                        ></div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                            <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
-                                                <button type="button" @click="value = ''; open = false" class="text-xs text-green-500 hover:text-green-700">Clear</button>
-                                                <button type="button" @click="init(); open = false" class="text-xs text-green-500 hover:text-green-700">Today</button>
-                                            </div>
+                                            </template>
+                                        </div>
+
+                                        <div class="flex justify-between mt-4 pt-3 border-t border-gray-100">
+                                            <button type="button" @click="startDate=''; endDate=''; open=false" class="text-xs font-medium text-gray-500 hover:text-red-500 transition-colors">Clear</button>
+                                            <button type="button" @click="let d=new Date(); startDate=d.toISOString().slice(0,10); endDate=d.toISOString().slice(0,10); open=false" class="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors">Today</button>
                                         </div>
                                     </div>
                                 </div>

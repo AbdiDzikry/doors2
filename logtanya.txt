@@ -1,0 +1,7 @@
+Ruang Semeru	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Meeting with HMC & Ge-stamp	Meeting with HMC & Ge-stamp	IGNATIUS BENNY SAPUTRO	1
+Ruang Merapi	2026-01-29	2026-01-29 13:00:00	2026-01-29 16:00:00	Meeting dengan DAEHO (PIC: NUEL)	Meeting dengan DAEHO (PIC: NUEL)	ISMA SEPTIANI	1
+Ruang Ciremai	2026-01-29	2026-01-29 08:00:00	2026-01-29 15:00:00	Eksternal	Meeting Activity Plan Vendor KMI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
+Ruang Galunggung	2026-01-29	2026-01-29 08:00:00	2026-01-29 17:00:00	Eksternal	Meeting dengan Kitada ( PIC : Andhika )	Jihan	1
+Ruang Merbabu	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Eksternal	Mando Visit (Tamu Pak Ir)	Salwa Faraisha	1
+Ruang Arjuna	2026-01-29	2026-01-29 14:00:00	2026-01-29 17:00:00	Web asset manajemen	Web asset manajemen	Siswi Arum Sayekti	1
+Ruang Auditorium	2026-01-29	2026-01-29 07:00:00	2026-01-29 17:00:00	Training Ms.Excel Intermediate	Training Ms.Excel Intermediate	Wisnu	1

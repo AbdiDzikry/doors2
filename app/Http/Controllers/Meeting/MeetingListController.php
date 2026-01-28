@@ -21,132 +21,157 @@ class MeetingListController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+
+        // Store current URL with query parameters for "Back" functionality
+        session(['meeting_list_url' => $request->fullUrl()]);
+
         $activeTab = $request->input('tab', 'meeting-list');
+        $filter = $request->input('filter', 'day');
+        $startDateInput = $request->input('start_date');
+        $endDateInput = $request->input('end_date');
+
+        if ($startDateInput || $endDateInput) {
+            $filter = 'custom';
+        }
+
+        // Calculate dates
+        [$effectiveStartDate, $effectiveEndDate] = $this->calculateDateRange($filter, $startDateInput, $endDateInput);
+
+        // Initialize variables
         $meetings = collect();
         $myMeetings = collect();
         $stats = [];
         $sortBy = $request->input('sort_by', 'start_time');
         $sortDirection = $request->input('sort_direction', 'asc');
 
-        $filter = $request->input('filter', 'day'); // Default to Today
-        $startDateInput = $request->input('start_date');
-        $endDateInput = $request->input('end_date');
-
-        // Check if date inputs are provided (Custom Range Logic)
-        // If user manually selected a date, we treat it as a custom filter
-        if ($startDateInput || $endDateInput) {
-            $filter = 'custom';
-        }
-
-        // Calculate dates for View and Query
-        [$effectiveStartDate, $effectiveEndDate] = $this->calculateDateRange($filter, $startDateInput, $endDateInput);
-
         if ($activeTab === 'my-meetings') {
-            $baseQuery = Meeting::where(function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhereHas('meetingParticipants', function ($subQ) use ($user) {
-                      $subQ->where('participant_type', \App\Models\User::class)
-                           ->where('participant_id', $user->id);
-                  });
-            })->where('status', '!=', 'cancelled');
-            
-            $baseQuery->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
+            $myMeetings = $this->getMyMeetings($user, $effectiveStartDate, $effectiveEndDate);
 
-            // Stats Calculation (Using DB queries instead of Collection filter)
-            $now = now();
-            $stats = [
-                'total' => (clone $baseQuery)->count(),
-                'scheduled' => (clone $baseQuery)->where('start_time', '>', $now)->count(),
-                'ongoing' => (clone $baseQuery)->where('start_time', '<=', $now)->where('end_time', '>=', $now)->count(),
-                'completed' => (clone $baseQuery)->where('end_time', '<', $now)->count(),
-                'cancelled' => 0 // As per requirement, cancelled are filtered out
-            ];
-
-            // Pagination
-            $myMeetings = $baseQuery->with('room')
-                                    ->orderBy('start_time', 'desc')
-                                    ->paginate(10)
-                                    ->withQueryString();
-
+            // Stats Calculation for My Meetings
+            $baseQuery = $this->getMyMeetingsQuery($user, $effectiveStartDate, $effectiveEndDate);
+            $stats = $this->calculateStats($baseQuery);
         } else {
-            $query = Meeting::query()->where('status', '!=', 'cancelled');
-            
-            // Date Filter
-            $query->whereBetween('start_time', [$effectiveStartDate, $effectiveEndDate]);
-
-            if ($request->filled('search')) {
-                $search = $request->input('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('topic', 'like', '%' . $search . '%')
-                        ->orWhereHas('room', function ($qr) use ($search) {
-                            $qr->where('name', 'like', '%' . $search . '%');
-                        })
-                        ->orWhereHas('user', function ($qu) use ($search) {
-                            $qu->where('name', 'like', '%' . $search . '%')
-                               ->orWhere('npk', 'like', '%' . $search . '%');
-                        });
-                });
-            }
-
-            // Get Collection
-            $meetings = $query->with('room', 'user')->get();
-
-            // 1. Filter by Status (calculated_status)
-            if ($request->filled('status_filter') && $request->input('status_filter') !== 'all') {
-                $statusFilter = $request->input('status_filter');
-                $meetings = $meetings->filter(function ($meeting) use ($statusFilter) {
-                    return $meeting->calculated_status === $statusFilter;
-                });
-            }
-
-            // 2. Sort Logic
-            // Default sort: Status (Scheduled -> Ongoing -> Completed -> Cancelled), then Start Time
-            // We define a helper for Status Weight
-            $getStatusWeight = function ($status) {
-                return match($status) {
-                    'scheduled' => 1,
-                    'ongoing' => 2,
-                    'completed' => 3,
-                    'cancelled' => 4,
-                    default => 5,
-                };
-            };
-
-            if ($request->has('sort_by') && in_array($sortBy, ['topic', 'room.name', 'start_time', 'user.name', 'calculated_status'])) {
-                $descending = $sortDirection === 'desc';
-                
-                if ($sortBy === 'calculated_status') {
-                    $meetings = $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
-                        return $getStatusWeight($meeting->calculated_status);
-                    }, SORT_REGULAR, $descending);
-                } else {
-                    $meetings = $descending 
-                        ? $meetings->sortByDesc($sortBy) 
-                        : $meetings->sortBy($sortBy);
-                }
-            } else {
-                // Default Sorting: Custom Status Order, then Start Time Ascending
-                $meetings = $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
-                    // Combine status weight and timestamp for sorting
-                    // Multi-level sort: Status first, then Start Time
-                    return [$getStatusWeight($meeting->calculated_status), $meeting->start_time->timestamp];
-                });
-            }
-
-            // Pagination Logic (Manual Pagination because of Collection Sorting/Filtering)
-            $perPage = 10;
-            $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
-            $currentItems = $meetings->slice(($currentPage - 1) * $perPage, $perPage)->all();
-            $meetings = new \Illuminate\Pagination\LengthAwarePaginator(
-                $currentItems,
-                $meetings->count(),
-                $perPage,
-                $currentPage,
-                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
-            );
+            $meetings = $this->getAllMeetings($request, $effectiveStartDate, $effectiveEndDate);
         }
 
         return view('meetings.list.index', compact('meetings', 'myMeetings', 'stats', 'filter', 'effectiveStartDate', 'effectiveEndDate', 'activeTab', 'sortBy', 'sortDirection'));
+    }
+
+    private function getMyMeetingsQuery($user, $start, $end)
+    {
+        return Meeting::where(function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+                ->orWhereHas('meetingParticipants', function ($subQ) use ($user) {
+                    $subQ->where('participant_type', \App\Models\User::class)
+                        ->where('participant_id', $user->id);
+                });
+        })
+            ->where('status', '!=', 'cancelled')
+            ->whereBetween('start_time', [$start, $end]);
+    }
+
+    private function getMyMeetings($user, $start, $end)
+    {
+        return $this->getMyMeetingsQuery($user, $start, $end)
+            ->with('room')
+            ->orderBy('start_time', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    private function calculateStats($query)
+    {
+        $now = now();
+        return [
+            'total' => (clone $query)->count(),
+            'scheduled' => (clone $query)->where('start_time', '>', $now)->count(),
+            'ongoing' => (clone $query)->where('start_time', '<=', $now)->where('end_time', '>=', $now)->count(),
+            'completed' => (clone $query)->where('end_time', '<', $now)->count(),
+            'cancelled' => 0
+        ];
+    }
+
+    private function getAllMeetings(Request $request, $start, $end)
+    {
+        $query = Meeting::query()->where('status', '!=', 'cancelled');
+        $query->whereBetween('start_time', [$start, $end]);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('topic', 'like', '%' . $search . '%')
+                    ->orWhereHas('room', function ($qr) use ($search) {
+                        $qr->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('user', function ($qu) use ($search) {
+                        $qu->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('npk', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        $meetings = $query->with('room', 'user')->get();
+
+        // 1. Filter by Status
+        if ($request->filled('status_filter') && $request->input('status_filter') !== 'all') {
+            $statusFilter = $request->input('status_filter');
+            $meetings = $meetings->filter(function ($meeting) use ($statusFilter) {
+                return $meeting->calculated_status === $statusFilter;
+            });
+        }
+
+        // 2. Sort
+        $sortBy = $request->input('sort_by', 'start_time');
+        $sortDirection = $request->input('sort_direction', 'asc');
+        $meetings = $this->sortMeetings($meetings, $sortBy, $sortDirection);
+
+        // 3. Paginate
+        return $this->paginateCollection($meetings, 10, $request);
+    }
+
+    private function sortMeetings($meetings, $sortBy, $sortDirection)
+    {
+        $getStatusWeight = function ($status) {
+            return match ($status) {
+                'scheduled' => 1,
+                'ongoing' => 2,
+                'completed' => 3,
+                'cancelled' => 4,
+                default => 5,
+            };
+        };
+
+        if ($sortBy && in_array($sortBy, ['topic', 'room.name', 'start_time', 'user.name', 'calculated_status'])) {
+            $descending = $sortDirection === 'desc';
+
+            if ($sortBy === 'calculated_status') {
+                return $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
+                    return $getStatusWeight($meeting->calculated_status);
+                }, SORT_REGULAR, $descending);
+            } else {
+                return $descending
+                    ? $meetings->sortByDesc($sortBy)
+                    : $meetings->sortBy($sortBy);
+            }
+        }
+
+        // Default Sort
+        return $meetings->sortBy(function ($meeting) use ($getStatusWeight) {
+            return [$getStatusWeight($meeting->calculated_status), $meeting->start_time->timestamp];
+        });
+    }
+
+    private function paginateCollection($items, $perPage, $request)
+    {
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
     }
 
     private function calculateDateRange($filter, $startDateInput, $endDateInput)
@@ -282,7 +307,7 @@ class MeetingListController extends Controller
             }
         });
 
-        return back()->with('success','Meeting cancelled successfully and pantry stock restored.');
+        return back()->with('success', 'Meeting cancelled successfully and pantry stock restored.');
     }
 
     public function exportAttendance(Meeting $meeting)
@@ -310,7 +335,7 @@ class MeetingListController extends Controller
     public function exportAttendancePdf(Meeting $meeting)
     {
         if ($meeting->calculated_status === 'cancelled') {
-             abort(403, 'Meeting is cancelled.');
+            abort(403, 'Meeting is cancelled.');
         }
 
         // Authorization: Removed restricted ownership/participant check to allow all authenticated users
