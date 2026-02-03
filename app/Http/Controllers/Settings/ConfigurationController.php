@@ -47,7 +47,7 @@ class ConfigurationController extends Controller
         Configuration::create($request->all());
 
         return redirect()->route('settings.configurations.index')
-                        ->with('success','Configuration created successfully.');
+            ->with('success', 'Configuration created successfully.');
     }
 
     /**
@@ -79,7 +79,7 @@ class ConfigurationController extends Controller
         $configuration->update($request->all());
 
         return redirect()->route('settings.configurations.index')
-                        ->with('success','Configuration updated successfully');
+            ->with('success', 'Configuration updated successfully');
     }
 
     /**
@@ -90,7 +90,7 @@ class ConfigurationController extends Controller
         $configuration->delete();
 
         return redirect()->route('settings.configurations.index')
-                        ->with('success','Configuration deleted successfully');
+            ->with('success', 'Configuration deleted successfully');
     }
 
     /**
@@ -108,7 +108,7 @@ class ConfigurationController extends Controller
         }
 
         // Set unchecked toggles to 0
-        $allToggleKeys = ['auto_cancel_unattended_meetings'];
+        $allToggleKeys = ['auto_cancel_unattended_meetings', 'enable_feature_tour'];
         foreach ($allToggleKeys as $toggleKey) {
             if (!isset($configurations[$toggleKey])) {
                 Configuration::updateOrCreate(
@@ -119,6 +119,6 @@ class ConfigurationController extends Controller
         }
 
         return redirect()->route('settings.configurations.index')
-                        ->with('success', 'Settings updated successfully');
+            ->with('success', 'Settings updated successfully');
     }
 }

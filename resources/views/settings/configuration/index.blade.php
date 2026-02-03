@@ -58,23 +58,53 @@
                     $isEnabled = $autoCancelConfig && $autoCancelConfig->value === '1';
                 @endphp
 
-                <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                <div x-data="{ enabled: {{ $isEnabled ? 'true' : 'false' }} }" class="flex items-start space-x-4 p-4 rounded-lg transition mt-2"
+                     :class="enabled ? 'bg-blue-50' : 'bg-gray-50'">
                     <div class="flex-shrink-0 mt-1">
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" 
                                    name="configurations[auto_cancel_unattended_meetings]" 
                                    value="1" 
-                                   {{ $isEnabled ? 'checked' : '' }}
+                                   x-model="enabled"
                                    class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
                     <div class="flex-grow">
-                        <h3 class="text-base font-semibold text-gray-800 mb-1">
-                            Auto-cancel unattended meetings
+                        <h3 class="text-base font-semibold mb-1" 
+                            :class="enabled ? 'text-blue-800' : 'text-gray-600'"
+                            x-text="enabled ? 'Auto-cancel Enabled' : 'Auto-cancel Disabled'">
                         </h3>
                         <p class="text-sm text-gray-600">
                             Automatically cancel meetings <strong>30 minutes</strong> after start time if no one checks in.
+                        </p>
+                    </div>
+                </div>
+
+                @php
+                    $tourConfig = $configurations->firstWhere('key', 'enable_feature_tour');
+                    $isTourEnabled = $tourConfig && $tourConfig->value === '1';
+                @endphp
+
+                <div x-data="{ enabled: {{ $isTourEnabled ? 'true' : 'false' }} }" class="flex items-start space-x-4 p-4 rounded-lg transition mt-4"
+                     :class="enabled ? 'bg-green-50' : 'bg-gray-50'">
+                    <div class="flex-shrink-0 mt-1">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   name="configurations[enable_feature_tour]" 
+                                   value="1" 
+                                   x-model="enabled"
+                                   class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                        </label>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-base font-semibold mb-1" 
+                            :class="enabled ? 'text-green-800' : 'text-gray-600'"
+                            x-text="enabled ? 'Feature Tour Enabled (Aktif)' : 'Feature Tour Disabled (Non-Aktif)'">
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Show "First Time User Tour" to users who strictly haven't seen it yet.
                         </p>
                     </div>
                 </div>

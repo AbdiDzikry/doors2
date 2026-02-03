@@ -9,4 +9,17 @@ class Configuration extends Model
 {
     use HasFactory;
     protected $fillable = ['key', 'value', 'description'];
+
+    /**
+     * Get configuration value by key
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function getValue($key, $default = null)
+    {
+        $config = self::where('key', $key)->first();
+        return $config ? $config->value : $default;
+    }
 }

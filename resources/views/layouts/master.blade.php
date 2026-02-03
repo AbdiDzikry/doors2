@@ -28,7 +28,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     @auth
-        @if(!auth()->user()->has_seen_tour)
+        @if(!auth()->user()->has_seen_tour && \App\Models\Configuration::getValue('enable_feature_tour', '0') == '1')
             <script>
                 window.shouldStartTour = true;
             </script>
@@ -454,26 +454,86 @@
 
 
 
-    @if (session('success'))
-        <div class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg" x-data="{ show: true }"
-            x-show="show" x-init="setTimeout(() => show = false, 3000)">
-            {{ session('success') }}
-        </div>
-    @endif
+    {{-- SweetAlert2 CDN --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    @if (session('error'))
-        <div class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg" x-data="{ show: true }"
-            x-show="show" x-init="setTimeout(() => show = false, 3000)">
-            {{ session('error') }}
-        </div>
-    @endif
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Success Message
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#089244',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
 
-    @if (session('message'))
-        <div class="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg" x-data="{ show: true }"
-            x-show="show" x-init="setTimeout(() => show = false, 3000)">
-            {{ session('message') }}
-        </div>
-    @endif
+            // Error Message
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#d33',
+                });
+            @endif
+
+            // Info/General Message
+            @if(session('message'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Info',
+                    text: "{{ session('message') }}",
+                    confirmButtonColor: '#3085d6',
+                });
+            @endif
+        });
+
+        // Global Helper Functions for SweetAlert Confirmations
+        function confirmDelete(id, text = 'Data yang dihapus tidak dapat dikembalikan.') {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Try to find form by ID (standard: delete-form-{id})
+                    const form = document.getElementById('delete-form-' + id);
+                    if (form) {
+                        form.submit();
+                    } else {
+                        console.error('Delete form not found for ID:', id);
+                    }
+                }
+            });
+        }
+
+        function confirmEdit(event, url, text = 'Apakah Anda yakin ingin mengedit data ini?') {
+            event.preventDefault(); // Prevent default link behavior
+            Swal.fire({
+                title: 'Edit Data?',
+                text: text,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Edit',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+    </script>
 
 
 
