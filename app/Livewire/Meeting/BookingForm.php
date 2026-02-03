@@ -60,11 +60,11 @@ class BookingForm extends Component
     public function updateInternalParticipants($payload)
     {
         if (is_array($payload) && isset($payload['participants'])) {
-             $this->internalParticipants = $payload['participants'];
-             $this->picParticipants = $payload['pics'] ?? [];
+            $this->internalParticipants = $payload['participants'];
+            $this->picParticipants = $payload['pics'] ?? [];
         } else {
-             // Fallback for simple array check (legacy)
-             $this->internalParticipants = $payload;
+            // Fallback for simple array check (legacy)
+            $this->internalParticipants = $payload;
         }
     }
 
@@ -98,7 +98,7 @@ class BookingForm extends Component
         }
 
         // We use the computed property roomMeetings which already uses the correct date
-        $meetings = $this->getRoomMeetingsProperty(); 
+        $meetings = $this->getRoomMeetingsProperty();
         $slots = [];
 
         foreach ($meetings as $meeting) {
@@ -124,47 +124,48 @@ class BookingForm extends Component
             $this->isEditMode = true;
             $this->meetingId = $meeting->id; // Assuming pass as model or ID, but route binding usually passes model.
             if (is_object($meeting)) {
-                 $this->setupEditMode($meeting);
+                $this->setupEditMode($meeting);
             } else {
-                 $meet = Meeting::find($meeting);
-                 if ($meet) $this->setupEditMode($meet);
+                $meet = Meeting::find($meeting);
+                if ($meet)
+                    $this->setupEditMode($meet);
             }
         } else {
             $this->selectedRoomId = $selectedRoomId;
-            $this->room_id = $selectedRoomId; 
-    
+            $this->room_id = $selectedRoomId;
+
             $this->rooms = Room::all();
             $this->priorityGuests = PriorityGuest::all();
-            
+
             // Handle Pre-filled Times from URL 
             if ($start_time && $end_time) {
                 try {
                     $start = \Carbon\Carbon::parse($start_time);
                     $end = \Carbon\Carbon::parse($end_time);
-    
+
                     $this->start_time = $start->format('Y-m-d\TH:i');
-                    
+
                     $diffInMinutes = $start->diffInMinutes($end);
                     $this->duration = $diffInMinutes > 0 ? $diffInMinutes : 60;
-                    
+
                     $this->ends_at = $end->format('Y-m-d');
-    
+
                 } catch (\Exception $e) {
                     $this->setDefaultTime();
                 }
             } else {
                 $this->setDefaultTime();
             }
-            
+
             // Initialize empty arrays
             $this->internalParticipants = [];
             $this->picParticipants = [];
             $this->externalParticipants = [];
             $this->pantryOrders = [];
-    
+
             $this->selectedRoom = Room::find($this->selectedRoomId);
             $this->calculateOccupiedSlots();
-            
+
             if (!$start_time) {
                 $this->adjustStartTimeToAvailable();
             }
@@ -178,18 +179,18 @@ class BookingForm extends Component
         $this->room_id = $meeting->room_id;
         $this->selectedRoomId = $meeting->room_id;
         $this->selectedRoom = $meeting->room;
-        
+
         $this->topic = $meeting->topic;
         $this->start_time = $meeting->start_time->format('Y-m-d\TH:i');
         $this->duration = $meeting->start_time->diffInMinutes($meeting->end_time);
         $this->priority_guest_id = $meeting->priority_guest_id;
-        
+
         // Participants
         $this->internalParticipants = $meeting->meetingParticipants()
             ->where('participant_type', User::class)
             ->pluck('participant_id')
             ->toArray();
-            
+
         $this->picParticipants = $meeting->meetingParticipants()
             ->where('participant_type', User::class)
             ->where('is_pic', true)
@@ -200,9 +201,9 @@ class BookingForm extends Component
             ->where('participant_type', ExternalParticipant::class)
             ->pluck('participant_id')
             ->toArray();
-            
+
         // Pantry
-        $this->pantryOrders = $meeting->pantryOrders->map(function($order) {
+        $this->pantryOrders = $meeting->pantryOrders->map(function ($order) {
             return [
                 'pantry_item_id' => $order->pantry_item_id,
                 'quantity' => $order->quantity,
@@ -212,29 +213,29 @@ class BookingForm extends Component
         if (empty($this->pantryOrders)) {
             $this->pantryOrders = []; // Ensure array
         }
-        
+
         // Load current organizer
         $this->organizer_user_id = $meeting->user_id;
-        
+
         // Load Resources
         $this->rooms = Room::all();
         $this->priorityGuests = PriorityGuest::all();
-        
+
         // Load all users for organizer dropdown (Super Admin only)
         if (auth()->user()->hasRole('Super Admin')) {
             $this->allUsers = User::orderBy('name')->get();
         }
-        
+
         $this->calculateOccupiedSlots();
     }
 
-    public function setDefaultTime() 
+    public function setDefaultTime()
     {
         // Set default start time based on business hours (7 AM to 6 PM)
         $currentTime = now();
         $minute = $currentTime->minute;
         $remainder = $minute % 15;
-        
+
         // Default to the next 15-minute slot to ensure it's in the future
         if ($remainder !== 0) {
             $currentTime->addMinutes(15 - $remainder)->second(0);
@@ -263,10 +264,10 @@ class BookingForm extends Component
         }
 
         $currentTime = \Carbon\Carbon::parse($this->start_time);
-        
+
         $limitTime = $currentTime->copy()->hour(18)->minute(0);
         $attempts = 0;
-        
+
         while ($attempts < 50 && $currentTime->lt($limitTime)) {
             $minutes = $currentTime->hour * 60 + $currentTime->minute;
             $isBlocked = false;
@@ -287,7 +288,7 @@ class BookingForm extends Component
                 $this->start_time = $currentTime->format('Y-m-d\TH:i');
                 return;
             }
-            
+
             $attempts++;
         }
     }
@@ -312,21 +313,31 @@ class BookingForm extends Component
             'recurring' => 'nullable|boolean',
             'frequency' => 'required_if:recurring,true|string',
             'ends_at' => 'exclude_unless:recurring,true|required|date|after:start_time',
+        ], [
+            'room_id.required' => 'Mohon pilih ruangan terlebih dahulu.',
+            'room_id.exists' => 'Ruangan yang dipilih tidak valid.',
+            'topic.required' => 'Topik pertemuan wajib diisi.',
+            'start_time.required' => 'Waktu mulai pertemuan wajib diisi.',
+            'duration.required' => 'Durasi pertemuan wajib diisi.',
+            'priority_guest_id.exists' => 'Tamu prioritas yang dipilih tidak valid.',
+            'frequency.required_if' => 'Frekuensi pengulangan wajib dipilih jika pertemuan berulang.',
+            'ends_at.required' => 'Tanggal berakhir wajib diisi untuk pertemuan berulang.',
+            'ends_at.after' => 'Tanggal berakhir harus setelah waktu mulai.',
         ]);
 
         $newStartTime = new \DateTime($this->start_time);
-        
+
         // Validation: Past Check (Skip if Edit Mode and time hasn't changed significantly? Or enforce future?)
         // If editing a past meeting, usually we allow it for record keeping correction.
         if (!$this->isEditMode && $newStartTime < now()->subMinute()) {
-            $this->addError('start_time', 'The meeting cannot be scheduled in the past.');
+            $this->addError('start_time', 'Pertemuan tidak dapat dijadwalkan di masa lalu.');
             return;
         }
 
         $newEndTime = (clone $newStartTime)->add(new \DateInterval('PT' . $this->duration . 'M'));
 
         if ($newEndTime->format('Hi') > '1800') {
-            $this->addError('duration', 'The meeting cannot end after 6:00 PM.');
+            $this->addError('duration', 'Pertemuan tidak dapat berakhir setelah jam 18:00.');
             return;
         }
 
@@ -337,20 +348,20 @@ class BookingForm extends Component
         // Ideally should account for currently held stock.
         // For now, skip strict stock check in Edit or trust BookingService to error out.
         // But let's keep basic check.
-        
+
         foreach ($this->pantryOrders as $index => $order) {
-             if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
+            if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
                 $item = PantryItem::find($order['pantry_item_id']);
                 // If edit mode, we might own some. 
                 // Ignored for now to keep speed.
-                
+
                 if (!$item || $item->stock < $order['quantity']) {
-                     // In edit mode this is annoying if we already have the items.
-                     // Only error if stock < quantity and NOT edit mode?
-                     // Let's rely on BookingService or just warn.
-                     // $this->addError(...) 
+                    // In edit mode this is annoying if we already have the items.
+                    // Only error if stock < quantity and NOT edit mode?
+                    // Let's rely on BookingService or just warn.
+                    // $this->addError(...) 
                 }
-             }
+            }
         }
 
         try {
@@ -359,54 +370,54 @@ class BookingForm extends Component
                 'topic' => $this->topic,
                 'start_time' => $this->start_time,
                 'duration' => $this->duration,
-                'priority_guest_id' => $this->priority_guest_id,
+                'priority_guest_id' => $this->priority_guest_id ?: null,
                 'recurring' => $this->recurring, // Edit usually disables recurring toggles
                 'frequency' => $this->frequency,
                 'ends_at' => $this->ends_at,
             ];
 
             if ($this->isEditMode) {
-                 $meeting = Meeting::find($this->meetingId);
-                 $oldOrganizerId = $meeting->user_id;
-                 
-                 // Check if Super Admin is changing organizer
-                 if (auth()->user()->hasRole('Super Admin') && $this->organizer_user_id && $this->organizer_user_id != $meeting->user_id) {
-                     // Remove old organizer from participants list
-                     $this->internalParticipants = array_values(
-                         array_filter($this->internalParticipants, function($participantId) use ($oldOrganizerId) {
-                             return $participantId != $oldOrganizerId;
-                         })
-                     );
-                     
-                     // Also remove from PIC participants if exists
-                     $this->picParticipants = array_values(
-                         array_filter($this->picParticipants, function($participantId) use ($oldOrganizerId) {
-                             return $participantId != $oldOrganizerId;
-                         })
-                     );
-                     
-                     // Update organizer
-                     $meeting->user_id = $this->organizer_user_id;
-                     $meeting->save();
-                     
-                     // Delete old organizer from meeting_participants table
-                     DB::table('meeting_participants')
-                         ->where('meeting_id', $meeting->id)
-                         ->where('participant_type', User::class)
-                         ->where('participant_id', $oldOrganizerId)
-                         ->delete();
-                 }
-                 
-                 $bookingService->updateMeeting(
+                $meeting = Meeting::find($this->meetingId);
+                $oldOrganizerId = $meeting->user_id;
+
+                // Check if Super Admin is changing organizer
+                if (auth()->user()->hasRole('Super Admin') && $this->organizer_user_id && $this->organizer_user_id != $meeting->user_id) {
+                    // Remove old organizer from participants list
+                    $this->internalParticipants = array_values(
+                        array_filter($this->internalParticipants, function ($participantId) use ($oldOrganizerId) {
+                            return $participantId != $oldOrganizerId;
+                        })
+                    );
+
+                    // Also remove from PIC participants if exists
+                    $this->picParticipants = array_values(
+                        array_filter($this->picParticipants, function ($participantId) use ($oldOrganizerId) {
+                            return $participantId != $oldOrganizerId;
+                        })
+                    );
+
+                    // Update organizer
+                    $meeting->user_id = $this->organizer_user_id;
+                    $meeting->save();
+
+                    // Delete old organizer from meeting_participants table
+                    DB::table('meeting_participants')
+                        ->where('meeting_id', $meeting->id)
+                        ->where('participant_type', User::class)
+                        ->where('participant_id', $oldOrganizerId)
+                        ->delete();
+                }
+
+                $bookingService->updateMeeting(
                     $meeting,
                     $data,
                     $this->internalParticipants,
                     $this->externalParticipants,
                     $this->pantryOrders,
                     $this->picParticipants
-                 );
-                 session()->flash('success', 'Meeting updated successfully!');
-                 return redirect()->route('meeting.meeting-lists.show', $meeting->id);
+                );
+                session()->flash('success', 'Pertemuan berhasil diperbarui!');
+                return redirect()->route('meeting.meeting-lists.show', $meeting->id);
             } else {
                 $bookingService->createMeeting(
                     $data,
@@ -415,7 +426,7 @@ class BookingForm extends Component
                     $this->pantryOrders,
                     $this->picParticipants
                 );
-                session()->flash('success', 'Meeting scheduled successfully!');
+                session()->flash('success', 'Pertemuan berhasil dijadwalkan!');
                 return redirect()->route('meeting.meeting-lists.index');
             }
 

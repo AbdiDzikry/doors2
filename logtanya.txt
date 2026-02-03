@@ -1,7 +1,140 @@
-Ruang Semeru	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Meeting with HMC & Ge-stamp	Meeting with HMC & Ge-stamp	IGNATIUS BENNY SAPUTRO	1
-Ruang Merapi	2026-01-29	2026-01-29 13:00:00	2026-01-29 16:00:00	Meeting dengan DAEHO (PIC: NUEL)	Meeting dengan DAEHO (PIC: NUEL)	ISMA SEPTIANI	1
-Ruang Ciremai	2026-01-29	2026-01-29 08:00:00	2026-01-29 15:00:00	Eksternal	Meeting Activity Plan Vendor KMI ( Pak Ali, Pak Edu, Pak Hadi )	Jihan	1
-Ruang Galunggung	2026-01-29	2026-01-29 08:00:00	2026-01-29 17:00:00	Eksternal	Meeting dengan Kitada ( PIC : Andhika )	Jihan	1
-Ruang Merbabu	2026-01-29	2026-01-29 10:00:00	2026-01-29 16:00:00	Eksternal	Mando Visit (Tamu Pak Ir)	Salwa Faraisha	1
-Ruang Arjuna	2026-01-29	2026-01-29 14:00:00	2026-01-29 17:00:00	Web asset manajemen	Web asset manajemen	Siswi Arum Sayekti	1
-Ruang Auditorium	2026-01-29	2026-01-29 07:00:00	2026-01-29 17:00:00	Training Ms.Excel Intermediate	Training Ms.Excel Intermediate	Wisnu	1
+# ParseError - Internal Server Error
+
+syntax error, unexpected identifier "ing", expecting ")"
+
+PHP 8.2.12
+Laravel 12.41.1
+127.0.0.1:8000
+
+## Stack Trace
+
+<!--[if BLOCK]><![endif]-->0 - resources\views\livewire\meeting\booking-form.blade.php:732
+1 - vendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php:38
+2 - vendor\laravel\framework\src\Illuminate\View\Engines\CompilerEngine.php:76
+3 - vendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php:16
+4 - vendor\laravel\framework\src\Illuminate\View\View.php:208
+5 - vendor\laravel\framework\src\Illuminate\View\View.php:191
+6 - vendor\laravel\framework\src\Illuminate\View\View.php:160
+7 - vendor\livewire\livewire\src\Mechanisms\HandleComponents\HandleComponents.php:259
+8 - vendor\livewire\livewire\src\Mechanisms\HandleComponents\HandleComponents.php:303
+9 - vendor\livewire\livewire\src\Mechanisms\HandleComponents\HandleComponents.php:251
+10 - vendor\livewire\livewire\src\Mechanisms\HandleComponents\HandleComponents.php:54
+11 - vendor\livewire\livewire\src\LivewireManager.php:73
+12 - resources\views\meetings\booking\create.blade.php:6
+13 - vendor\laravel\framework\src\Illuminate\Filesystem\Filesystem.php:123
+14 - vendor\laravel\framework\src\Illuminate\Filesystem\Filesystem.php:124
+15 - vendor\laravel\framework\src\Illuminate\View\Engines\PhpEngine.php:57
+16 - vendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php:22
+17 - vendor\laravel\framework\src\Illuminate\View\Engines\CompilerEngine.php:76
+18 - vendor\livewire\livewire\src\Mechanisms\ExtendBlade\ExtendedCompilerEngine.php:10
+19 - vendor\laravel\framework\src\Illuminate\View\View.php:208
+20 - vendor\laravel\framework\src\Illuminate\View\View.php:191
+21 - vendor\laravel\framework\src\Illuminate\View\View.php:160
+22 - vendor\laravel\framework\src\Illuminate\Http\Response.php:78
+23 - vendor\laravel\framework\src\Illuminate\Http\Response.php:34
+24 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:939
+25 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:906
+26 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:821
+27 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:180
+28 - vendor\laravel\framework\src\Illuminate\Auth\Middleware\EnsureEmailIsVerified.php:41
+29 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+30 - app\Http\Middleware\SSOTokenMiddleware.php:26
+31 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+32 - vendor\laravel\framework\src\Illuminate\Routing\Middleware\SubstituteBindings.php:50
+33 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+34 - vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php:63
+35 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+36 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken.php:87
+37 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+38 - vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php:48
+39 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+40 - vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php:120
+41 - vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php:63
+42 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+43 - vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php:36
+44 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+45 - vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php:74
+46 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+47 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:137
+48 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:821
+49 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:800
+50 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:764
+51 - vendor\laravel\framework\src\Illuminate\Routing\Router.php:753
+52 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:200
+53 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:180
+54 - vendor\livewire\livewire\src\Features\SupportDisablingBackButtonCache\DisableBackButtonCacheMiddleware.php:19
+55 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+56 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php:21
+57 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php:31
+58 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+59 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php:21
+60 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php:51
+61 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+62 - vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php:27
+63 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+64 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php:109
+65 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+66 - vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php:48
+67 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+68 - vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php:58
+69 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+70 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php:22
+71 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+72 - vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php:26
+73 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:219
+74 - vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php:137
+75 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:175
+76 - vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php:144
+77 - vendor\laravel\framework\src\Illuminate\Foundation\Application.php:1220
+78 - public\index.php:20
+79 - vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php:23
+<!--[if ENDBLOCK]><![endif]-->
+## Request
+
+GET /meeting/bookings/create
+
+## Headers
+
+<!--[if BLOCK]><![endif]-->* **host**: 127.0.0.1:8000
+* **connection**: keep-alive
+* **cache-control**: max-age=0
+* **sec-ch-ua**: "Not:A-Brand";v="99", "Google Chrome";v="145", "Chromium";v="145"
+* **sec-ch-ua-mobile**: ?0
+* **sec-ch-ua-platform**: "Windows"
+* **upgrade-insecure-requests**: 1
+* **user-agent**: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36
+* **accept**: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+* **sec-fetch-site**: same-origin
+* **sec-fetch-mode**: navigate
+* **sec-fetch-dest**: document
+* **referer**: http://127.0.0.1:8000/meeting/bookings/create?room_id=3
+* **accept-encoding**: gzip, deflate, br, zstd
+* **accept-language**: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7
+* **cookie**: _ga=GA1.1.298083017.1768351116; _ga_699NE13B0K=GS2.1.s1768351116$o1$g0$t1768351118$j58$l0$h0; XSRF-TOKEN=eyJpdiI6ImNQZXQyOUFjZFN0M1BKUE9jeEZjcXc9PSIsInZhbHVlIjoieVppbXBXRktaTkVtb0lCV2RmTm1wUFcvZVVLbzVNTm96Y1J4ejhOZGNrVjIwOWhlQTRBYzgrVkh5S3ErOFg2Zjdzd05ZSEY3VjRRSWNWYlMrUEhySmVPS3B3emRMRUNrMmIyZDhnT2NTTnUwcnJ5TUM4Rk15NHlEekszSERVVDUiLCJtYWMiOiIzYWMxNjkzNWIxMTI4NmNlY2Y3ZGRhNTBlMDM0Nzc3YTNkZjlkOTVkZmExZDRmYTJlMjA3MjEzNGE0ZmYyOGRlIiwidGFnIjoiIn0%3D; laravel-session=eyJpdiI6IkpCQlA2MTBERlNDWGlEeitocEFyakE9PSIsInZhbHVlIjoiUS9abXhyd0pvVm8vRDlvRGhXeC9GZk90ZHhBQmdLN1NaREprL09MdCtWZzBhaVBieHRaeGpTS1NBSU02Nkh0ZGZGeHRVcmJ3aFRDQmsrY1NEWm1rcHJWbk5VV0hzL1Y2UElaOXMweGFsUHJoa24xMVFBNmduTjA0TUJ5Qm9NUWEiLCJtYWMiOiJlMzU1MzA1NmUzZmM3MWQzNmViYzhjNjhjZTA5NDQwZjg1ZDg2YWNjYmI3NDc3Mjk1OGQ3NDNmY2FkYWY4ZTBjIiwidGFnIjoiIn0%3D
+<!--[if ENDBLOCK]><![endif]-->
+## Route Context
+
+<!--[if BLOCK]><![endif]-->controller: App\Http\Controllers\Meeting\BookingController@create
+route name: meeting.bookings.create
+middleware: web, auth, verified
+<!--[if ENDBLOCK]><![endif]-->
+## Route Parameters
+
+<!--[if BLOCK]><![endif]-->No route parameter data available.
+<!--[if ENDBLOCK]><![endif]-->
+## Database Queries
+
+<!--[if BLOCK]><![endif]-->* mysql - select * from `users` where `id` = 1875 limit 1 (6.59 ms)
+* mysql - select * from `rooms` (0.91 ms)
+* mysql - select * from `priority_guests` (1.31 ms)
+* mysql - select * from `users` (28.64 ms)
+* mysql - select * from `pantry_items` (0.96 ms)
+* mysql - select * from `external_participants` (1.19 ms)
+* mysql - select * from `configurations` where `key` = 'default_meeting_duration' limit 1 (1.06 ms)
+* mysql - select * from `rooms` where `rooms`.`id` = '3' limit 1 (0.75 ms)
+* mysql - select * from `meetings` where `meetings`.`room_id` = 3 and `meetings`.`room_id` is not null and `start_time` <= '2026-01-30 16:41:25' and `end_time` >= '2026-01-30 16:41:25' and `status` != 'cancelled' limit 1 (1.16 ms)
+* mysql - select * from `rooms` (0.88 ms)
+* mysql - select * from `priority_guests` (0.56 ms)
+* mysql - select * from `rooms` where `rooms`.`id` = '3' limit 1 (1.27 ms)
+* mysql - select * from `meetings` where `room_id` = '3' and `start_time` >= '2026-01-30 00:00:00' and `end_time` <= '2026-01-30 23:59:59' and `status` != 'cancelled' order by `start_time` asc limit 10 (1.07 ms)
+<!--[if ENDBLOCK]><![endif]-->

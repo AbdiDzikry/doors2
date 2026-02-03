@@ -31,34 +31,17 @@ class CancelUnattendedMeetings extends Command
         // Check if auto-cancel is enabled
         $autoCancelEnabled = \App\Models\Configuration::where('key', 'auto_cancel_unattended_meetings')
             ->value('value');
-        
-        if ($autoCancelEnabled !== '1') {
-            $this->info('Auto-cancel is disabled. Skipping...');
-            return 0;
-        }
 
-        // New Logic (Per User Request): 
-        // Cancel if meeting has started > 30 mins ago (now > start_time + 30)
-        // AND no attendance recorded.
-        // This frees up the room if they are late.
+        // Logic:
+        // We fetch meetings that started at least 30 minutes ago.
+        // If Auto-Cancel is ON:
+        //    - No Attendance -> Cancel.
+        //    - Has Attendance AND Ended -> Complete.
+        // If Auto-Cancel is OFF:
+        //    - Ended -> Complete (Implicitly assuming attendance or ignoring it).
+        //    - Not Ended -> Do nothing.
 
         $threshold = now()->subMinutes(30);
-
-        // We look for meetings where:
-        // 1. Status is 'scheduled' or 'ongoing'
-        // 2. Start Time was BEFORE the threshold (meaning 30 mins have passed since start)
-        // 3. Current time is still BEFORE End Time (so we don't cancel meetings that just finished normally, 
-        //    though if they finished without attendance they technically should be cancelled too? 
-        //    Let's stick to the "Free up active room" logic first. 
-        //    Actually, if the meeting is OVER and no one attended, it should also be cancelled/completed.
-        //    
-        //    Let's handle BOTH cases in one sweep or separate?
-        //    Case A: Meeting started > 30 mins ago, still ongoing, no attendance -> CANCEL (Free up room).
-        //    Case B: Meeting Ended > 30 mins ago, no attendance -> CANCEL (Admin cleanup).
-        
-        // Let's implement Case A (The "Free up room" logic) + Case B (The "Cleanup" logic).
-        // A simple query: If start_time <= (Now - 30mins) AND no attendance -> Cancel.
-        // This covers both "Late start" and "Already ended".
 
         $meetings = Meeting::whereIn('status', ['scheduled', 'ongoing'])
             ->where('start_time', '<=', $threshold)
@@ -66,38 +49,51 @@ class CancelUnattendedMeetings extends Command
             ->get();
 
         $countCancelled = 0;
-        $countCompleted = 0; // Not really processing completions here anymore, mainly cancellations.
+        $countCompleted = 0;
 
         foreach ($meetings as $meeting) {
-            // Check for ANY attendance
             $hasAttendance = $meeting->meetingParticipants()
                 ->whereNotNull('attended_at')
                 ->exists();
 
-            if ($hasAttendance) {
-                // If attended, we check if it is already finished to mark as completed?
-                // The logical place for "Mark Completed" is strictly after End Time.
-                if (now()->gt($meeting->end_time)) {
-                     $meeting->status = 'completed';
-                     $meeting->save();
-                     $countCompleted++;
-                }
-                // If still ongoing (between start and end), we leave it as is (or set to 'ongoing').
-            } else {
-                // NO ATTENDANCE + >30 mins since start = CANCEL
-                $meeting->status = 'cancelled';
-                // Optional: $meeting->cancellation_reason = 'System Auto-Cancel (No Show > 30m)';
-                $meeting->save();
-                
-                $countCancelled++;
-            }
+            $isEnded = now()->gt($meeting->end_time);
 
-            // Sync events
-            MeetingStatusUpdated::dispatch($meeting->room);
-            RoomStatusUpdated::dispatch($meeting->room_id);
+            if ($autoCancelEnabled === '1') {
+                // strict mode
+                if (!$hasAttendance) {
+                    $meeting->status = 'cancelled';
+                    $meeting->save();
+                    $countCancelled++;
+
+                    MeetingStatusUpdated::dispatch($meeting->room);
+                    RoomStatusUpdated::dispatch($meeting->room_id);
+                    continue; // Done with this meeting
+                }
+
+                // If attended, check if we should complete
+                if ($isEnded) {
+                    $meeting->status = 'completed';
+                    $meeting->save();
+                    $countCompleted++;
+
+                    MeetingStatusUpdated::dispatch($meeting->room);
+                    RoomStatusUpdated::dispatch($meeting->room_id);
+                }
+            } else {
+                // Auto-cancel OFF (Relaxed mode)
+                // We never auto-cancel. We only auto-complete if time is up.
+                if ($isEnded) {
+                    $meeting->status = 'completed';
+                    $meeting->save();
+                    $countCompleted++;
+
+                    MeetingStatusUpdated::dispatch($meeting->room);
+                    RoomStatusUpdated::dispatch($meeting->room_id);
+                }
+            }
         }
 
-        $this->info("Processed meetings. Cancelled (No Show): {$countCancelled}, Marked Completed: {$countCompleted}.");
+        $this->info("Processed meetings. Mode: " . ($autoCancelEnabled === '1' ? 'Strict' : 'Relaxed') . ". Cancelled: {$countCancelled}, Completed: {$countCompleted}.");
     }
 
 

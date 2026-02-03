@@ -37,7 +37,7 @@ class BookingService
                 $query->where(function ($q) use ($startTime, $endTime) {
                     // Overlap check
                     $q->where('start_time', '<', $endTime)
-                      ->where('end_time', '>', $startTime);
+                        ->where('end_time', '>', $startTime);
                 });
             })
             // Exclude cancelled meetings from availability check
@@ -66,7 +66,7 @@ class BookingService
         $roomId = $data['room_id'];
         $duration = $data['duration'];
         $startTimeString = $data['start_time'];
-        
+
         DB::beginTransaction();
         try {
             if ($recurring) {
@@ -88,7 +88,7 @@ class BookingService
         $newEndTime = (clone $newStartTime)->add(new \DateInterval('PT' . $data['duration'] . 'M'));
 
         if (!$this->isRoomAvailable($newStartTime->format('Y-m-d H:i:s'), $newEndTime->format('Y-m-d H:i:s'), $data['room_id'])) {
-            throw new Exception('The selected room is not available at the chosen time.');
+            throw new Exception('Ruangan yang dipilih tidak tersedia pada waktu tersebut.');
         }
 
         $meeting = Meeting::create([
@@ -116,15 +116,21 @@ class BookingService
         // Recurring meetings include the start date, so we treat it as Period
         $period = new \DatePeriod($startDate, $interval, $endDate);
 
+        $conflictingDates = [];
+
         // Pre-check availability for all slots
         foreach ($period as $date) {
             $recurringStartTime = $date;
             $recurringEndTime = (clone $recurringStartTime)->add(new \DateInterval('PT' . $data['duration'] . 'M'));
-            
+
             if (!$this->isRoomAvailable($recurringStartTime->format('Y-m-d H:i:s'), $recurringEndTime->format('Y-m-d H:i:s'), $data['room_id'])) {
-                // Formatting for readable error
-                throw new Exception('The room is not available for the recurring schedule on ' . $recurringStartTime->format('d-m-Y H:i'));
+                $conflictingDates[] = $recurringStartTime->format('d-m-Y H:i');
             }
+        }
+
+        if (!empty($conflictingDates)) {
+            // Formatting for readable error with all dates
+            throw new Exception('Ruangan tidak tersedia untuk jadwal berulang pada tanggal: ' . implode(', ', $conflictingDates));
         }
 
         $recurringMeeting = RecurringMeeting::create([
@@ -135,7 +141,7 @@ class BookingService
         foreach ($period as $date) {
             $recurringStartTime = $date;
             $recurringEndTime = (clone $recurringStartTime)->add(new \DateInterval('PT' . $data['duration'] . 'M'));
-            
+
             $meeting = Meeting::create([
                 'room_id' => $data['room_id'],
                 'topic' => $data['topic'],
@@ -236,7 +242,7 @@ class BookingService
             // Check availability (exclude current meeting)
             if (!$this->isRoomAvailable($startTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s'), $data['room_id'], $meeting->id)) {
                 // Formatting for readable error (re-using matching logic)
-                 throw new Exception('The selected room is not available at the chosen time (Time Collision).');
+                throw new Exception('Ruangan yang dipilih tidak tersedia pada waktu tersebut (Bentrokan Waktu).');
             }
 
             // Update Basic Info
@@ -256,7 +262,7 @@ class BookingService
             // Sync Participants
             // 1. Detach all (or smart sync). Simple detach+create is easier but loses check-in status.
             // Better: Sync Internal
-            
+
             // Get current participants
             $currentInternalMap = $meeting->meetingParticipants()
                 ->where('participant_type', User::class)
@@ -266,7 +272,7 @@ class BookingService
             // Process Internal Re-sync
             // We want to KEEP check-in status if the person is still invited.
             $keepParticipantIds = [];
-            
+
             // Always ensure Organizer is kept/added
             if (!in_array($meeting->user_id, $internalParticipants)) {
                 $internalParticipants[] = $meeting->user_id;
@@ -294,7 +300,7 @@ class BookingService
             // External Participants (Simple Sync: Delete & Re-add is usually fine as they don't have check-in accounts mostly, 
             // but if they do (future feature), smart sync is better. For now simple sync for external IDs is tricky 
             // because `externalParticipants` array from form usually contains IDs of `ExternalParticipant` models.
-            
+
             $currentExternalMap = $meeting->meetingParticipants()
                 ->where('participant_type', ExternalParticipant::class)
                 ->get()
@@ -324,10 +330,10 @@ class BookingService
             // 1. Restore stock of REMOVED orders.
             // 2. Deduct stock of NEW orders.
             // 3. Update changed quantities.
-            
+
             // Simplified: Detach all & Restore Stock -> Create new & Deduct Stock.
             // Efficient enough for typical meeting edits.
-            
+
             // A. Restore Stock from current orders
             foreach ($meeting->pantryOrders as $oldOrder) {
                 $this->inventoryService->restoreStock($oldOrder->pantry_item_id, $oldOrder->quantity);
@@ -341,7 +347,7 @@ class BookingService
             foreach ($pantryOrders as $order) {
                 if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
                     $validOrders[] = $order;
-                     PantryOrder::create([
+                    PantryOrder::create([
                         'meeting_id' => $meeting->id,
                         'pantry_item_id' => $order['pantry_item_id'],
                         'quantity' => $order['quantity'],

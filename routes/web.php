@@ -20,6 +20,13 @@ use App\Http\Controllers\Meeting\UserBookingController;
 // use App\Http\Controllers\GuideController;
 use App\Http\Controllers\SurveyController;
 
+
+// General Affair Public Routes (No Auth)
+Route::prefix('ga')->name('ga.')->group(function () {
+    Route::get('/report-asset/{uuid}', [App\Http\Controllers\GeneralAffair\PublicReportController::class, 'show'])->name('report.show');
+    Route::post('/report-asset/{uuid}', [App\Http\Controllers\GeneralAffair\PublicReportController::class, 'store'])->name('report.store');
+});
+
 Route::redirect('/', '/login');
 
 // SSO Routes
@@ -86,6 +93,12 @@ Route::middleware(['auth', 'can:manage pantry'])->name('master.')->prefix('maste
     Route::resource('pantry-items', PantryItemController::class);
 });
 
+// General Affair Admin Routes (Protected)
+Route::middleware(['auth', 'can:manage assets'])->prefix('ga')->name('ga.')->group(function () {
+    Route::get('/assets', [App\Http\Controllers\GeneralAffair\AssetController::class, 'index'])->name('assets.index');
+    Route::get('/assets/{uuid}/qr', [App\Http\Controllers\GeneralAffair\AssetController::class, 'printQr'])->name('assets.qr');
+});
+
 Route::middleware(['auth', 'verified'])->prefix('meeting')->name('meeting.')->group(function () {
 
     Route::resource('room-reservations', RoomReservationController::class);
@@ -106,7 +119,7 @@ Route::name('settings.')->prefix('settings')->group(function () {
         Route::resource('configurations', ConfigurationController::class);
     });
     Route::resource('role-permissions', RolePermissionController::class)->parameters(['role-permissions' => 'role'])->middleware(['auth', 'can:manage roles and permissions']);
-    Route::middleware(['auth', 'role:Super Admin'])->group(function () {
+    Route::middleware(['auth', 'can:manage settings'])->group(function () {
         Route::get('input-code', [App\Http\Controllers\Settings\InputCodeController::class, 'index'])->name('input-code.index');
         Route::post('input-code/unlock', [App\Http\Controllers\Settings\InputCodeController::class, 'unlock'])->name('input-code.unlock');
         Route::post('input-code', [App\Http\Controllers\Settings\InputCodeController::class, 'execute'])->name('input-code.execute');
@@ -141,5 +154,21 @@ Route::get('/debug-perms', function () {
         'can_access_tablet' => $user->can('access tablet mode')
     ];
 })->middleware('auth');
+
+
+// General Affair Routes (Assets & Tickets)
+Route::middleware(['auth', 'can:manage assets'])->prefix('ga')->name('ga.')->group(function () {
+    Route::get('/assets', [App\Http\Controllers\GeneralAffair\AssetController::class, 'index'])->name('assets.index');
+    Route::get('/assets/{uuid}/qr', [App\Http\Controllers\GeneralAffair\AssetController::class, 'printQr'])->name('assets.qr');
+
+    Route::get('/tickets', [App\Http\Controllers\GeneralAffair\TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{uuid}', [App\Http\Controllers\GeneralAffair\TicketController::class, 'show'])->name('tickets.show');
+
+    // Ticket Actions
+    Route::post('/tickets/{uuid}/validate', [App\Http\Controllers\GeneralAffair\TicketController::class, 'validateTicket'])->name('tickets.validate');
+    Route::post('/tickets/{uuid}/reject', [App\Http\Controllers\GeneralAffair\TicketController::class, 'rejectTicket'])->name('tickets.reject');
+    Route::post('/tickets/{uuid}/assign', [App\Http\Controllers\GeneralAffair\TicketController::class, 'assignTicket'])->name('tickets.assign');
+    Route::post('/tickets/{uuid}/resolve', [App\Http\Controllers\GeneralAffair\TicketController::class, 'resolveTicket'])->name('tickets.resolve');
+});
 
 require __DIR__ . '/auth.php';

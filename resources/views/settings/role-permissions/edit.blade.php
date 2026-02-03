@@ -27,16 +27,68 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Permissions:</label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        @foreach ($permissions as $permission)
-                            <div class="flex items-center">
-                                <input type="checkbox" name="permissions[]" id="permission_{{ $permission->id }}" value="{{ $permission->id }}" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                                    {{ in_array($permission->name, old('permissions', $rolePermissions)) ? 'checked' : '' }}>
-                                <label for="permission_{{ $permission->id }}" class="ml-2 block text-sm text-gray-900">{{ $permission->name }}</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Permissions:</label>
+                    
+                    {{-- Categorized Permissions --}}
+                    @php
+                        $permissionGroups = [
+                            'System Settings' => ['manage settings', 'manage configurations', 'manage roles and permissions'],
+                            'Master Data' => ['manage master data', 'manage users', 'manage rooms', 'manage pantry', 'manage external participants', 'manage priority guests'],
+                            'Meeting & Room' => ['access meeting room', 'book rooms', 'view analytics'],
+                            'General Affair' => ['manage assets'],
+                            'Dashboards' => ['access pantry dashboard', 'access tablet mode'],
+                        ];
+                        
+                        // Define parent-child relationships
+                        $parentPermissions = ['manage settings', 'manage master data', 'access meeting room', 'manage assets'];
+                        $permissionDependencies = [
+                            'manage configurations' => 'manage settings',
+                            'manage roles and permissions' => 'manage settings',
+                            'manage users' => 'manage master data',
+                            'manage rooms' => 'manage master data',
+                            'manage external participants' => 'manage master data',
+                            'manage priority guests' => 'manage master data',
+                            'book rooms' => 'access meeting room',
+                            'view analytics' => 'access meeting room',
+                        ];
+                    @endphp
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="permissions-container">
+                        @foreach ($permissionGroups as $groupName => $groupPerms)
+                            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <h5 class="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">{{ $groupName }}</h5>
+                                <div class="space-y-2">
+                                    @foreach ($permissions as $permission)
+                                        @if (in_array($permission->name, $groupPerms))
+                                            @php
+                                                $isParent = in_array($permission->name, $parentPermissions);
+                                                $isChecked = in_array($permission->name, old('permissions', $rolePermissions));
+                                            @endphp
+                                            <div class="flex items-center {{ $isParent ? 'bg-white border border-green-200 rounded px-2 py-1.5' : '' }}">
+                                                <input 
+                                                    type="checkbox" 
+                                                    name="permissions[]" 
+                                                    id="permission_{{ $permission->id }}" 
+                                                    value="{{ $permission->id }}" 
+                                                    data-permission-name="{{ $permission->name }}"
+                                                    @if($isParent) data-is-parent="true" @endif
+                                                    @if(isset($permissionDependencies[$permission->name])) data-requires="{{ $permissionDependencies[$permission->name] }}" @endif
+                                                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded permission-checkbox"
+                                                    {{ $isChecked ? 'checked' : '' }}>
+                                                <label for="permission_{{ $permission->id }}" class="ml-2 block text-sm {{ $isParent ? 'font-semibold text-gray-800' : 'text-gray-700' }}">
+                                                    {{ $permission->name }}
+                                                    @if($isParent)
+                                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">PARENT</span>
+                                                    @endif
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
                         @endforeach
                     </div>
+                    
                     @error('permissions') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -51,4 +103,78 @@
             </form>
         </div>
     </div>
+
+    {{-- JavaScript for managing parent-child permission dependencies --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.permission-checkbox');
+            
+            // Initialize: disable children if parent not checked
+            updateChildrenState();
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const isParent = this.dataset.isParent === 'true';
+                    const requiredParent = this.dataset.requires;
+                    
+                    if (isParent) {
+                        // This is a parent checkbox - enable/disable its children
+                        const parentName = this.dataset.permissionName;
+                        toggleChildren(parentName, this.checked);
+                    } else if (this.checked && requiredParent) {
+                        // Child was checked - auto-check parent if not already
+                        const parentCheckbox = document.querySelector(`[data-permission-name="${requiredParent}"]`);
+                        if (parentCheckbox && !parentCheckbox.checked) {
+                            parentCheckbox.checked = true;
+                            toggleChildren(requiredParent, true);
+                            showNotification(`Auto-enabled: "${requiredParent}" (required parent)`, 'success');
+                        }
+                    }
+                });
+            });
+            
+            function toggleChildren(parentName, enable) {
+                // Find all children of this parent
+                const children = document.querySelectorAll(`[data-requires="${parentName}"]`);
+                children.forEach(child => {
+                    child.disabled = !enable;
+                    if (!enable) {
+                        child.checked = false; // Uncheck when disabling
+                    }
+                    // Update visual state
+                    const label = child.parentElement.querySelector('label');
+                    if (label) {
+                        if (enable) {
+                            label.classList.remove('text-gray-400', 'cursor-not-allowed');
+                            label.classList.add('text-gray-700');
+                        } else {
+                            label.classList.remove('text-gray-700');
+                            label.classList.add('text-gray-400', 'cursor-not-allowed');
+                        }
+                    }
+                });
+            }
+            
+            function updateChildrenState() {
+                // On page load, ensure children match parent state
+                const parentCheckboxes = document.querySelectorAll('[data-is-parent="true"]');
+                parentCheckboxes.forEach(parent => {
+                    const parentName = parent.dataset.permissionName;
+                    toggleChildren(parentName, parent.checked);
+                });
+            }
+            
+            function showNotification(message, type = 'success') {
+                const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 ${bgColor} border px-4 py-3 rounded shadow-lg z-50`;
+                notification.innerHTML = `<strong>${message}</strong>`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+        });
+    </script>
 @endsection

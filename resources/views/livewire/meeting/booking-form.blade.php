@@ -21,27 +21,48 @@
         <form wire:submit.prevent="submitForm" method="POST">
             @csrf
 
-            {{-- Enhanced Error Display Block --}}
+            {{-- Enhanced Error Display Block (Floating) --}}
             @if ($errors->any())
-                <div class="mb-6 rounded-md bg-red-50 p-4 border border-red-200 shadow-sm animate-pulse-soft">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            {{-- Error Icon --}}
-                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">
-                                Booking Failed
-                            </h3>
-                            <div class="mt-2 text-sm text-red-700">
-                                <p class="mb-2">We encountered the following problems with your request:</p>
-                                <ul role="list" class="list-disc pl-5 space-y-1">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 8000)"
+                    x-transition:enter="transform ease-out duration-300 transition"
+                    x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+                    x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+                    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed top-24 right-4 z-50 w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-lg border-l-4 border-red-500">
+                    <div class="p-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3 w-0 flex-1 pt-0.5">
+                                <h3 class="text-sm font-medium text-gray-900">
+                                    Pemesanan Gagal
+                                </h3>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    <p>Mohon periksa kembali input Anda:</p>
+                                    <ul class="list-disc pl-5 mt-1 space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-shrink-0 flex">
+                                <button @click="show = false"
+                                    class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <span class="sr-only">Tutup</span>
+                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -57,19 +78,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
                         </path>
                     </svg>
-                    Back to Room Selection
+                    Kembali ke Pemilihan Ruangan
                 </a>
                 <h3 class="text-gray-800 text-3xl font-bold">
-                    {{ $isEditMode ? 'Edit Meeting' : 'Create Booking' }}
+                    {{ $isEditMode ? 'Edit Pertemuan' : 'Buat Pesanan Baru' }}
                 </h3>
                 @if ($selectedRoom)
                     <div class="flex items-center">
-                        <p class="text-sm text-gray-600">You are booking for room: <span
+                        <p class="text-sm text-gray-600">Anda memesan ruangan: <span
                                 class="font-semibold">{{ $selectedRoom->name }}</span></p>
                     </div>
                     <input type="hidden" name="room_id" value="{{ $selectedRoom->id }}">
                 @else
-                    <p class="text-sm text-gray-600">Select a room and fill in the meeting details.</p>
+                    <p class="text-sm text-gray-600">Pilih ruangan dan isi detail pertemuan.</p>
                 @endif
             </div>
 
@@ -87,25 +108,25 @@
                                  return newEndDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
                              }
                          }">
-                        <h4 class="text-xl font-semibold text-gray-800 mb-4">1. Meeting Details</h4>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-4">1. Detail Pertemuan</h4>
 
                         @if (!$selectedRoom)
                             <div class="mb-4" id="tour-room-selection">
-                                <label for="room_id" class="block text-sm font-medium text-gray-700 mb-1">Room <span
+                                <label for="room_id" class="block text-sm font-medium text-gray-700 mb-1">Ruangan <span
                                         class="text-red-500">*</span></label>
                                 <div class="relative" x-data="{ 
-                                        open: false, 
-                                        selected: @entangle('room_id'),
-                                        get label() { 
-                                            if (!this.selected) return '-- Select a Room --';
-                                            // We need a way to look up the name. Since we can't easily pass the full array to JS without bloating, 
-                                            // we'll rely on a hidden map or just update the UI text via Alpine when clicking an option.
-                                            // Better yet, let's just use the selected text content logic if possible, or a simpler approach:
-                                            // We will store the selected name in a separate Alpine var, initialized from PHP.
-                                            return this.selectedName;
-                                        },
-                                        selectedName: '{{ $rooms->firstWhere('id', $room_id)?->name ?? '-- Select a Room --' }}'
-                                    }" @click.away="open = false">
+                                                    open    : false, 
+                                                    sele    cted: @entangle('room_id'),
+                                                    get     label() { 
+                                                        if (    !this.selected) return '-- Pilih Ruangan --';
+                                                        // W    e need a way to look up the name. Since we can't easily pass the full array to JS without bloating, 
+                                                        // w    e'll rely on a hidden map or just update the UI text via Alpine when clicking an option.
+                                                        // B    etter yet, let's just use the selected text content logic if possible, or a simpler approach:
+                                                        // W    e will store the selected name in a separate Alpine var, initialized from PHP.
+                                                        retu    rn this.selectedName;
+                                                    },    
+                                                    sele    ctedName: '{{ $rooms->firstWhere('id', $room_id)?->name ?? '-- Pilih Ruangan --' }}'
+                                                }" @ click.away="open = false">
                                     <button type="button" @click="open = !open"
                                         class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
                                         :class="{ 'border-green-500 ring-1 ring-green-500': open }">
@@ -145,11 +166,11 @@
                         @endif
 
                         <div class="mb-4">
-                            <label for="topic" class="block text-sm font-medium text-gray-700 mb-1">Topic <span
+                            <label for="topic" class="block text-sm font-medium text-gray-700 mb-1">Topik <span
                                     class="text-red-500">*</span></label>
                             <input type="text" wire:model="topic" id="topic"
                                 class="w-full bg-white border border-gray-300 rounded-lg shadow-sm px-4 py-2.5 sm:text-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all duration-200 placeholder-gray-400 @error('topic') border-red-500 @enderror"
-                                placeholder="e.g., Quarterly Review">
+                                placeholder="cth., Rapat Mingguan">
                             @error('topic') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
@@ -214,7 +235,8 @@
                                 }
                             }">
                             <div class="mb-4">
-                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date
+                                <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                                    Mulai
                                     <span class="text-red-500">*</span></label>
                                 <!-- Start Date Picker -->
                                 <div class="relative group" x-data="datePicker({ value: date })"
@@ -223,7 +245,7 @@
                                     <button type="button" @click="open = !open"
                                         class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200 text-gray-700"
                                         :class="{ 'border-green-500 ring-1 ring-green-500': open }">
-                                        <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                        <span class="block truncate" x-text="formattedDate || 'Pilih Tanggal'"></span>
                                         <span
                                             class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
                                             <i class="fas fa-calendar-alt text-xs"></i>
@@ -277,16 +299,17 @@
                                         </div>
                                         <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
                                             <button type="button" @click="value = ''; open = false"
-                                                class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                                class="text-xs text-green-500 hover:text-green-700">Hapus</button>
                                             <button type="button" @click="init(); open = false"
-                                                class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                                class="text-xs text-green-500 hover:text-green-700">Hari Ini</button>
                                         </div>
                                     </div>
                                 </div>
                                 @error('start_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
-                                <label for="start_hour" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Start
-                                    Time <span class="text-red-500">*</span></label>
+                                <label for="start_hour" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Waktu
+                                    Mulai
+                                    <span class="text-red-500">*</span></label>
                                 <div class="flex space-x-2">
                                     <!-- Hour Dropdown -->
                                     <div class="w-1/2 relative" x-data="{ open: false }" @click.away="open = false">
@@ -313,10 +336,10 @@
                                                 <div @click="if(!isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}')) { hour = '{{ $val }}'; updateStartTime(); open = false; }"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                     :class="{ 
-                                                            'text-green-900 bg-green-50': hour == '{{ $val }}', 
-                                                            'text-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}'),
-                                                            'text-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')
-                                                         }">
+                                                                        'tex    t-green-900 bg-green-50': hour == '{{ $val }}', 
+                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}'),
+                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')
+                                                                     }">
                                                     <span class="block truncate font-medium"
                                                         :class="{ 'font-semibold': hour == '{{ $val }}' }">{{ $val }}</span>
                                                     <span x-show="hour == '{{ $val }}'"
@@ -356,10 +379,10 @@
                                                 <div @click="if(!isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}')) { minute = '{{ $m }}'; updateStartTime(); open = false; }"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                     :class="{ 
-                                                            'text-green-900 bg-green-50': minute == '{{ $m }}', 
-                                                            'text-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}'),
-                                                            'text-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')
-                                                         }">
+                                                                        'tex    t-green-900 bg-green-50': minute == '{{ $m }}', 
+                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}'),
+                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')
+                                                                     }">
                                                     <span class="block truncate font-medium"
                                                         :class="{ 'font-semibold': minute == '{{ $m }}' }">{{ $m }}</span>
                                                     <span x-show="minute == '{{ $m }}'"
@@ -378,16 +401,16 @@
                                 </div>
                             </div>
                             <div class="mb-4">
-                                <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Duration
+                                <label for="duration" class="block text-sm font-medium text-gray-700 mb-1">Durasi
                                     <span class="text-red-500">*</span></label>
                                 <div class="relative" x-data="{ 
                                     open: false, 
                                     options: {
-                                        '15': '15 Minutes', '30': '30 Minutes', '45': '45 Minutes',
-                                        '60': '1 Hour', '75': '1 Hour 15 Minutes', '90': '1 Hour 30 Minutes', '105': '1 Hour 45 Minutes', '120': '2 Hours',
-                                        '150': '2.5 Hours', '180': '3 Hours', '210': '3.5 Hours', '240': '4 Hours', '270': '4.5 Hours', '300': '5 Hours', '330': '5.5 Hours', '360': '6 Hours'
+                                        '15': '15 Menit', '30': '30 Menit', '45': '45 Menit',
+                                        '60': '1 Jam', '75': '1 Jam 15 Menit', '90': '1.5 Jam', '105': '1 Jam 45 Menit', '120': '2 Jam',
+                                        '150': '2.5 Jam', '180': '3 Jam', '210': '3.5 Jam', '240': '4 Jam', '270': '4.5 Jam', '300': '5 Jam', '330': '5.5 Jam', '360': '6 Jam'
                                     },
-                                    get label() { return this.options[this.duration] || 'Select Duration' }
+                                    get label() { return this.options[this.duration] || 'Pilih Durasi' }
                                 }" @click.away="open = false">
                                     <button type="button" @click="open = !open"
                                         class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
@@ -413,7 +436,7 @@
                                         <div
                                             class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50">
                                             Rapat Cepat</div>
-                                        @foreach (['15' => '15 Minutes', '30' => '30 Minutes', '45' => '45 Minutes'] as $val => $text)
+                                        @foreach (['15' => '15 Menit', '30' => '30 Menit', '45' => '45 Menit'] as $val => $text)
                                             <div @click="duration = '{{ $val }}'; open = false"
                                                 class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150"
                                                 :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
@@ -429,7 +452,7 @@
                                         <div
                                             class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 border-t border-gray-100">
                                             Rapat Standar</div>
-                                        @foreach (['60' => '1 Hour', '75' => '1 Hour 15 Minutes', '90' => '1 Hour 30 Minutes', '105' => '1 Hour 45 Minutes', '120' => '2 Hours'] as $val => $text)
+                                        @foreach (['60' => '1 Jam', '75' => '1 Jam 15 Menit', '90' => '1.5 Jam', '105' => '1 Jam 45 Menit', '120' => '2 Jam'] as $val => $text)
                                             <div @click="duration = '{{ $val }}'; open = false"
                                                 class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150"
                                                 :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
@@ -445,7 +468,7 @@
                                         <div
                                             class="px-3 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-gray-50 border-t border-gray-100">
                                             Sesi Panjang</div>
-                                        @foreach (['150' => '2.5 Hours', '180' => '3 Hours', '210' => '3.5 Hours', '240' => '4 Hours', '270' => '4.5 Hours', '300' => '5 Hours', '330' => '5.5 Hours', '360' => '6 Hours'] as $val => $text)
+                                        @foreach (['150' => '2.5 Jam', '180' => '3 Jam', '210' => '3.5 Jam', '240' => '4 Jam', '270' => '4.5 Jam', '300' => '5 Jam', '330' => '5.5 Jam', '360' => '6 Jam'] as $val => $text)
                                             <div @click="duration = '{{ $val }}'; open = false"
                                                 class="cursor-pointer select-none relative py-2 pl-4 pr-9 transition-colors duration-150"
                                                 :class="{ 'text-green-900 bg-green-50': duration == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': duration != '{{ $val }}' }">
@@ -459,19 +482,20 @@
                                     </div>
                                 </div>
                                 <div class="mt-1 text-xs text-gray-500">
-                                    Suggested End Time: <span x-text="calculateEndTime()" class="font-semibold"></span>
+                                    Estimasi Waktu Selesai: <span x-text="calculateEndTime()"
+                                        class="font-semibold"></span>
                                 </div>
                                 @error('duration') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="priority_guest_id" class="block text-sm font-medium text-gray-700 mb-1">Priority
-                                Guest (Optional)</label>
+                            <label for="priority_guest_id" class="block text-sm font-medium text-gray-700 mb-1">Tamu
+                                Prioritas (Opsional)</label>
                             <div class="relative" x-data="{ 
                                 open: false, 
                                 selected: @entangle('priority_guest_id'),
-                                selectedName: '{{ $priorityGuests->firstWhere('id', $priority_guest_id) ? ($priorityGuests->firstWhere('id', $priority_guest_id)->name . ' - ' . $priorityGuests->firstWhere('id', $priority_guest_id)->title) : '-- No Priority Guest --' }}'
+                                selectedName: '{{ $priorityGuests->firstWhere('id', $priority_guest_id) ? ($priorityGuests->firstWhere('id', $priority_guest_id)->name . ' - ' . $priorityGuests->firstWhere('id', $priority_guest_id)->title) : '-- Tidak Ada Tamu Prioritas --' }}'
                             }" @click.away="open = false">
                                 <button type="button" @click="open = !open"
                                     class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
@@ -495,7 +519,8 @@
                                         class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                         :class="{ 'text-green-900 bg-green-50': !selected, 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected }">
                                         <span class="block truncate font-medium"
-                                            :class="{ 'font-semibold': !selected }">-- No Priority Guest --</span>
+                                            :class="{ 'font-semibold': !selected }">-- Tidak Ada Tamu Prioritas
+                                            --</span>
                                         <span x-show="!selected"
                                             class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
                                             <i class="fas fa-check text-xs"></i>
@@ -526,19 +551,19 @@
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" wire:model.live="recurring"
                                 class="form-checkbox h-5 w-5 text-green-600 rounded focus:ring-green-500">
-                            <span class="ml-3 text-lg font-semibold text-gray-800">Make this a Recurring Meeting</span>
+                            <span class="ml-3 text-lg font-semibold text-gray-800">Buat Pertemuan Berulang</span>
                         </label>
 
                         <div x-show="$wire.recurring" x-transition class="mt-4 pt-4 border-t">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="frequency"
-                                        class="block text-sm font-medium text-gray-700 mb-1">Repeat</label>
+                                        class="block text-sm font-medium text-gray-700 mb-1">Ulangi</label>
                                     <div class="relative" x-data="{ 
                                         open: false, 
                                         selected: @entangle('frequency'),
-                                        options: { 'daily': 'Daily', 'weekly': 'Weekly' }, 
-                                        get label() { return this.options[this.selected] || 'Daily' }
+                                        options: { 'daily': 'Harian', 'weekly': 'Mingguan' }, 
+                                        get label() { return this.options[this.selected] || 'Harian' }
                                     }" @click.away="open = false">
                                         <button type="button" @click="open = !open"
                                             class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
@@ -559,7 +584,7 @@
                                             x-transition:leave-end="transform opacity-0 scale-95"
                                             class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-green-500/30"
                                             style="display: none;">
-                                            @foreach (['daily' => 'Daily', 'weekly' => 'Weekly'] as $val => $text)
+                                            @foreach (['daily' => 'Harian', 'weekly' => 'Mingguan'] as $val => $text)
                                                 <div @click="selected = '{{ $val }}'; open = false"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                     :class="{ 'text-green-900 bg-green-50': selected == '{{ $val }}', 'text-gray-900 hover:bg-green-50 hover:text-green-700': selected != '{{ $val }}' }">
@@ -575,15 +600,16 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-1">End
-                                        Date</label>
+                                    <label for="ends_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                                        Berakhir</label>
                                     <div class="relative group" x-data="datePicker({ value: @entangle('ends_at') })">
                                         <input type="hidden" x-model="value" id="ends_at">
 
                                         <button type="button" @click="open = !open"
                                             class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-8 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200 text-gray-700"
                                             :class="{ 'border-green-500 ring-1 ring-green-500': open }">
-                                            <span class="block truncate" x-text="formattedDate || 'Select Date'"></span>
+                                            <span class="block truncate"
+                                                x-text="formattedDate || 'Pilih Tanggal'"></span>
                                             <span
                                                 class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
                                                 <i class="fas fa-calendar-alt text-xs"></i>
@@ -638,9 +664,10 @@
                                             </div>
                                             <div class="flex justify-between mt-2 pt-2 border-t border-gray-100">
                                                 <button type="button" @click="value = ''; open = false"
-                                                    class="text-xs text-green-500 hover:text-green-700">Clear</button>
+                                                    class="text-xs text-green-500 hover:text-green-700">Hapus</button>
                                                 <button type="button" @click="init(); open = false"
-                                                    class="text-xs text-green-500 hover:text-green-700">Today</button>
+                                                    class="text-xs text-green-500 hover:text-green-700">Hari
+                                                    Ini</button>
                                             </div>
                                         </div>
                                     </div>
@@ -654,7 +681,7 @@
                     <div class="bg-white rounded-lg shadow-md" id="tour-participants"
                         x-data="{ activeTab: 'internal' }">
                         <div class="p-6">
-                            <h4 class="text-xl font-semibold text-gray-800 mb-4">2. Add Participants</h4>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">2. Tambahkan Peserta</h4>
                             <div class="border-b border-gray-200">
                                 <nav class="-mb-px flex space-x-6" aria-label="Tabs">
                                     <button type="button" @click="activeTab = 'internal'"
@@ -665,7 +692,7 @@
                                     <button type="button" @click="activeTab = 'external'"
                                         :class="{'border-green-500 text-green-600': activeTab === 'external', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'external'}"
                                         class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm">
-                                        External
+                                        Eksternal
                                     </button>
                                 </nav>
                             </div>
@@ -685,9 +712,9 @@
                         <div class="bg-white rounded-lg shadow-md overflow-hidden">
                             <div class="p-4 bg-gray-50 border-b border-gray-200">
                                 <h4 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i class="fas fa-calendar-check mr-2 text-green-600"></i> Room Schedule
+                                    <i class="fas fa-calendar-check mr-2 text-green-600"></i> Jadwal Ruangan
                                 </h4>
-                                <p class="text-xs text-gray-500 mt-1">Upcoming meetings in this room</p>
+                                <p class="text-xs text-gray-500 mt-1">Pertemuan mendatang di ruangan ini</p>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -695,13 +722,13 @@
                                         <tr>
                                             <th scope="col"
                                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Time</th>
+                                                Waktu</th>
                                             <th scope="col"
                                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Topic</th>
+                                                Topik</th>
                                             <th scope="col"
                                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                By</th>
+                                                Oleh</th>
                                             <th scope="col"
                                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Status</th>
@@ -728,10 +755,10 @@
                                                 <td class="px-4 py-3 whitespace-nowrap text-xs">
                                                     <span
                                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                {{ $meeting->calculated_status === 'scheduled' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                                {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
-                                                                {{ $meeting->calculated_status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
-                                                                {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
+                                                                                        {{ $meeting->calculated_status === 'scheduled' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                                        {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
+                                                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
+                                                                                        {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
                                                         {{ ucfirst($meeting->calculated_status) }}
                                                     </span>
                                                 </td>
@@ -739,7 +766,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500 italic">
-                                                    No upcoming meetings scheduled.
+                                                    Tidak ada pertemuan terjadwal.
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -755,18 +782,18 @@
                     <!-- Room/Booker Info Card -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         @if ($selectedRoom)
-                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Room Info</h4>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Info Ruangan</h4>
                             <img class="w-full h-40 object-cover rounded-md mb-4"
                                 src="{{ $selectedRoom->image_path ? route('master.rooms.image', ['filename' => basename($selectedRoom->image_path)]) : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" style="background:#f0f0f0;font-family:sans-serif;font-size:30px;color:#888;text-anchor:middle"><text x="50%" y="50%" dominant-baseline="middle">No Image for ' . htmlspecialchars($selectedRoom->name) . '</text></svg>' }}"
                                 alt="{{ $selectedRoom->name }}">
                             <p class="font-bold text-lg">{{ $selectedRoom->name }}</p>
-                            <p class="text-sm text-gray-600">Capacity: {{ $selectedRoom->capacity }} people</p>
+                            <p class="text-sm text-gray-600">Kapasitas: {{ $selectedRoom->capacity }} orang</p>
                             @php
                                 $facilities = !empty($selectedRoom->facilities) ? array_map('trim', explode(',', $selectedRoom->facilities)) : [];
                             @endphp
                             @if (!empty($facilities))
                                 <div class="mt-2">
-                                    <h5 class="text-sm font-semibold text-gray-700">Facilities:</h5>
+                                    <h5 class="text-sm font-semibold text-gray-700">Fasilitas:</h5>
                                     <div class="flex flex-wrap items-center mt-1 gap-x-4 gap-y-2">
                                         @foreach ($facilities as $facility)
                                             <span class="text-sm text-gray-600">{{ $facility }}</span>
@@ -778,20 +805,21 @@
                             {{-- Status Chip --}}
                             <div class="mt-4">
                                 @if ($selectedRoom->status === 'under_maintenance')
-                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">Under
-                                        Maintenance</span>
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">Dalam
+                                        Perbaikan</span>
                                 @elseif ($current_meeting)
-                                    <span class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">In
-                                        Use until {{ $current_meeting->end_time?->format('H:i T') ?? 'N/A' }}</span>
+                                    <span
+                                        class="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded-full">Digunakan
+                                        sampai {{ $current_meeting->end_time?->format('H:i T') ?? 'N/A' }}</span>
                                 @else
                                     <span
-                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Available</span>
+                                        class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Tersedia</span>
                                 @endif
                             </div>
                         @else
-                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Room Info</h4>
-                            <p class="text-gray-600">Please select a room from the dropdown in the "Meeting Details"
-                                section.</p>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Info Ruangan</h4>
+                            <p class="text-gray-600">Silakan pilih ruangan dari menu dropdown di bagian "Detail Pertemuan".
+                            </p>
                         @endif
 
                         <div class="border-t mt-4 pt-4">
@@ -802,29 +830,30 @@
                                 <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                     <p class="text-xs text-yellow-800 mb-2">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
-                                        <strong>Super Admin:</strong> You can change the meeting organizer below
+                                        <strong>Super Admin:</strong> Anda dapat mengubah penyelenggara pertemuan di bawah
+                                        ini
                                     </p>
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="organizer_user_id" class="block text-sm font-medium text-gray-700 mb-1">
-                                        Meeting Organizer <span class="text-red-500">*</span>
+                                        Penyelenggara Pertemuan <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative" x-data="{ 
-                                            open: false, 
-                                            selected: @entangle('organizer_user_id'),
-                                            selectedName: '{{ $allUsers->firstWhere('id', $organizer_user_id)?->name ?? Auth::user()->name }}',
-                                            searchQuery: '',
-                                            get filteredUsers() {
-                                                if (!this.searchQuery) return @js($allUsers->toArray());
-                                                const query = this.searchQuery.toLowerCase();
-                                                return @js($allUsers->toArray()).filter(user => 
-                                                    user.name.toLowerCase().includes(query) || 
-                                                    (user.npk && user.npk.toLowerCase().includes(query)) ||
-                                                    (user.department && user.department.toLowerCase().includes(query))
-                                                );
-                                            }
-                                        }" @click.away="open = false">
+                                                        open    : false, 
+                                                        sele    cted: @entangle('organizer_user_id'),
+                                                        sele    ctedName: '{{ $allUsers->firstWhere('id', $organizer_user_id)?->name ?? Auth::user()->name }}',
+                                                        sear    chQuery: '',
+                                                        get     filteredUsers() {
+                                                            if (    !this.searchQuery) return @js($allUsers->toArray());
+                                                            cons    t query = this.searchQuery.toLowerCase();
+                                                            retu    rn @js($allUsers->toArray()).filter(user => 
+                                                                user    .name.toLowerCase().includes(query) || 
+                                                                (use    r.npk && user.npk.toLowerCase().includes(query)) ||
+                                                                (use    r.department && user.department.toLowerCase().includes(query))
+                                                            );    
+                                                        }    
+                                                    }" @ click.away="open = false">
                                         <button type="button" @click="open = !open"
                                             class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
                                             :class="{ 'border-green-500 ring-1 ring-green-500': open }">
@@ -849,7 +878,7 @@
                                             <div class="sticky top-0 bg-white p-2 border-b border-gray-200 rounded-t-xl">
                                                 <div class="relative">
                                                     <input type="text" x-model="searchQuery" @click.stop
-                                                        placeholder="Search by name, NPK, or department..."
+                                                        placeholder="Cari berdasarkan nama, NPK, atau departemen..."
                                                         class="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500">
                                                     <i
                                                         class="fas fa-search absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
@@ -882,24 +911,25 @@
                                                 <div x-show="filteredUsers.length === 0"
                                                     class="py-4 text-center text-sm text-gray-500">
                                                     <i class="fas fa-search text-gray-400 mb-2"></i>
-                                                    <p>No users found matching "<span x-text="searchQuery"></span>"</p>
+                                                    <p>Tidak ada pengguna yang cocok dengan "<span
+                                                            x-text="searchQuery"></span>"</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <p class="text-sm text-gray-700"><span class="font-medium">Current Organizer NPK:</span>
+                                <p class="text-sm text-gray-700"><span class="font-medium">NPK Penyelenggara:</span>
                                     {{ $allUsers->firstWhere('id', $organizer_user_id)?->npk ?? 'N/A' }}</p>
-                                <p class="text-sm text-gray-700"><span class="font-medium">Department:</span>
+                                <p class="text-sm text-gray-700"><span class="font-medium">Departemen:</span>
                                     {{ $allUsers->firstWhere('id', $organizer_user_id)?->department ?? 'N/A' }}</p>
                             @else
                                 {{-- Regular user or create mode: show current user info --}}
-                                <p class="text-sm text-gray-700"><span class="font-medium">Name:</span>
+                                <p class="text-sm text-gray-700"><span class="font-medium">Nama:</span>
                                     {{ Auth::user()->name }}</p>
                                 <p class="text-sm text-gray-700"><span class="font-medium">NPK:</span>
                                     {{ Auth::user()->npk ?? 'N/A' }}</p>
-                                <p class="text-sm text-gray-700"><span class="font-medium">Department:</span>
+                                <p class="text-sm text-gray-700"><span class="font-medium">Departemen:</span>
                                     {{ Auth::user()->department ?? 'N/A' }}</p>
                             @endif
                         </div>
@@ -909,7 +939,7 @@
                     <!-- Pantry Card (Moved) -->
                     <div class="bg-white rounded-lg shadow-md" id="tour-pantry">
                         <div class="p-6">
-                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Pantry Orders</h4>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-4">Pesanan Pantry</h4>
                         </div>
                         <div class="p-6 bg-gray-50 rounded-b-lg">
                             @livewire('meeting.select-pantry-items', ['initialPantryItems' => $pantryOrders])
@@ -928,7 +958,7 @@
                         wire:target="submitForm"
                         class="inline-flex items-center justify-center px-6 py-3 bg-green-600 border border-transparent rounded-md font-semibold text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed transition ease-in-out duration-150 text-lg relative">
                         <span wire:loading.remove wire:target="submitForm">
-                            {{ $isEditMode ? 'Update Meeting' : 'Book Meeting' }}
+                            {{ $isEditMode ? 'Perbarui Pertemuan' : 'Buat Pertemuan' }}
                         </span>
                         <span wire:loading wire:target="submitForm" class="flex items-center">
                             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
@@ -939,7 +969,7 @@
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                 </path>
                             </svg>
-                            Processing...
+                            Sedang Memproses...
                         </span>
                     </button>
                 </div>

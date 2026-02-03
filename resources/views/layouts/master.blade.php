@@ -103,203 +103,177 @@
 
 
 
-                    @role('Super Admin|Admin')
-
-
-
-
-
-
-
-                    <div x-data="{ open: {{ request()->routeIs('master.*') ? 'true' : 'false' }} }" class="relative">
-
-                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('master.*')">
-
-                            <i class="fas fa-database mr-3"></i>
-
-                            <span>Master Data</span>
-
-                            <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
-
-                        </x-sidebar-link>
-
-                        <div x-show="open" x-cloak class="ml-4 border-l border-gray-300">
-
-                            <x-sidebar-link :href="route('master.external-participants.index')"
-                                :active="request()->routeIs('master.external-participants.*')">
-
-                                <i class="fas fa-user-friends mr-3"></i>
-
-                                <span>External Participants</span>
-
+                    @can('manage master data')
+                        <div x-data="{ open: {{ request()->routeIs('master.*') ? 'true' : 'false' }} }" class="relative">
+                            <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('master.*')">
+                                <i class="fas fa-database mr-3"></i>
+                                <span>Master Data</span>
+                                <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
                             </x-sidebar-link>
 
-                            <x-sidebar-link :href="route('master.pantry-items.index')"
-                                :active="request()->routeIs('master.pantry-items.*')">
+                            <div x-show="open" x-cloak class="ml-4 border-l border-gray-300">
+                                @can('manage external participants')
+                                    <x-sidebar-link :href="route('master.external-participants.index')"
+                                        :active="request()->routeIs('master.external-participants.*')">
+                                        <i class="fas fa-user-friends mr-3"></i>
+                                        <span>External Participants</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                                <i class="fas fa-boxes mr-3"></i>
+                                @can('manage pantry')
+                                    <x-sidebar-link :href="route('master.pantry-items.index')"
+                                        :active="request()->routeIs('master.pantry-items.*')">
+                                        <i class="fas fa-boxes mr-3"></i>
+                                        <span>Pantry Items</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                                <span>Pantry Items</span>
+                                @can('manage rooms')
+                                    <x-sidebar-link :href="route('master.rooms.index')"
+                                        :active="request()->routeIs('master.rooms.*')">
+                                        <i class="fas fa-door-closed mr-3"></i>
+                                        <span>Rooms</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                            </x-sidebar-link>
+                                @can('manage priority guests')
+                                    <x-sidebar-link :href="route('master.priority-guests.index')"
+                                        :active="request()->routeIs('master.priority-guests.*')">
+                                        <i class="fas fa-star mr-3"></i>
+                                        <span>Priority Guests</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                            <x-sidebar-link :href="route('master.rooms.index')"
-                                :active="request()->routeIs('master.rooms.*')">
-
-                                <i class="fas fa-door-closed mr-3"></i>
-
-                                <span>Rooms</span>
-
-                            </x-sidebar-link>
-
-                            <x-sidebar-link :href="route('master.priority-guests.index')"
-                                :active="request()->routeIs('master.priority-guests.*')">
-
-                                <i class="fas fa-star mr-3"></i>
-
-                                <span>Priority Guests</span>
-
-                            </x-sidebar-link>
-
-                            <x-sidebar-link :href="route('master.users.index')"
-                                :active="request()->routeIs('master.users.*')">
-
-                                <i class="fas fa-users-cog mr-3"></i>
-
-                                <span>Users</span>
-
-                            </x-sidebar-link>
-
+                                @can('manage users')
+                                    <x-sidebar-link :href="route('master.users.index')"
+                                        :active="request()->routeIs('master.users.*')">
+                                        <i class="fas fa-users-cog mr-3"></i>
+                                        <span>Users</span>
+                                    </x-sidebar-link>
+                                @endcan
+                            </div>
                         </div>
+                    @endcan
 
-                    </div>
+                    <!-- Master Data GA Group -->
+                    @can('manage assets')
+                        <div x-data="{ open: {{ request()->routeIs('ga.*') ? 'true' : 'false' }} }" class="relative">
+                            <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('ga.*')">
+                                <i class="fas fa-building mr-3"></i>
+                                <span>Master Data GA</span>
+                                <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
+                            </x-sidebar-link>
 
-                    @endrole
+                            <div x-show="open" x-cloak class="ml-4 border-l border-gray-300">
+                                <x-sidebar-link :href="route('ga.assets.index')" :active="request()->routeIs('ga.assets.*')">
+                                    <i class="fas fa-cubes mr-3"></i>
+                                    <span>Assets (GA)</span>
+                                </x-sidebar-link>
+
+                                <x-sidebar-link :href="route('ga.tickets.index')" :active="request()->routeIs('ga.tickets.*')">
+                                    <i class="fas fa-ticket-alt mr-3"></i>
+                                    <span>Tiket AC</span>
+                                </x-sidebar-link>
+                            </div>
+                        </div>
+                    @endcan
 
 
 
                     <!-- Meeting Management Group -->
 
-                    @role('Super Admin|Karyawan')
+                    @can('access meeting room')
+                        <div x-data="{ open: {{ request()->routeIs('meeting.*') ? 'true' : 'false' }} }" class="relative">
+                            <x-sidebar-link id="nav-meeting-mgmt" href="#" @click="open = !open"
+                                :active="request()->routeIs('meeting.*')">
+                                <i class="fas fa-handshake mr-3"></i>
+                                <span>Meeting Management</span>
+                                <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
+                            </x-sidebar-link>
 
-                    <div x-data="{ open: {{ request()->routeIs('meeting.*') ? 'true' : 'false' }} }" class="relative">
+                            <div x-show="open" x-cloak class="ml-4 border-l border-gray-700">
+                                @can('book rooms')
+                                    <x-sidebar-link :href="route('meeting.room-reservations.index')"
+                                        :active="request()->routeIs('meeting.room-reservations.*')">
+                                        <i class="fas fa-calendar-alt mr-3"></i>
+                                        <span>Room Reservation</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                        <x-sidebar-link id="nav-meeting-mgmt" href="#" @click="open = !open"
-                            :active="request()->routeIs('meeting.*')">
+                                @can('access meeting room')
+                                    <x-sidebar-link :href="route('meeting.meeting-lists.index')"
+                                        :active="request()->routeIs('meeting.meeting-lists.*')">
+                                        <i class="fas fa-list-alt mr-3"></i>
+                                        <span>Meeting List</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                            <i class="fas fa-handshake mr-3"></i>
+                                @can('view analytics')
+                                    <x-sidebar-link :href="route('meeting.analytics.index')"
+                                        :active="request()->routeIs('meeting.analytics.*')">
+                                        <i class="fas fa-chart-line mr-3"></i>
+                                        <span>{{ auth()->user()->hasRole('Super Admin') ? 'Analytics' : 'My Analytics' }}</span>
+                                    </x-sidebar-link>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
 
-                            <span>Meeting Management</span>
-
-                            <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
-
+                    @can('access meeting room')
+                        <x-sidebar-link :href="route('guide.index')" :active="request()->routeIs('guide.index')">
+                            <i class="fas fa-book-open mr-3"></i>
+                            <span>User Guide</span>
                         </x-sidebar-link>
 
-                        <div x-show="open" x-cloak class="ml-4 border-l border-gray-700">
-
-                            <x-sidebar-link :href="route('meeting.room-reservations.index')"
-                                :active="request()->routeIs('meeting.room-reservations.*')">
-
-                                <i class="fas fa-calendar-alt mr-3"></i>
-
-                                <span>Room Reservation</span>
-
-                            </x-sidebar-link>
-
-                            <x-sidebar-link :href="route('meeting.meeting-lists.index')"
-                                :active="request()->routeIs('meeting.meeting-lists.*')">
-
-                                <i class="fas fa-list-alt mr-3"></i>
-
-                                <span>Meeting List</span>
-
-                            </x-sidebar-link>
-
-
-
-                            <x-sidebar-link :href="route('meeting.analytics.index')"
-                                :active="request()->routeIs('meeting.analytics.*')">
-
-                                <i class="fas fa-chart-line mr-3"></i>
-
-                                <span>{{ auth()->user()->hasRole('Super Admin') ? 'Analytics' : 'My Analytics' }}</span>
-
-                            </x-sidebar-link>
-
-                        </div>
-
-                    </div>
-
-                    @endrole
-
-                    @role('Super Admin|Karyawan')
-                    <x-sidebar-link :href="route('guide.index')" :active="request()->routeIs('guide.index')">
-                        <i class="fas fa-book-open mr-3"></i>
-                        <span>User Guide</span>
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('survey.create')" :active="request()->routeIs('survey.create')">
-                        <i class="far fa-smile mr-3"></i>
-                        <span>Give Feedback</span>
-                    </x-sidebar-link>
-                    @endrole
+                        <x-sidebar-link :href="route('survey.create')" :active="request()->routeIs('survey.create')">
+                            <i class="far fa-smile mr-3"></i>
+                            <span>Give Feedback</span>
+                        </x-sidebar-link>
+                    @endcan
 
                     <!-- Settings Group -->
 
-                    @role('Super Admin')
-
-                    <div x-data="{ open: {{ request()->routeIs('settings.*') || request()->routeIs('survey.index') ? 'true' : 'false' }} }"
-                        class="relative">
-
-                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('settings.*') || request()->routeIs('survey.index')">
-
-                            <i class="fas fa-cogs mr-3"></i>
-
-                            <span>Settings & Tools</span>
-
-                            <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
-
-                        </x-sidebar-link>
-
-                        <div x-show="open" x-cloak class="ml-4 border-l border-gray-700">
-
-                            <x-sidebar-link :href="route('settings.configurations.index')"
-                                :active="request()->routeIs('settings.configurations.*')">
-
-                                <i class="fas fa-cog mr-3"></i>
-
-                                <span>Configurations</span>
-
+                    @canany(['manage configurations', 'manage roles and permissions', 'manage settings'])
+                        <div x-data="{ open: {{ request()->routeIs('settings.*') || request()->routeIs('survey.index') ? 'true' : 'false' }} }"
+                            class="relative">
+                            <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('settings.*') || request()->routeIs('survey.index')">
+                                <i class="fas fa-cogs mr-3"></i>
+                                <span>Settings & Tools</span>
+                                <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
                             </x-sidebar-link>
 
-                            <x-sidebar-link :href="route('settings.role-permissions.index')"
-                                :active="request()->routeIs('settings.role-permissions.*')">
+                            <div x-show="open" x-cloak class="ml-4 border-l border-gray-700">
+                                @can('manage configurations')
+                                    <x-sidebar-link :href="route('settings.configurations.index')"
+                                        :active="request()->routeIs('settings.configurations.*')">
+                                        <i class="fas fa-cog mr-3"></i>
+                                        <span>Configurations</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                                <i class="fas fa-user-shield mr-3"></i>
+                                @can('manage roles and permissions')
+                                    <x-sidebar-link :href="route('settings.role-permissions.index')"
+                                        :active="request()->routeIs('settings.role-permissions.*')">
+                                        <i class="fas fa-user-shield mr-3"></i>
+                                        <span>Role & Permissions</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-                                <span>Role & Permissions</span>
+                                @can('manage settings')
+                                    <x-sidebar-link :href="route('survey.index')" :active="request()->routeIs('survey.index')">
+                                        <i class="fas fa-poll mr-3"></i>
+                                        <span>Survey Results</span>
+                                    </x-sidebar-link>
 
-                            </x-sidebar-link>
-
-                            <x-sidebar-link :href="route('survey.index')" :active="request()->routeIs('survey.index')">
-
-                                <i class="fas fa-poll mr-3"></i>
-
-                                <span>Survey Results</span>
-
-                            </x-sidebar-link>
-
-                            <x-sidebar-link :href="route('settings.input-code.index')"
-                                :active="request()->routeIs('settings.input-code.*')">
-                                <i class="fas fa-terminal mr-3"></i>
-                                <span>Input Code</span>
-                            </x-sidebar-link>
-
+                                    <x-sidebar-link :href="route('settings.input-code.index')"
+                                        :active="request()->routeIs('settings.input-code.*')">
+                                        <i class="fas fa-terminal mr-3"></i>
+                                        <span>Input Code</span>
+                                    </x-sidebar-link>
+                                @endcan
+                            </div>
                         </div>
-
-                    </div>
-
-                    @endrole
+                    @endcanany
 
 
 
@@ -307,82 +281,34 @@
 
 
 
-                    @role('Super Admin|Resepsionis')
-
-
-
-                    <div x-data="{ open: {{ request()->routeIs('dashboard.receptionist') || request()->routeIs('master.pantry-items.*') ? 'true' : 'false' }} }"
-                        class="relative">
-
-
-
-                        <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('dashboard.receptionist') || request()->routeIs('master.pantry-items.*')">
-
-
-
-                            <i class="fas fa-concierge-bell mr-3"></i>
-
-
-
-                            <span>Receptionist</span>
-
-
-
-                            <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
-
-
-
-                        </x-sidebar-link>
-
-
-
-                        <div x-show="open" x-cloak class="ml-4 border-l border-gray-300">
-
-
-
-                            <x-sidebar-link :href="route('dashboard.receptionist')"
-                                :active="request()->routeIs('dashboard.receptionist')">
-
-
-
-                                <i class="fas fa-clipboard-list mr-3"></i>
-
-
-
-                                <span>Dashboard</span>
-
-
-
+                    @can('access pantry dashboard')
+                        <div x-data="{ open: {{ request()->routeIs('dashboard.receptionist') || request()->routeIs('master.pantry-items.*') ? 'true' : 'false' }} }"
+                            class="relative">
+                            <x-sidebar-link href="#" @click="open = !open" :active="request()->routeIs('dashboard.receptionist') || request()->routeIs('master.pantry-items.*')">
+                                <i class="fas fa-concierge-bell mr-3"></i>
+                                <span>Receptionist</span>
+                                <i class="fas fa-chevron-down ml-auto" :class="{ 'rotate-180': open }"></i>
                             </x-sidebar-link>
 
+                            <div x-show="open" x-cloak class="ml-4 border-l border-gray-300">
+                                @can('access pantry dashboard')
+                                    <x-sidebar-link :href="route('dashboard.receptionist')"
+                                        :active="request()->routeIs('dashboard.receptionist')">
+                                        <i class="fas fa-clipboard-list mr-3"></i>
+                                        <span>Dashboard</span>
+                                    </x-sidebar-link>
+                                @endcan
 
-
-                            <x-sidebar-link :href="route('master.pantry-items.index')"
-                                :active="request()->routeIs('master.pantry-items.*')">
-
-
-
-                                <i class="fas fa-boxes mr-3"></i>
-
-
-
-                                <span>Pantry Items</span>
-
-
-
-                            </x-sidebar-link>
-
-
-
+                                @can('manage pantry')
+                                    <x-sidebar-link :href="route('master.pantry-items.index')"
+                                        :active="request()->routeIs('master.pantry-items.*')">
+                                        <i class="fas fa-boxes mr-3"></i>
+                                        <span>Pantry Items</span>
+                                    </x-sidebar-link>
+                                @endcan
+                            </div>
                         </div>
-
-
-
-                    </div>
-
-
-
-                    @endrole
+                    @endcan
 
                     {{-- <!-- Tablet Display Link -->
                     <x-sidebar-link :href="route('tablet.room.display', ['room' => 1])"

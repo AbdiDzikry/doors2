@@ -1,76 +1,9 @@
-Ruang Kencana	2026-01-27	2026-01-27 13:30:00	2026-01-27 16:00:00	meeting IPP infra	meeting IPP infra	Andreas Calvin Gotandra	1
-Ruang Raung	2026-01-27	2026-01-27 10:00:00	2026-01-27 12:00:00	proses rpa yg di jalankan di adm	Untuk memperlancar proses rpa yg di jalankan di adm. Izin mengundang bapak-ibu utk meeting weekly evaluasi RPA: - hari: selasa 27 januari 2026 - ⁠jam: 10:00-11:40	Eka Wulandari	1
-Ruang Arjuna	2026-01-27	2026-01-27 07:00:00	2026-01-27 12:00:00	Internal SAP Meeting	Meeting E-Invoice-SAP Enhancement, Partial Payment with Termin	Fajar Faqih	1
-Ruang Kencana	2026-01-27	2026-01-27 07:00:00	2026-01-27 11:00:00	Meeting Marketing 4W	Meeting Marketing 4W	IGNATIUS BENNY SAPUTRO	1
-Ruang Rinjani	2026-01-27	2026-01-27 10:00:00	2026-01-27 16:00:00	Meeting dengan PT. HMMI & POSCO IJPC	Meeting dengan PT. HMMI & POSCO. PIC : Juniafit	ISMA SEPTIANI	1
-Ruang Merapi	2026-01-27	2026-01-27 09:00:00	2026-01-27 12:00:00	meeting dengan supplier baru (PIC Emanuel)	meeting dengan supplier baru (PIC Emanuel)	ISMA SEPTIANI	1
-Ruang Ciremai	2026-01-27	2026-01-27 14:30:00	2026-01-27 17:30:00	Eksternal	Meeting Vendor Pak Ali	Jihan	1
-Ruang Galunggung	2026-01-27	2026-01-27 09:30:00	2026-01-27 12:00:00	Review Sosialisasi STO vendor tahun 2026	Review Sosialisasi STO vendor tahun 2026	Muhammad Alpin Dwizahra	1
-Ruang Merbabu	2026-01-27	2026-01-27 10:00:00	2026-01-27 11:30:00	Meeting Weekly RPA	Meeting Weekly RPA	Ricky	1
-Ruang Semeru	2026-01-27	2026-01-27 07:00:00	2026-01-27 13:00:00	Metting project	Metting project	Tri Witanto Aldian	1
-
-==========================================
-
-Meeting Marketing 4w
-Ruang Kencana
-27-01-2026
-07:00 - 11:00
-Fa
-Faizal
-Scheduled	
-
-Meeting Dengan Supplier Baru (pic Emanuel)
-Ruang Merapi
-27-01-2026
-09:00 - 12:00
-An
-Ansori
-Scheduled	
-
-Review Sosialisasi Sto Vendor Tahun 2026
-Ruang Galunggung
-27-01-2026
-09:30 - 12:00
-Ig
-Ignatius Brilian Mahendra
-Scheduled	
-
-Proses Rpa Yg Di Jalankan Di Adm
-Ruang Raung
-27-01-2026
-10:00 - 12:00
-Yo
-Yosa Ramdani
-Scheduled	
-
-Meeting Dengan Pt. Hmmi & Posco Ijpc
-Ruang Rinjani
-27-01-2026
-10:00 - 16:00
-An
-Ansori
-Scheduled	
-
-Meeting Weekly Rpa
-Ruang Merbabu
-27-01-2026
-10:00 - 11:30
-Yo
-Yosa Ramdani
-Scheduled	
-
-Meeting Internal
-Ruang Semeru
-27-01-2026
-13:00 - 17:00
-Fa
-Fatkhul Anam Ma'Arif
-Scheduled	
-
-Meeting Ipp Infra
-Ruang Kencana
-27-01-2026
-13:30 - 16:00
-Lu
-Lukman Hawari Pratama
-Scheduled
+PS C:\laragon\www\doors\doors-app> php artisan tinker test_email_script.php
+Psy Shell v0.12.15 (PHP 8.2.12 — cli) by Justin Hileman
+New PHP manual is available (latest: 3.0.0). Update with `doc --update-manual`
+Meeting created: Test Notification System
+ICS Generated 449 bytes.
+ICS Format Valid.
+Email Sending Failed: Failed to authenticate on SMTP server with username "notification@dp.dharmap.com" using the following authenticators: "LOGIN", "XOAUTH2". Authenticator "LOGIN" returned "Expected response code "235" but got code "535", with message "535 5.7.139 Authentication unsuccessful, the user credentials were incorrect. [SG2PR04CA0172.apcprd04.prod.outlook.com 2026-02-03T02:10:41.588Z 08DE61CB242989CC]".". Authenticator "XOAUTH2" returned "Expected response code "235" but got code "535", with message "535 5.7.3 Authentication unsuccessful [SG2PR04CA0172.apcprd04.prod.outlook.com 2026-02-03T02:10:52.377Z 08DE61CB242989CC]".".
+Cleanup done.
+>                                 

@@ -11,7 +11,6 @@ use App\Models\PantryOrder;
 use App\Models\RecurringMeeting;
 use App\Http\Requests\MeetingRequest;
 use App\Mail\MeetingInvitation;
-use App\Services\IcsService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Events\MeetingStatusUpdated; // Import the event
@@ -29,7 +28,7 @@ class RoomReservationController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('facilities', 'like', '%' . $search . '%');
+                    ->orWhere('facilities', 'like', '%' . $search . '%');
             });
         }
 
@@ -38,14 +37,14 @@ class RoomReservationController extends Controller
             if ($status === 'in_use') {
                 $query->whereHas('meetings', function ($q) use ($now) {
                     $q->where('start_time', '<=', $now)
-                      ->where('end_time', '>=', $now)
-                      ->where('status', '!=', 'cancelled');
+                        ->where('end_time', '>=', $now)
+                        ->where('status', '!=', 'cancelled');
                 });
             } elseif ($status === 'available') {
                 $query->whereDoesntHave('meetings', function ($q) use ($now) {
                     $q->where('start_time', '<=', $now)
-                      ->where('end_time', '>=', $now)
-                      ->where('status', '!=', 'cancelled');
+                        ->where('end_time', '>=', $now)
+                        ->where('status', '!=', 'cancelled');
                 })->where('status', 'available');
             } else {
                 $query->where('status', $status);
@@ -55,26 +54,28 @@ class RoomReservationController extends Controller
         $view = $request->input('view', 'grid');
         $date = $request->input('date', now()->format('Y-m-d'));
 
-        $rooms = $query->orderBy('name', 'asc')->with(['meetings' => function ($q) use ($now, $view, $date) {
-            if ($view === 'timeline') {
-                $q->whereDate('start_time', $date)
-                  ->where('status', '!=', 'cancelled')
-                  ->orderBy('start_time');
-            } else {
-                $q->where('start_time', '<=', $now)
-                  ->where('end_time', '>=', $now)
-                  ->where('status', '!=', 'cancelled');
+        $rooms = $query->orderBy('name', 'asc')->with([
+            'meetings' => function ($q) use ($now, $view, $date) {
+                if ($view === 'timeline') {
+                    $q->whereDate('start_time', $date)
+                        ->where('status', '!=', 'cancelled')
+                        ->orderBy('start_time');
+                } else {
+                    $q->where('start_time', '<=', $now)
+                        ->where('end_time', '>=', $now)
+                        ->where('status', '!=', 'cancelled');
+                }
             }
-        }])->get();
+        ])->get();
 
         $rooms->each(function ($room) {
             $room->is_in_use = $room->meetings->isNotEmpty();
             // specific logic for card view only to show current meeting
             if ($room->meetings->isNotEmpty()) {
-                 // For grid view, we only loaded current meeting, so first is correct.
-                 // For timeline view, we loaded many, but we won't strictly use current_meeting for status display in the same way, 
-                 // effectively we can just grab the first one that is "now" if we really needed to, but for simplicity:
-                 $room->current_meeting = $room->meetings->first();
+                // For grid view, we only loaded current meeting, so first is correct.
+                // For timeline view, we loaded many, but we won't strictly use current_meeting for status display in the same way, 
+                // effectively we can just grab the first one that is "now" if we really needed to, but for simplicity:
+                $room->current_meeting = $room->meetings->first();
             }
         });
 
@@ -204,9 +205,6 @@ class RoomReservationController extends Controller
 
     private function sendMeetingInvitation(Meeting $meeting)
     {
-        $icsService = new IcsService();
-        $icsContent = $icsService->generateIcsFile($meeting);
-
         // Get all participants (internal and external)
         $participants = collect();
         if ($meeting->user) {
@@ -218,7 +216,11 @@ class RoomReservationController extends Controller
 
         foreach ($participants as $participant) {
             if ($participant->email) {
-                Mail::to($participant->email)->send(new MeetingInvitation($meeting, $icsContent));
+                try {
+                    Mail::to($participant->email)->queue(new MeetingInvitation($meeting));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send meeting invitation: ' . $e->getMessage());
+                }
             }
         }
     }

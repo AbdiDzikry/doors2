@@ -2,28 +2,28 @@
 
 namespace App\Mail;
 
+use App\Helpers\IcsGenerator;
+use App\Models\Meeting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Meeting;
 
 class MeetingInvitation extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $meeting;
-    public $icsContent;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Meeting $meeting, string $icsContent)
+    public function __construct(Meeting $meeting)
     {
         $this->meeting = $meeting;
-        $this->icsContent = $icsContent;
     }
 
     /**
@@ -32,7 +32,7 @@ class MeetingInvitation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Meeting Invitation: ' . $this->meeting->topic,
+            subject: 'Undangan Meeting: ' . $this->meeting->topic,
         );
     }
 
@@ -42,10 +42,7 @@ class MeetingInvitation extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.meetings.invitation',
-            with: [
-                'meeting' => $this->meeting,
-            ],
+            view: 'emails.meetings.invitation',
         );
     }
 
@@ -56,8 +53,10 @@ class MeetingInvitation extends Mailable
      */
     public function attachments(): array
     {
+        $icsContent = IcsGenerator::generate($this->meeting);
+
         return [
-            \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $this->icsContent, 'meeting.ics')
+            Attachment::fromData(fn() => $icsContent, 'invite.ics')
                 ->withMime('text/calendar'),
         ];
     }

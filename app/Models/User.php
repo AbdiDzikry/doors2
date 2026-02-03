@@ -48,7 +48,7 @@ class User extends Authenticatable
     /**
      * Get the attributes that should be cast.
      *
-     * @return array<string, string>
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function meetingParticipants()
     {

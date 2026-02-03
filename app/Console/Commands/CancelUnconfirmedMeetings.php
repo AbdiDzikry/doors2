@@ -40,6 +40,7 @@ class CancelUnconfirmedMeetings extends Command
         }
 
         foreach ($meetingsToCancel as $meeting) {
+            /** @var Meeting $meeting */
             $inventoryService->refundStockForMeeting($meeting);
             $meeting->update(['status' => 'cancelled']);
             $this->warn("Meeting ID {$meeting->id} ('{$meeting->topic}') has been cancelled due to non-confirmation.");

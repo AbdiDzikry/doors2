@@ -47,15 +47,15 @@ class RoomController extends Controller
             if ($request->hasFile('image')) {
                 $validatedData['image_path'] = $request->file('image')->store('rooms', 'local');
             }
-    
+
             Room::create($validatedData);
-    
+
             return redirect()->route('master.rooms.create')
-                            ->with('message','Room created successfully.');
+                ->with('message', 'Room created successfully.');
         } catch (\Exception $e) {
             Log::error('Error creating room: ' . $e->getMessage());
             return redirect()->route('master.rooms.create')
-                            ->with('error','Failed to create room. Please check the logs for details.');
+                ->with('error', 'Failed to create room. Please check the logs for details.');
         }
     }
 
@@ -102,12 +102,12 @@ class RoomController extends Controller
             $room->update($validatedData);
 
             return redirect()->route('master.rooms.edit', $room->id)
-                            ->with('message','Room updated successfully.');
+                ->with('message', 'Room updated successfully.');
 
         } catch (\Exception $e) {
             Log::error('Error updating room: ' . $e->getMessage());
             return redirect()->route('master.rooms.edit', $room->id)
-                            ->with('error','Failed to update room. Please check the logs for details.');
+                ->with('error', 'Failed to update room. Please check the logs for details.');
         }
     }
 
@@ -122,7 +122,7 @@ class RoomController extends Controller
         $room->delete();
 
         return redirect()->route('master.rooms.index')
-                        ->with('success','Room deleted successfully');
+            ->with('success', 'Room deleted successfully');
     }
 
     public function getImage($filename)
@@ -131,8 +131,10 @@ class RoomController extends Controller
 
         $disk = null;
         if (Storage::disk('local')->exists($path)) {
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
             $disk = Storage::disk('local');
         } elseif (Storage::disk('public')->exists($path)) {
+            /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
             $disk = Storage::disk('public');
         } else {
             abort(404);
