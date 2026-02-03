@@ -4,33 +4,35 @@
 
 @section('content')
     @push('styles')
-    <style>
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* Hide native date picker icon but keep functionality */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
-        }
-    </style>
+        <style>
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            /* Hide native date picker icon but keep functionality */
+            input[type="date"]::-webkit-calendar-picker-indicator {
+                background: transparent;
+                bottom: 0;
+                color: transparent;
+                cursor: pointer;
+                height: auto;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+            }
+        </style>
     @endpush
 
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8" x-data="{ activeTab: '{{ $activeTab }}' }">
-            
+
             <!-- Header -->
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                 <div>
@@ -38,7 +40,8 @@
                     <p class="mt-2 text-sm text-gray-500">Manage and track all your scheduled room reservations.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                     <a href="{{ route('meeting.room-reservations.index') }}" id="tour-new-booking-btn" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
+                    <a href="{{ route('meeting.room-reservations.index') }}" id="tour-new-booking-btn"
+                        class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all">
                         <i class="fas fa-plus mr-2"></i> New Booking
                     </a>
                 </div>
@@ -49,15 +52,17 @@
                 <div class="border-b border-gray-200 overflow-x-auto no-scrollbar">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                         <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}"
-                           class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 group flex items-center"
-                           :class="{ 'border-green-500 text-green-600': activeTab === 'meeting-list', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'meeting-list' }">
-                           <i class="fas fa-list-ul mr-2" :class="{ 'text-green-500': activeTab === 'meeting-list', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'meeting-list' }"></i>
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 group flex items-center"
+                            :class="{ 'border-green-500 text-green-600': activeTab === 'meeting-list', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'meeting-list' }">
+                            <i class="fas fa-list-ul mr-2"
+                                :class="{ 'text-green-500': activeTab === 'meeting-list', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'meeting-list' }"></i>
                             All Meetings
                         </a>
                         <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'my-meetings']) }}"
-                           class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 group flex items-center"
-                           :class="{ 'border-green-500 text-green-600': activeTab === 'my-meetings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'my-meetings' }">
-                           <i class="fas fa-user-clock mr-2" :class="{ 'text-green-500': activeTab === 'my-meetings', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'my-meetings' }"></i>
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 group flex items-center"
+                            :class="{ 'border-green-500 text-green-600': activeTab === 'my-meetings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'my-meetings' }">
+                            <i class="fas fa-user-clock mr-2"
+                                :class="{ 'text-green-500': activeTab === 'my-meetings', 'text-gray-400 group-hover:text-gray-500': activeTab !== 'my-meetings' }"></i>
                             My Meetings
                         </a>
 
@@ -66,156 +71,164 @@
             </div>
 
             <!-- Tab Content -->
-            <div x-show="activeTab === 'meeting-list'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
-                
+            <div x-show="activeTab === 'meeting-list'" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+
                 <!-- Filter Section -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 mb-4" id="tour-list-filter">
                     <form action="{{ route('meeting.meeting-lists.index') }}" method="GET" x-data="{ 
-                        filter: '{{ request('filter', 'day') }}',
-                        updateFilter() {
-                            if (this.filter !== 'custom') {
-                                document.getElementById('start_date').value = '';
-                                document.getElementById('end_date').value = '';
-                            }
-                        }
-                    }">
+                                        filter: '{{ request('filter', 'day') }}',
+                                        updateFilter() {
+                                            if (this.filter !== 'custom') {
+                                                document.getElementById('start_date').value = '';
+                                                document.getElementById('end_date').value = '';
+                                            }
+                                        }
+                                    }">
                         <input type="hidden" name="tab" value="meeting-list">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                             <!-- Date Range Picker (Unified) -->
                             <div class="md:col-span-5" x-show="filter === 'custom'" x-cloak x-transition>
-                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Date Range</label>
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Date
+                                    Range</label>
                                 <div class="relative" x-data="{
-                                    startDate: '{{ request('start_date') }}',
-                                    endDate: '{{ request('end_date') }}',
-                                    month: '',
-                                    year: '',
-                                    no_of_days: [],
-                                    blankdays: [],
-                                    days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                                    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                                    open: false,
-                                    
-                                    init() {
-                                        let today = new Date();
-                                        // Initialize with start date month if exists, else today
-                                        if (this.startDate) {
-                                            let start = new Date(this.startDate);
-                                            this.month = start.getMonth();
-                                            this.year = start.getFullYear();
-                                        } else {
-                                            this.month = today.getMonth();
-                                            this.year = today.getFullYear();
-                                        }
-                                        this.getNoOfDays();
-                                    },
+                                                    startDate: '{{ request('start_date') }}',
+                                                    endDate: '{{ request('end_date') }}',
+                                                    month: '',
+                                                    year: '',
+                                                    no_of_days: [],
+                                                    blankdays: [],
+                                                    days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                                                    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                                                    open: false,
 
-                                    isToday(date) {
-                                        const d = new Date(this.year, this.month, date);
-                                        const today = new Date();
-                                        return d.toDateString() === today.toDateString();
-                                    },
+                                                    init() {
+                                                        let today = new Date();
+                                                        // Initialize with start date month if exists, else today
+                                                        if (this.startDate) {
+                                                            let start = new Date(this.startDate);
+                                                            this.month = start.getMonth();
+                                                            this.year = start.getFullYear();
+                                                        } else {
+                                                            this.month = today.getMonth();
+                                                            this.year = today.getFullYear();
+                                                        }
+                                                        this.getNoOfDays();
+                                                    },
 
-                                    // Check if date is strictly the start or end date
-                                    isSelected(date) {
-                                        const d = new Date(this.year, this.month, date).getTime();
-                                        const start = this.startDate ? new Date(this.startDate).getTime() : 0;
-                                        const end = this.endDate ? new Date(this.endDate).getTime() : 0;
-                                        return d === start || d === end;
-                                    },
+                                                    isToday(date) {
+                                                        const d = new Date(this.year, this.month, date);
+                                                        const today = new Date();
+                                                        return d.toDateString() === today.toDateString();
+                                                    },
 
-                                    // Check if date is between start and end
-                                    isInRange(date) {
-                                        if (!this.startDate || !this.endDate) return false;
-                                        const d = new Date(this.year, this.month, date).getTime();
-                                        const start = new Date(this.startDate).getTime();
-                                        const end = new Date(this.endDate).getTime();
-                                        return d > start && d < end;
-                                    },
+                                                    // Check if date is strictly the start or end date
+                                                    isSelected(date) {
+                                                        const d = new Date(this.year, this.month, date).getTime();
+                                                        const start = this.startDate ? new Date(this.startDate).getTime() : 0;
+                                                        const end = this.endDate ? new Date(this.endDate).getTime() : 0;
+                                                        return d === start || d === end;
+                                                    },
 
-                                    getDateValue(date) {
-                                        let selectedDate = new Date(this.year, this.month, date);
-                                        // Adjust for timezone offset to prevent day shift when formatting
-                                        selectedDate.setMinutes(selectedDate.getMinutes() - selectedDate.getTimezoneOffset());
-                                        let formatted = selectedDate.toISOString().slice(0, 10);
+                                                    // Check if date is between start and end
+                                                    isInRange(date) {
+                                                        if (!this.startDate || !this.endDate) return false;
+                                                        const d = new Date(this.year, this.month, date).getTime();
+                                                        const start = new Date(this.startDate).getTime();
+                                                        const end = new Date(this.endDate).getTime();
+                                                        return d > start && d < end;
+                                                    },
 
-                                        if (!this.startDate || (this.startDate && this.endDate)) {
-                                            // Start new selection
-                                            this.startDate = formatted;
-                                            this.endDate = '';
-                                        } else {
-                                            // We have start, verify end
-                                            if (new Date(formatted) < new Date(this.startDate)) {
-                                                // New date is before start, so it becomes new start
-                                                this.startDate = formatted;
-                                            } else {
-                                                // Valid end date
-                                                this.endDate = formatted;
-                                                this.open = false; // Close on complete selection
-                                            }
-                                        }
-                                    },
+                                                    getDateValue(date) {
+                                                        let selectedDate = new Date(this.year, this.month, date);
+                                                        // Adjust for timezone offset to prevent day shift when formatting
+                                                        selectedDate.setMinutes(selectedDate.getMinutes() - selectedDate.getTimezoneOffset());
+                                                        let formatted = selectedDate.toISOString().slice(0, 10);
 
-                                    getNoOfDays() {
-                                        let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
-                                        let dayOfWeek = new Date(this.year, this.month).getDay();
-                                        this.blankdays = Array(dayOfWeek).fill(null);
-                                        this.no_of_days = Array.from({length: daysInMonth}, (_, i) => i + 1);
-                                    },
+                                                        if (!this.startDate || (this.startDate && this.endDate)) {
+                                                            // Start new selection
+                                                            this.startDate = formatted;
+                                                            this.endDate = '';
+                                                        } else {
+                                                            // We have start, verify end
+                                                            if (new Date(formatted) < new Date(this.startDate)) {
+                                                                // New date is before start, so it becomes new start
+                                                                this.startDate = formatted;
+                                                            } else {
+                                                                // Valid end date
+                                                                this.endDate = formatted;
+                                                                this.open = false; // Close on complete selection
+                                                            }
+                                                        }
+                                                    },
 
-                                    nextMonth() {
-                                        this.month++;
-                                        if (this.month > 11) { this.month = 0; this.year++; }
-                                        this.getNoOfDays();
-                                    },
-                                    prevMonth() {
-                                        this.month--;
-                                        if (this.month < 0) { this.month = 11; this.year--; }
-                                        this.getNoOfDays();
-                                    },
+                                                    getNoOfDays() {
+                                                        let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+                                                        let dayOfWeek = new Date(this.year, this.month).getDay();
+                                                        this.blankdays = Array(dayOfWeek).fill(null);
+                                                        this.no_of_days = Array.from({length: daysInMonth}, (_, i) => i + 1);
+                                                    },
 
-                                    formattedRange() {
-                                        if (!this.startDate) return 'Select Date Range';
-                                        if (this.startDate && !this.endDate) return this.formatDateDisplay(this.startDate) + ' - ...';
-                                        return this.formatDateDisplay(this.startDate) + ' - ' + this.formatDateDisplay(this.endDate);
-                                    },
+                                                    nextMonth() {
+                                                        this.month++;
+                                                        if (this.month > 11) { this.month = 0; this.year++; }
+                                                        this.getNoOfDays();
+                                                    },
+                                                    prevMonth() {
+                                                        this.month--;
+                                                        if (this.month < 0) { this.month = 11; this.year--; }
+                                                        this.getNoOfDays();
+                                                    },
 
-                                    formatDateDisplay(dateStr) {
-                                        if(!dateStr) return '';
-                                        let d = new Date(dateStr);
-                                        return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
-                                    }
-                                }" x-init="init()" @click.away="open = false">
-                                    
+                                                    formattedRange() {
+                                                        if (!this.startDate) return 'Select Date Range';
+                                                        if (this.startDate && !this.endDate) return this.formatDateDisplay(this.startDate) + ' - ...';
+                                                        return this.formatDateDisplay(this.startDate) + ' - ' + this.formatDateDisplay(this.endDate);
+                                                    },
+
+                                                    formatDateDisplay(dateStr) {
+                                                        if(!dateStr) return '';
+                                                        let d = new Date(dateStr);
+                                                        return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
+                                                    }
+                                                }" x-init="init()" @click.away="open = false">
+
                                     <input type="hidden" name="start_date" x-model="startDate">
                                     <input type="hidden" name="end_date" x-model="endDate">
-                                    
-                                    <button type="button" @click="open = !open" 
+
+                                    <button type="button" @click="open = !open"
                                         class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200 text-gray-700"
                                         :class="{ 'border-green-500 ring-1 ring-green-500': open }">
                                         <span class="block truncate" x-text="formattedRange()"></span>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
+                                        <span
+                                            class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none text-gray-400 group-hover:text-green-600 transition-colors">
                                             <i class="fas fa-calendar-alt text-xs"></i>
                                         </span>
                                     </button>
 
                                     <!-- Calendar Dropdown -->
-                                    <div x-show="open" 
+                                    <div x-show="open"
                                         class="absolute z-50 mt-1 w-72 bg-white shadow-xl rounded-xl p-4 text-sm border border-green-500/30 ring-1 ring-black ring-opacity-5"
-                                        style="display: none;" 
-                                        x-transition:enter="transition ease-out duration-100"
+                                        style="display: none;" x-transition:enter="transition ease-out duration-100"
                                         x-transition:enter-start="transform opacity-0 scale-95"
                                         x-transition:enter-end="transform opacity-100 scale-100">
-                                        
+
                                         <div class="flex items-center justify-between mb-4">
                                             <div>
-                                                <span x-text="months[month]" class="text-base font-bold text-gray-800"></span>
+                                                <span x-text="months[month]"
+                                                    class="text-base font-bold text-gray-800"></span>
                                                 <span x-text="year" class="ml-1 text-base text-gray-600 font-normal"></span>
                                             </div>
                                             <div class="flex items-center space-x-1">
-                                                <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors" @click="prevMonth">
+                                                <button type="button"
+                                                    class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
+                                                    @click="prevMonth">
                                                     <i class="fas fa-chevron-left text-xs"></i>
                                                 </button>
-                                                <button type="button" class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors" @click="nextMonth">
+                                                <button type="button"
+                                                    class="p-1.5 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
+                                                    @click="nextMonth">
                                                     <i class="fas fa-chevron-right text-xs"></i>
                                                 </button>
                                             </div>
@@ -223,7 +236,9 @@
 
                                         <div class="grid grid-cols-7 mb-2">
                                             <template x-for="day in days">
-                                                <div x-text="day" class="text-xs font-semibold text-center text-gray-400 uppercase tracking-wide"></div>
+                                                <div x-text="day"
+                                                    class="text-xs font-semibold text-center text-gray-400 uppercase tracking-wide">
+                                                </div>
                                             </template>
                                         </div>
 
@@ -233,69 +248,81 @@
                                             </template>
                                             <template x-for="date in no_of_days" :key="date">
                                                 <div class="relative h-8 px-0.5">
-                                                    <div @click="getDateValue(date)"
-                                                        x-text="date"
+                                                    <div @click="getDateValue(date)" x-text="date"
                                                         class="w-full h-full flex items-center justify-center cursor-pointer text-xs rounded-md transition-all duration-100 border border-transparent"
                                                         :class="{ 
-                                                            'bg-green-600 text-white font-bold shadow-sm': isSelected(date), 
-                                                            'bg-green-100 text-green-800': isInRange(date),
-                                                            'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-200': !isSelected(date) && !isInRange(date),
-                                                            'ring-1 ring-green-500': isToday(date) && !isSelected(date) && !isInRange(date)
-                                                        }"
-                                                    ></div>
+                                                                            'bg-green-600 text-white font-bold shadow-sm': isSelected(date), 
+                                                                            'bg-green-100 text-green-800': isInRange(date),
+                                                                            'text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-200': !isSelected(date) && !isInRange(date),
+                                                                            'ring-1 ring-green-500': isToday(date) && !isSelected(date) && !isInRange(date)
+                                                                        }"></div>
                                                 </div>
                                             </template>
                                         </div>
 
                                         <div class="flex justify-between mt-4 pt-3 border-t border-gray-100">
-                                            <button type="button" @click="startDate=''; endDate=''; open=false" class="text-xs font-medium text-gray-500 hover:text-red-500 transition-colors">Clear</button>
-                                            <button type="button" @click="let d=new Date(); startDate=d.toISOString().slice(0,10); endDate=d.toISOString().slice(0,10); open=false" class="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors">Today</button>
+                                            <button type="button" @click="startDate=''; endDate=''; open=false"
+                                                class="text-xs font-medium text-gray-500 hover:text-red-500 transition-colors">Clear</button>
+                                            <button type="button"
+                                                @click="let d=new Date(); startDate=d.toISOString().slice(0,10); endDate=d.toISOString().slice(0,10); open=false"
+                                                class="text-xs font-semibold text-green-600 hover:text-green-800 transition-colors">Today</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Filter & Search -->
                             <div class="md:col-span-4 grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Period</label>
+                                    <label
+                                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Period</label>
                                     <div class="relative" x-data="{ 
-                                        open: false, 
-                                        options: {
-                                            'custom': 'Custom Range', 
-                                            'day': 'Today', 
-                                            'week': 'This Week', 
-                                            'month': 'This Month',
-                                            'year': 'This Year',
-                                            'all': 'All Time'
-                                        },
-                                        get activeLabel() { return this.options[this.filter] } 
-                                    }" @click.away="open = false">
+                                                        open: false, 
+                                                        options: {
+                                                            'custom': 'Custom Range', 
+                                                            'day': 'Today', 
+                                                            'week': 'This Week', 
+                                                            'month': 'This Month',
+                                                            'year': 'This Year',
+                                                            'all': 'All Time'
+                                                        },
+                                                        get activeLabel() { return this.options[this.filter] } 
+                                                    }" @click.away="open = false">
                                         <!-- Hidden Native Input for Form Submission -->
                                         <input type="hidden" name="filter" x-model="filter">
 
                                         <!-- Custom Trigger Button -->
-                                        <button type="button" @click="open = !open" 
+                                        <button type="button" @click="open = !open"
                                             class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200"
                                             :class="{ 'border-green-500 ring-1 ring-green-500': open }">
                                             <span class="block truncate" x-text="activeLabel"></span>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            <span
+                                                class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200"
+                                                    :class="{ 'transform rotate-180': open }"></i>
                                             </span>
                                         </button>
 
                                         <!-- Custom Dropdown List -->
-                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter-start="transform opacity-0 scale-95"
+                                            x-transition:enter-end="transform opacity-100 scale-100"
+                                            x-transition:leave="transition ease-in duration-75"
+                                            x-transition:leave-start="transform opacity-100 scale-100"
+                                            x-transition:leave-end="transform opacity-0 scale-95"
                                             class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-xs border border-green-500/30"
                                             style="display: none;">
                                             <template x-for="(label, value) in options" :key="value">
                                                 <div @click="filter = value; updateFilter(); open = false"
-                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
-                                                     :class="{ 'text-green-900 bg-green-50': filter === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': filter !== value }">
-                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': filter === value, 'font-normal': filter !== value }" x-text="label"></span>
-                                                    
+                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                    :class="{ 'text-green-900 bg-green-50': filter === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': filter !== value }">
+                                                    <span class="block truncate font-medium"
+                                                        :class="{ 'font-semibold': filter === value, 'font-normal': filter !== value }"
+                                                        x-text="label"></span>
+
                                                     <!-- Checkmark for selected item -->
-                                                    <span x-show="filter === value" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                    <span x-show="filter === value"
+                                                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
                                                         <i class="fas fa-check text-xs"></i>
                                                     </span>
                                                 </div>
@@ -304,39 +331,50 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Status</label>
+                                    <label
+                                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Status</label>
                                     <div class="relative" x-data="{
-                                        status: '{{ request('status_filter', 'all') }}',
-                                        open: false,
-                                        options: {
-                                            'all': 'All Status',
-                                            'scheduled': 'Scheduled',
-                                            'ongoing': 'Ongoing',
-                                            'completed': 'Completed',
-                                            'cancelled': 'Cancelled'
-                                        },
-                                        get activeLabel() { return this.options[this.status] }
-                                    }" @click.away="open = false">
+                                                        status: '{{ request('status_filter', 'all') }}',
+                                                        open: false,
+                                                        options: {
+                                                            'all': 'All Status',
+                                                            'scheduled': 'Scheduled',
+                                                            'ongoing': 'Ongoing',
+                                                            'completed': 'Completed',
+                                                            'cancelled': 'Cancelled'
+                                                        },
+                                                        get activeLabel() { return this.options[this.status] }
+                                                    }" @click.away="open = false">
                                         <input type="hidden" name="status_filter" x-model="status">
-                                        
-                                        <button type="button" @click="open = !open" 
+
+                                        <button type="button" @click="open = !open"
                                             class="relative w-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm pl-3 pr-8 py-1.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-xs transition-all duration-200"
                                             :class="{ 'border-green-500 ring-1 ring-green-500': open }">
                                             <span class="block truncate" x-text="activeLabel"></span>
-                                            <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200" :class="{ 'transform rotate-180': open }"></i>
+                                            <span
+                                                class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform duration-200"
+                                                    :class="{ 'transform rotate-180': open }"></i>
                                             </span>
                                         </button>
 
-                                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
+                                        <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter-start="transform opacity-0 scale-95"
+                                            x-transition:enter-end="transform opacity-100 scale-100"
+                                            x-transition:leave="transition ease-in duration-75"
+                                            x-transition:leave-start="transform opacity-100 scale-100"
+                                            x-transition:leave-end="transform opacity-0 scale-95"
                                             class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-xs border border-green-500/30"
                                             style="display: none;">
                                             <template x-for="(label, value) in options" :key="value">
                                                 <div @click="status = value; open = false"
-                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
-                                                     :class="{ 'text-green-900 bg-green-50': status === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': status !== value }">
-                                                    <span class="block truncate font-medium" :class="{ 'font-semibold': status === value, 'font-normal': status !== value }" x-text="label"></span>
-                                                    <span x-show="status === value" class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
+                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
+                                                    :class="{ 'text-green-900 bg-green-50': status === value, 'text-gray-900 hover:bg-green-50 hover:text-green-700': status !== value }">
+                                                    <span class="block truncate font-medium"
+                                                        :class="{ 'font-semibold': status === value, 'font-normal': status !== value }"
+                                                        x-text="label"></span>
+                                                    <span x-show="status === value"
+                                                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600">
                                                         <i class="fas fa-check text-xs"></i>
                                                     </span>
                                                 </div>
@@ -345,17 +383,22 @@
                                     </div>
                                 </div>
                                 <div>
-                                     <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Search</label>
-                                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Topic, Room..." class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 text-xs py-1.5 bg-gray-50">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Search</label>
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                        placeholder="Topic, Room..."
+                                        class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 text-xs py-1.5 bg-gray-50">
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="md:col-span-3 flex gap-2">
-                                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 text-xs rounded-lg shadow-sm transition-colors">
+                                <button type="submit"
+                                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 text-xs rounded-lg shadow-sm transition-colors">
                                     <i class="fas fa-filter mr-1"></i> Filter
                                 </button>
-                                <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}" class="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center justify-center">
+                                <a href="{{ route('meeting.meeting-lists.index', ['tab' => 'meeting-list']) }}"
+                                    class="px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors flex items-center justify-center">
                                     Reset
                                 </a>
                             </div>
@@ -370,12 +413,14 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     @foreach (['topic' => 'Topic', 'room.name' => 'Room', 'start_time' => 'Date & Time', 'user.name' => 'Booked By', 'calculated_status' => 'Status'] as $column => $title)
-                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                                        <th scope="col"
+                                            class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                                             onclick="window.location.href='{{ request()->fullUrlWithQuery(['sort_by' => $column, 'sort_direction' => request('sort_by') === $column && request('sort_direction') === 'asc' ? 'desc' : 'asc']) }}'">
                                             <div class="flex items-center space-x-1">
                                                 <span>{{ $title }}</span>
                                                 @if(request('sort_by') === $column)
-                                                    <i class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-500"></i>
+                                                    <i
+                                                        class="fas fa-sort-{{ request('sort_direction') === 'asc' ? 'up' : 'down' }} text-green-500"></i>
                                                 @else
                                                     <i class="fas fa-sort text-gray-300 text-[10px]"></i>
                                                 @endif
@@ -390,12 +435,14 @@
                                     <tr class="hover:bg-gray-50 transition-colors duration-150 group">
                                         <!-- Topic -->
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-bold text-gray-900">{{ ucwords(strtolower($meeting->topic)) }}</div>
+                                            <div class="text-sm font-bold text-gray-900">
+                                                {{ ucwords(strtolower($meeting->topic)) }}
+                                            </div>
                                             @if($meeting->calculated_status === 'cancelled')
                                                 <span class="text-xs text-red-500 italic mt-1 block">Cancelled</span>
                                             @endif
                                         </td>
-                                        
+
                                         <!-- Room -->
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center text-sm text-gray-600">
@@ -411,7 +458,8 @@
                                                     {{ \Carbon\Carbon::parse($meeting->start_time)->format('d-m-Y') }}
                                                 </span>
                                                 <span class="text-xs text-gray-500">
-                                                    {{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}
+                                                    {{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }} -
+                                                    {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}
                                                 </span>
                                             </div>
                                         </td>
@@ -419,11 +467,14 @@
                                         <!-- Booked By -->
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs uppercase">
+                                                <div
+                                                    class="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold text-xs uppercase">
                                                     {{ substr($meeting->user?->name ?? 'U', 0, 2) }}
                                                 </div>
                                                 <div class="ml-3">
-                                                    <div class="text-sm font-medium text-gray-900">{{ $meeting->user?->name ?? 'N/A' }}</div>
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {{ $meeting->user?->name ?? 'N/A' }}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -431,7 +482,7 @@
                                         <!-- Status -->
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @php
-                                            $statusClasses = match($meeting->calculated_status) {
+                                                $statusClasses = match ($meeting->calculated_status) {
                                                     'scheduled' => 'bg-indigo-50 text-indigo-700',
                                                     'ongoing' => 'bg-blue-100 text-blue-800 ring-2 ring-blue-500 ring-opacity-50',
                                                     'completed' => 'bg-green-100 text-green-800',
@@ -440,7 +491,8 @@
                                                 };
                                                 $statusLabel = ucfirst($meeting->calculated_status);
                                             @endphp
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses }}">
                                                 @if($meeting->calculated_status === 'ongoing')
                                                     <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
                                                 @endif
@@ -451,28 +503,38 @@
                                         <!-- Actions -->
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex items-center justify-end space-x-3">
-                                                <a href="{{ route('meeting.meeting-lists.show', $meeting->id) }}" class="text-gray-400 hover:text-green-600 transition-colors" title="View Details">
+                                                <a href="{{ route('meeting.meeting-lists.show', $meeting->id) }}"
+                                                    class="text-gray-400 hover:text-green-600 transition-colors"
+                                                    title="View Details">
                                                     <i class="far fa-eye text-lg"></i>
                                                 </a>
 
                                                 @if($meeting->calculated_status !== 'cancelled')
-                                                    <a href="{{ route('meeting.meetings.attendance.export-pdf', $meeting->id) }}" class="text-gray-400 hover:text-red-600 transition-colors" title="Download Absensi (PDF)">
+                                                    <a href="{{ route('meeting.meetings.attendance.export-pdf', $meeting->id) }}"
+                                                        class="text-gray-400 hover:text-red-600 transition-colors"
+                                                        title="Download Absensi (PDF)">
                                                         <i class="far fa-file-pdf text-lg"></i>
                                                     </a>
                                                 @endif
 
                                                 @if($meeting->calculated_status !== 'cancelled')
                                                     @if(Auth::user()->hasAnyRole(['Admin', 'Super Admin']) || (Auth::id() === $meeting->user_id && !in_array($meeting->calculated_status, ['ongoing', 'completed'])))
-                                                        <a href="{{ route('meeting.meeting-lists.edit', $meeting->id) }}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Edit Meeting">
+                                                        <a href="#"
+                                                            onclick="confirmEdit(event, '{{ route('meeting.meeting-lists.edit', $meeting->id) }}')"
+                                                            class="text-gray-400 hover:text-blue-600 transition-colors"
+                                                            title="Edit Meeting">
                                                             <i class="far fa-edit text-lg"></i>
                                                         </a>
                                                     @endif
 
                                                     @if(Auth::user()->hasAnyRole(['Admin', 'Super Admin']) || Auth::id() === $meeting->user_id)
-                                                        <form action="{{ route('meeting.meeting-lists.destroy', $meeting->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to cancel this meeting?');">
+                                                        <form action="{{ route('meeting.meeting-lists.destroy', $meeting->id) }}"
+                                                            method="POST" class="inline-block" id="delete-form-{{ $meeting->id }}">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition-colors" title="Cancel Meeting">
+                                                            <button type="button" onclick="confirmDelete('{{ $meeting->id }}')"
+                                                                class="text-gray-400 hover:text-red-600 transition-colors"
+                                                                title="Cancel Meeting">
                                                                 <i class="far fa-trash-alt text-lg"></i>
                                                             </button>
                                                         </form>
@@ -497,7 +559,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Pagination -->
             <div class="mt-4">
                 @if($meetings instanceof \Illuminate\Pagination\LengthAwarePaginator)
@@ -507,11 +569,11 @@
 
             <!-- Other Tabs Content Placeholders (Keep existing includes/logic if complex, or simple placeholders if handled by Livewire elsewhere) -->
             <div x-show="activeTab === 'my-meetings'">
-               @include('meetings.list.partials.my-meetings')
+                @include('meetings.list.partials.my-meetings')
             </div>
 
 
 
         </div>
     </div>
-@endsection
+</div>@endsection

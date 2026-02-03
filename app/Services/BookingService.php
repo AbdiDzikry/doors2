@@ -103,14 +103,18 @@ class BookingService
         ]);
 
         $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
-        
+
         // Refresh meeting to load participants
         $meeting->refresh();
         $meeting->load('meetingParticipants.participant');
-        
+
         $this->sendMeetingInvitation($meeting);
-        \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
-        \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+        try {
+            \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+            \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+        } catch (\Exception $e) {
+            \Log::error("Failed to broadcast meetings updates: " . $e->getMessage());
+        }
     }
 
     protected function handleRecurringCreation($data, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants)
@@ -161,14 +165,18 @@ class BookingService
             ]);
 
             $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
-            
+
             // Refresh meeting to load participants
             $meeting->refresh();
             $meeting->load('meetingParticipants.participant');
-            
+
             $this->sendMeetingInvitation($meeting);
-            \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
-            \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+            try {
+                \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+                \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+            } catch (\Exception $e) {
+                \Log::error("Failed to broadcast recurring meeting updates: " . $e->getMessage());
+            }
         }
     }
 
@@ -214,7 +222,11 @@ class BookingService
                 ]);
 
                 // Definite dispatch for real-time updates
-                \App\Events\PantryOrderStatusUpdated::dispatch($pantryOrder);
+                try {
+                    \App\Events\PantryOrderStatusUpdated::dispatch($pantryOrder);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to broadcast pantry order: " . $e->getMessage());
+                }
             }
         }
 
@@ -232,16 +244,16 @@ class BookingService
             $participants->push($meeting->user);
             \Log::info("Added organizer: " . $meeting->user->email);
         }
-        
+
         $meetingParticipants = $meeting->meetingParticipants->map(function ($mp) {
             return $mp->participant;
         })->filter();
-        
+
         \Log::info("Meeting participants count: " . $meetingParticipants->count());
         foreach ($meetingParticipants as $mp) {
             \Log::info("Participant: " . ($mp->email ?? 'no email'));
         }
-        
+
         $participants = $participants->merge($meetingParticipants);
 
         foreach ($participants as $participant) {
@@ -387,8 +399,12 @@ class BookingService
             // $this->sendMeetingInvitation($meeting); // Optional: Only if time changed? Or always?
             // For now specific "Update" email might be better, or just silent update. 
             // Let's dispatch events for Tablet/Dashboard refresh.
-            \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
-            \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+            try {
+                \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+                \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+            } catch (\Exception $e) {
+                \Log::error("Failed to broadcast status update: " . $e->getMessage());
+            }
 
             DB::commit();
         } catch (Exception $e) {
