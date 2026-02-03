@@ -17,13 +17,15 @@ class MeetingInvitation extends Mailable
     use Queueable, SerializesModels;
 
     public $meeting;
+    public $icsContent;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Meeting $meeting)
+    public function __construct(Meeting $meeting, $icsContent = null)
     {
         $this->meeting = $meeting;
+        $this->icsContent = $icsContent;
     }
 
     /**
@@ -53,11 +55,22 @@ class MeetingInvitation extends Mailable
      */
     public function attachments(): array
     {
-        $icsContent = IcsGenerator::generate($this->meeting);
-
-        return [
-            Attachment::fromData(fn() => $icsContent, 'invite.ics')
-                ->withMime('text/calendar'),
-        ];
+        if ($this->icsContent) {
+            return [
+                Attachment::fromData(fn() => $this->icsContent, 'invite.ics')
+                    ->withMime('text/calendar'),
+            ];
+        }
+        
+        // Fallback jika tidak ada icsContent
+        try {
+            $icsContent = IcsGenerator::generate($this->meeting);
+            return [
+                Attachment::fromData(fn() => $icsContent, 'invite.ics')
+                    ->withMime('text/calendar'),
+            ];
+        } catch (Exception $e) {
+            return [];
+        }
     }
 }

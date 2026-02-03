@@ -103,6 +103,11 @@ class BookingService
         ]);
 
         $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
+        
+        // Refresh meeting to load participants
+        $meeting->refresh();
+        $meeting->load('meetingParticipants.participant');
+        
         $this->sendMeetingInvitation($meeting);
         \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
         \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
@@ -156,6 +161,11 @@ class BookingService
             ]);
 
             $this->attachParticipantsAndPantryOrders($meeting, $internalParticipants, $externalParticipants, $pantryOrders, $picParticipants);
+            
+            // Refresh meeting to load participants
+            $meeting->refresh();
+            $meeting->load('meetingParticipants.participant');
+            
             $this->sendMeetingInvitation($meeting);
             \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
             \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
@@ -220,14 +230,28 @@ class BookingService
         $participants = collect();
         if ($meeting->user) {
             $participants->push($meeting->user);
+            \Log::info("Added organizer: " . $meeting->user->email);
         }
-        $participants = $participants->merge($meeting->meetingParticipants->map(function ($mp) {
-            return $mp->user ?? $mp->externalParticipant;
-        })->filter());
+        
+        $meetingParticipants = $meeting->meetingParticipants->map(function ($mp) {
+            return $mp->participant;
+        })->filter();
+        
+        \Log::info("Meeting participants count: " . $meetingParticipants->count());
+        foreach ($meetingParticipants as $mp) {
+            \Log::info("Participant: " . ($mp->email ?? 'no email'));
+        }
+        
+        $participants = $participants->merge($meetingParticipants);
 
         foreach ($participants as $participant) {
             if ($participant->email) {
-                Mail::to($participant->email)->send(new MeetingInvitation($meeting, $icsContent));
+                try {
+                    Mail::to($participant->email)->send(new MeetingInvitation($meeting, $icsContent));
+                    \Log::info("Email invitation sent to: " . $participant->email);
+                } catch (Exception $e) {
+                    \Log::error("Failed to send email to " . $participant->email . ": " . $e->getMessage());
+                }
             }
         }
     }
