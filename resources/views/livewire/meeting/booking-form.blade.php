@@ -115,18 +115,18 @@
                                 <label for="room_id" class="block text-sm font-medium text-gray-700 mb-1">Ruangan <span
                                         class="text-red-500">*</span></label>
                                 <div class="relative" x-data="{ 
-                                                    open    : false, 
-                                                    sele    cted: @entangle('room_id'),
-                                                    get     label() { 
-                                                        if (    !this.selected) return '-- Pilih Ruangan --';
-                                                        // W    e need a way to look up the name. Since we can't easily pass the full array to JS without bloating, 
-                                                        // w    e'll rely on a hidden map or just update the UI text via Alpine when clicking an option.
-                                                        // B    etter yet, let's just use the selected text content logic if possible, or a simpler approach:
-                                                        // W    e will store the selected name in a separate Alpine var, initialized from PHP.
-                                                        retu    rn this.selectedName;
-                                                    },    
-                                                    sele    ctedName: '{{ $rooms->firstWhere('id', $room_id)?->name ?? '-- Pilih Ruangan --' }}'
-                                                }" @ click.away="open = false">
+                                                                    open    : false, 
+                                                                    sele    cted: @entangle('room_id'),
+                                                                    get     label() { 
+                                                                        if (    !this.selected) return '-- Pilih Ruangan --';
+                                                                        // W    e need a way to look up the name. Since we can't easily pass the full array to JS without bloating, 
+                                                                        // w    e'll rely on a hidden map or just update the UI text via Alpine when clicking an option.
+                                                                        // B    etter yet, let's just use the selected text content logic if possible, or a simpler approach:
+                                                                        // W    e will store the selected name in a separate Alpine var, initialized from PHP.
+                                                                        retu    rn this.selectedName;
+                                                                    },    
+                                                                    sele    ctedName: '{{ $rooms->firstWhere('id', $room_id)?->name ?? '-- Pilih Ruangan --' }}'
+                                                                }" @ click.away="open = false">
                                     <button type="button" @click="open = !open"
                                         class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
                                         :class="{ 'border-green-500 ring-1 ring-green-500': open }">
@@ -174,66 +174,11 @@
                             @error('topic') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-datetime" x-data="{ 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="tour-datetime" x-data="dateTimeSelector({
                                 date: '{{ \Carbon\Carbon::parse($start_time)->format('Y-m-d') }}',
                                 hour: '{{ \Carbon\Carbon::parse($start_time)->format('H') }}',
-                                minute: '{{ \Carbon\Carbon::parse($start_time)->format('i') }}',
-                                duration: @entangle('duration').live,
-                                occupiedSlots: @entangle('occupiedSlots').live,
-                                isTimeBlocked(h, m) {
-                                    const time = parseInt(h) * 60 + parseInt(m);
-                                    return this.occupiedSlots.some(slot => time >= slot.start_minutes && time < slot.end_minutes);
-                                },
-                                isHourFull(h) {
-                                    return ['00', '15', '30', '45'].every(m => this.isTimeBlocked(h, m));
-                                },
-                                isPastTime(h, m) {
-                                    const now = new Date();
-                                    const year = now.getFullYear();
-                                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                                    const day = String(now.getDate()).padStart(2, '0');
-                                    const today = `${year}-${month}-${day}`;
-
-                                    if (this.date !== today) return false;
-                                    
-                                    const currentHour = now.getHours();
-                                    const currentMinute = now.getMinutes();
-                                    
-                                    if (parseInt(h) < currentHour) return true;
-                                    if (parseInt(h) === currentHour && parseInt(m) < currentMinute) return true;
-                                    return false;
-                                },
-                                isHourInPast(h) {
-                                    const now = new Date();
-                                    const year = now.getFullYear();
-                                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                                    const day = String(now.getDate()).padStart(2, '0');
-                                    const today = `${year}-${month}-${day}`;
-                                    
-                                    if (this.date !== today) return false;
-                                    
-                                    const currentHour = now.getHours();
-                                    if (parseInt(h) < currentHour) return true;
-                                    if (parseInt(h) === currentHour) {
-                                        return 45 < now.getMinutes();
-                                    }
-                                    return false;
-                                },
-                                updateStartTime() {
-                                    const selectedMinute = Math.round(this.minute / 15) * 15;
-                                    const formattedMinute = String(selectedMinute).padStart(2, '0');
-                                    const newStartTime = `${this.date}T${this.hour}:${formattedMinute}`;
-                                    @this.set('start_time', newStartTime);
-                                    this.startTime = newStartTime; 
-                                },
-                                calculateEndTime() {
-                                    if (!this.hour || !this.minute || !this.duration) return '';
-                                    let totalMinutes = parseInt(this.hour) * 60 + parseInt(this.minute) + parseInt(this.duration);
-                                    let endH = Math.floor(totalMinutes / 60) % 24;
-                                    let endM = totalMinutes % 60;
-                                    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-                                }
-                            }">
+                                minute: '{{ \Carbon\Carbon::parse($start_time)->format('i') }}'
+                            })">
                             <div class="mb-4">
                                 <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                     Mulai
@@ -286,7 +231,8 @@
                                         </div>
                                         <div class="grid grid-cols-7">
                                             <template x-for="blank in blankdays">
-                                                <div class="text-center border p-1 border-transparent text-sm"></div>
+                                                <div class="text-center border p-1 border-transparent text-sm">
+                                                </div>
                                             </template>
                                             <template x-for="(date, dateIndex) in no_of_days" :key="dateIndex">
                                                 <div class="px-0.5 mb-1">
@@ -301,11 +247,13 @@
                                             <button type="button" @click="value = ''; open = false"
                                                 class="text-xs text-green-500 hover:text-green-700">Hapus</button>
                                             <button type="button" @click="init(); open = false"
-                                                class="text-xs text-green-500 hover:text-green-700">Hari Ini</button>
+                                                class="text-xs text-green-500 hover:text-green-700">Hari
+                                                Ini</button>
                                         </div>
                                     </div>
                                 </div>
-                                @error('start_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                @error('start_time') <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
 
                                 <label for="start_hour" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Waktu
                                     Mulai
@@ -336,10 +284,10 @@
                                                 <div @click="if(!isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}')) { hour = '{{ $val }}'; updateStartTime(); open = false; }"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                     :class="{ 
-                                                                        'tex    t-green-900 bg-green-50': hour == '{{ $val }}', 
-                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}'),
-                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')
-                                                                     }">
+                                                                                        'tex    t-green-900 bg-green-50': hour == '{{ $val }}', 
+                                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': hour != '{{ $val }}' && !isHourFull('{{ $val }}') && !isHourInPast('{{ $val }}'),
+                                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isHourFull('{{ $val }}') || isHourInPast('{{ $val }}')
+                                                                                     }">
                                                     <span class="block truncate font-medium"
                                                         :class="{ 'font-semibold': hour == '{{ $val }}' }">{{ $val }}</span>
                                                     <span x-show="hour == '{{ $val }}'"
@@ -379,10 +327,10 @@
                                                 <div @click="if(!isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}')) { minute = '{{ $m }}'; updateStartTime(); open = false; }"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-150"
                                                     :class="{ 
-                                                                        'tex    t-green-900 bg-green-50': minute == '{{ $m }}', 
-                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}'),
-                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')
-                                                                     }">
+                                                                                        'tex    t-green-900 bg-green-50': minute == '{{ $m }}', 
+                                                                                        'tex    t-gray-900 hover:bg-green-50 hover:text-green-700': minute != '{{ $m }}' && !isTimeBlocked(hour, '{{ $m }}') && !isPastTime(hour, '{{ $m }}'),
+                                                                                        'tex    t-gray-400 cursor-not-allowed bg-gray-50': isTimeBlocked(hour, '{{ $m }}') || isPastTime(hour, '{{ $m }}')
+                                                                                     }">
                                                     <span class="block truncate font-medium"
                                                         :class="{ 'font-semibold': minute == '{{ $m }}' }">{{ $m }}</span>
                                                     <span x-show="minute == '{{ $m }}'"
@@ -755,10 +703,10 @@
                                                 <td class="px-4 py-3 whitespace-nowrap text-xs">
                                                     <span
                                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                                        {{ $meeting->calculated_status === 'scheduled' ? 'bg-blue-100 text-blue-800' : '' }}
-                                                                                        {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
-                                                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
-                                                                                        {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
+                                                                                                                        {{ $meeting->calculated_status === 'scheduled' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                                                                                        {{ $meeting->calculated_status === 'ongoing' ? 'bg-green-100 text-green-800' : '' }}
+                                                                                                                        {{ $meeting->calculated_status === 'completed' ? 'bg-green-100 text-green-800' : '' }}
+                                                                                                                        {{ $meeting->calculated_status === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
                                                         {{ ucfirst($meeting->calculated_status) }}
                                                     </span>
                                                 </td>
@@ -840,20 +788,20 @@
                                         Penyelenggara Pertemuan <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative" x-data="{ 
-                                                        open    : false, 
-                                                        sele    cted: @entangle('organizer_user_id'),
-                                                        sele    ctedName: '{{ $allUsers->firstWhere('id', $organizer_user_id)?->name ?? Auth::user()->name }}',
-                                                        sear    chQuery: '',
-                                                        get     filteredUsers() {
-                                                            if (    !this.searchQuery) return @js($allUsers->toArray());
-                                                            cons    t query = this.searchQuery.toLowerCase();
-                                                            retu    rn @js($allUsers->toArray()).filter(user => 
-                                                                user    .name.toLowerCase().includes(query) || 
-                                                                (use    r.npk && user.npk.toLowerCase().includes(query)) ||
-                                                                (use    r.department && user.department.toLowerCase().includes(query))
-                                                            );    
-                                                        }    
-                                                    }" @ click.away="open = false">
+                                                                        open: false, 
+                                                                        selected: @entangle('organizer_user_id'),
+                                                                        selectedName: '{{ $allUsers->firstWhere('id', $organizer_user_id)?->name ?? Auth::user()->name }}',
+                                                                        searchQuery: '',
+                                                                        get filteredUsers() {
+                                                                            if (!this.searchQuery) return @js($allUsers->toArray());
+                                                                            const query = this.searchQuery.toLowerCase();
+                                                                            return @js($allUsers->toArray()).filter(user => 
+                                                                                user.name.toLowerCase().includes(query) || 
+                                                                                (user.npk && user.npk.toLowerCase().includes(query)) ||
+                                                                                (user.department && user.department.toLowerCase().includes(query))
+                                                                            );    
+                                                                        }    
+                                                                    }" @click.away="open = false">
                                         <button type="button" @click="open = !open"
                                             class="relative w-full bg-white border border-gray-300 rounded-lg shadow-sm pl-3 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
                                             :class="{ 'border-green-500 ring-1 ring-green-500': open }">
@@ -976,3 +924,96 @@
         </form>
     </div>
 </main>
+
+@push('scripts')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('bookingForm', () => ({
+                // existing data...
+            }));
+
+            Alpine.data('dateTimeSelector', (initialData) => ({
+                date: initialData.date,
+                hour: initialData.hour,
+                minute: initialData.minute,
+                duration: @entangle('duration').live,
+                occupiedSlots: @entangle('occupiedSlots').live,
+
+                init() {
+                    // Any initialization if needed
+                },
+
+                isTimeBlocked(h, m) {
+                    if (!this.occupiedSlots) return false;
+                    const time = parseInt(h) * 60 + parseInt(m);
+                    return this.occupiedSlots.some(slot => time >= slot.start_minutes && time < slot.end_minutes);
+                },
+
+                isHourFull(h) {
+                    return ['00', '15', '30', '45'].every(m => this.isTimeBlocked(h, m));
+                },
+
+                isPastTime(h, m) {
+                    const now = new Date();
+                    const selectedDate = new Date(this.date);
+
+                    if (isNaN(selectedDate.getTime())) return false;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const checkDate = new Date(selectedDate);
+                    checkDate.setHours(0, 0, 0, 0);
+
+                    // If date is in the past
+                    if (checkDate < today) return true;
+
+                    // If date is future, time is fine
+                    if (checkDate > today) return false;
+
+                    // If date is today, check time
+                    const checkTime = parseInt(h) * 60 + parseInt(m);
+                    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+                    return checkTime < currentTime;
+                },
+
+                isHourInPast(h) {
+                    const now = new Date();
+                    const selectedDate = new Date(this.date);
+                    if (isNaN(selectedDate.getTime())) return false;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const checkDate = new Date(selectedDate);
+                    checkDate.setHours(0, 0, 0, 0);
+
+                    if (checkDate < today) return true;
+                    if (checkDate > today) return false;
+
+                    return parseInt(h) < now.getHours();
+                },
+
+                updateStartTime() {
+                    const selectedMinute = Math.round(this.minute / 15) * 15;
+                    const formattedMinute = String(selectedMinute).padStart(2, '0');
+                    const newStartTime = `${this.date}T${this.hour}:${formattedMinute}`;
+
+                    // Update Livewire property
+                    @this.set('start_time', newStartTime);
+
+                    // Debug log
+                    console.log('Time updated:', newStartTime);
+                },
+
+                calculateEndTime() {
+                    if (!this.hour || !this.minute || !this.duration) return '';
+                    let totalMinutes = parseInt(this.hour) * 60 + parseInt(this.minute) + parseInt(this.duration);
+                    let endH = Math.floor(totalMinutes / 60) % 24;
+                    let endM = totalMinutes % 60;
+                    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+                }
+            }));
+        });
+    </script>
+@endpush
+```

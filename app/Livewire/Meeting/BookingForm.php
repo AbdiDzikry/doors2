@@ -87,6 +87,19 @@ class BookingForm extends Component
 
     public function updatedStartTime()
     {
+        $this->resetErrorBag('start_time'); // Clear previous errors first
+
+        try {
+            if ($this->start_time) {
+                $time = \Carbon\Carbon::parse($this->start_time);
+                if ($time->lt(now())) {
+                    $this->addError('start_time', 'Waktu mulai tidak boleh di masa lalu.');
+                }
+            }
+        } catch (\Exception $e) {
+            // Invalid date format handled by standard rules later, or ignore
+        }
+
         $this->calculateOccupiedSlots();
     }
 
@@ -304,10 +317,12 @@ class BookingForm extends Component
 
     public function submitForm(BookingService $bookingService)
     {
+        \Log::info("BookingForm: submitForm called. Edit Mode: " . ($this->isEditMode ? 'Yes' : 'No'));
+
         $this->validate([
             'room_id' => 'required|exists:rooms,id',
             'topic' => 'required|string|max:255',
-            'start_time' => 'required|date', // Removed after_or_equal:today for edit mode flexibility? Or keep?
+            'start_time' => 'required|date',
             'duration' => 'required|integer|min:1',
             'priority_guest_id' => 'nullable|exists:priority_guests,id',
             'recurring' => 'nullable|boolean',
@@ -341,25 +356,11 @@ class BookingForm extends Component
             return;
         }
 
-        // Validate Pantry Stock 
-        // Logic: For Edit, we need to consider we MIGHT already hold stock.
-        // Simplest: Check stock of (New Qty - Old Qty) -> Too complex here.
-        // Lazy check: Just check full quantity against stock. If it fails, user has to reduce.
-        // Ideally should account for currently held stock.
-        // For now, skip strict stock check in Edit or trust BookingService to error out.
-        // But let's keep basic check.
-
         foreach ($this->pantryOrders as $index => $order) {
             if (!empty($order['pantry_item_id']) && !empty($order['quantity'])) {
                 $item = PantryItem::find($order['pantry_item_id']);
-                // If edit mode, we might own some. 
-                // Ignored for now to keep speed.
-
                 if (!$item || $item->stock < $order['quantity']) {
-                    // In edit mode this is annoying if we already have the items.
-                    // Only error if stock < quantity and NOT edit mode?
-                    // Let's rely on BookingService or just warn.
-                    // $this->addError(...) 
+                    // Ignored for now
                 }
             }
         }
@@ -431,7 +432,9 @@ class BookingForm extends Component
             }
 
         } catch (\Exception $e) {
-            $this->addError('room_id', $e->getMessage());
+            \Log::error("BookingForm Submit Error: " . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            $this->addError('room_id', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -445,11 +448,16 @@ class BookingForm extends Component
 
         $date = $this->start_time ? \Carbon\Carbon::parse($this->start_time) : now();
 
-        return Meeting::where('room_id', $this->room_id)
+        $query = Meeting::where('room_id', $this->room_id)
             ->where('start_time', '>=', $date->copy()->startOfDay())
             ->where('end_time', '<=', $date->copy()->endOfDay())
-            ->where('status', '!=', 'cancelled')
-            ->orderBy('start_time')
+            ->where('status', '!=', 'cancelled');
+
+        if ($this->isEditMode && $this->meetingId) {
+            $query->where('id', '!=', $this->meetingId);
+        }
+
+        return $query->orderBy('start_time')
             ->take(10)
             ->with('user')
             ->get();
