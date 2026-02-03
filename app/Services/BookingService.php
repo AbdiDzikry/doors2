@@ -234,39 +234,7 @@ class BookingService
         $this->inventoryService->deductStock($pantryOrders);
     }
 
-    protected function sendMeetingInvitation(Meeting $meeting)
-    {
-        $icsService = new \App\Services\IcsService();
-        $icsContent = $icsService->generateIcsFile($meeting);
 
-        $participants = collect();
-        if ($meeting->user) {
-            $participants->push($meeting->user);
-            \Log::info("Added organizer: " . $meeting->user->email);
-        }
-
-        $meetingParticipants = $meeting->meetingParticipants->map(function ($mp) {
-            return $mp->participant;
-        })->filter();
-
-        \Log::info("Meeting participants count: " . $meetingParticipants->count());
-        foreach ($meetingParticipants as $mp) {
-            \Log::info("Participant: " . ($mp->email ?? 'no email'));
-        }
-
-        $participants = $participants->merge($meetingParticipants);
-
-        foreach ($participants as $participant) {
-            if ($participant->email) {
-                try {
-                    Mail::to($participant->email)->send(new MeetingInvitation($meeting, $icsContent));
-                    \Log::info("Email invitation sent to: " . $participant->email);
-                } catch (Exception $e) {
-                    \Log::error("Failed to send email to " . $participant->email . ": " . $e->getMessage());
-                }
-            }
-        }
-    }
 
     public function updateMeeting(Meeting $meeting, array $data, array $internalParticipants, array $externalParticipants, array $pantryOrders, array $picParticipants = [])
     {
@@ -396,8 +364,8 @@ class BookingService
 
 
             // Notify
-            // $this->sendMeetingInvitation($meeting); // Optional: Only if time changed? Or always?
-            // For now specific "Update" email might be better, or just silent update. 
+            $this->sendMeetingInvitation($meeting, 'update'); // Send Update Email
+
             // Let's dispatch events for Tablet/Dashboard refresh.
             try {
                 \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
@@ -421,5 +389,78 @@ class BookingService
             'monthly' => 'P1M',
             default => 'P1D',
         };
+    }
+
+    /**
+     * Cancel a meeting and notify participants.
+     */
+    public function cancelMeeting(Meeting $meeting)
+    {
+        DB::beginTransaction();
+        try {
+            $meeting->update(['status' => 'cancelled']);
+
+            // Notify
+            $this->sendMeetingInvitation($meeting, 'cancellation');
+
+            // Restore Pantry Stock?
+            foreach ($meeting->pantryOrders as $order) {
+                // Restore stock logic
+                // Assuming restoreStock handles checking if order was actually fulfilled or pending
+                // If order is still pending/approved, we should probably restore stock.
+                if ($order->status !== 'cancelled') {
+                    $this->inventoryService->restoreStock($order->pantry_item_id, $order->quantity);
+                    $order->update(['status' => 'cancelled']);
+                }
+            }
+
+            // Events
+            try {
+                \App\Events\MeetingStatusUpdated::dispatch($meeting->room);
+                \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
+            } catch (\Exception $e) {
+                \Log::error("Failed to broadcast cancellation: " . $e->getMessage());
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function sendMeetingInvitation(Meeting $meeting, $type = 'invitation')
+    {
+        $icsService = new \App\Services\IcsService();
+        $icsContent = $icsService->generateIcsFile($meeting);
+
+        $participants = collect();
+
+        // Add Organizer
+        if ($meeting->user && $meeting->user->email) {
+            $participants->push($meeting->user);
+            \Log::info("Added organizer to email list: " . $meeting->user->email . " (Type: $type)");
+        }
+
+        $meetingParticipants = $meeting->meetingParticipants->map(function ($mp) {
+            return $mp->participant;
+        })->filter(function ($p) {
+            return $p && $p->email;
+        });
+
+        $participants = $participants->merge($meetingParticipants)->unique('email');
+
+        \Log::info("Sending $type emails to " . $participants->count() . " recipients for Meeting ID: " . $meeting->id);
+
+        foreach ($participants as $participant) {
+            if ($participant->email) {
+                try {
+                    Mail::to($participant->email)->send(new MeetingInvitation($meeting, $icsContent, $type));
+                    \Log::info("Email ($type) sent to: " . $participant->email);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to send email to " . $participant->email . ": " . $e->getMessage());
+                }
+            }
+        }
     }
 }

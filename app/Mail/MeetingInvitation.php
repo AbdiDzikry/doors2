@@ -18,14 +18,16 @@ class MeetingInvitation extends Mailable
 
     public $meeting;
     public $icsContent;
+    public $type; // 'invitation', 'update', 'cancellation'
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Meeting $meeting, $icsContent = null)
+    public function __construct(Meeting $meeting, $icsContent = null, $type = 'invitation')
     {
         $this->meeting = $meeting;
         $this->icsContent = $icsContent;
+        $this->type = $type;
     }
 
     /**
@@ -33,8 +35,14 @@ class MeetingInvitation extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subjectPrefix = match ($this->type) {
+            'update' => 'Update Meeting: ',
+            'cancellation' => 'Pembatalan Meeting: ',
+            default => 'Undangan Meeting: ',
+        };
+
         return new Envelope(
-            subject: 'Undangan Meeting: ' . $this->meeting->topic,
+            subject: $subjectPrefix . $this->meeting->topic,
         );
     }
 
@@ -45,6 +53,7 @@ class MeetingInvitation extends Mailable
     {
         return new Content(
             view: 'emails.meetings.invitation',
+            with: ['type' => $this->type],
         );
     }
 
@@ -61,7 +70,7 @@ class MeetingInvitation extends Mailable
                     ->withMime('text/calendar'),
             ];
         }
-        
+
         // Fallback jika tidak ada icsContent
         try {
             $icsContent = IcsGenerator::generate($this->meeting);
@@ -69,7 +78,7 @@ class MeetingInvitation extends Mailable
                 Attachment::fromData(fn() => $icsContent, 'invite.ics')
                     ->withMime('text/calendar'),
             ];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }

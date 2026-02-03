@@ -259,7 +259,7 @@ class MeetingListController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Meeting $meeting)
+    public function update(Request $request, Meeting $meeting, \App\Services\BookingService $bookingService)
     {
         // Authorization
         if (Auth::id() !== $meeting->user_id && !Auth::user()->hasAnyRole(['Super Admin', 'Admin'])) {
@@ -280,6 +280,27 @@ class MeetingListController extends Controller
 
         $meeting->update($validatedData);
 
+        // Notify participants of the update
+        // Note: Participants are not synced here, only topic/time.
+        // If participant sync is needed, we should use BookingService::updateMeeting fully.
+        // For now, we just notify the existing list.
+        try {
+            // Need to reload relations to ensure participants are loaded for email
+            $meeting->load('meetingParticipants.participant', 'user');
+            // We can access sendMeetingInvitation via reflection or make it public.
+            // Wait, sendMeetingInvitation is protected in BookingService. 
+            // Better to add a public method triggerUpdateNotification or allow access.
+            // Actually, in previous step I made duplication of sendMeetingInvitation protected? 
+            // In the "Refactor BookingService" step, I removed the old one. The new one is protected?
+            // "protected function sendMeetingInvitation"
+            // I should make it PUBLIC if I want to call it from here.
+            // Or I can call updateMeeting? But arguments mismatch.
+            // Let's make sendMeetingInvitation PUBLIC in BookingService.
+            $bookingService->sendMeetingInvitation($meeting, 'update');
+        } catch (\Exception $e) {
+            \Log::error("Failed to send update notifications: " . $e->getMessage());
+        }
+
         return redirect()->route('meeting.meeting-lists.show', $meeting)->with('success', 'Meeting updated successfully.');
     }
 
@@ -287,27 +308,16 @@ class MeetingListController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Meeting $meeting, \App\Services\InventoryService $inventoryService)
+    public function destroy(Meeting $meeting, \App\Services\BookingService $bookingService)
     {
         // Authorization: Only the meeting creator or an admin can cancel.
         if (auth()->user()->id !== $meeting->user_id && !auth()->user()->hasRole(['Super Admin', 'Admin'])) {
             return back()->with('error', 'You are not authorized to cancel this meeting.');
         }
 
-        // Begin a transaction to ensure atomicity
-        \Illuminate\Support\Facades\DB::transaction(function () use ($meeting, $inventoryService) {
-            // Only refund stock if the meeting is not already cancelled to prevent double refunds
-            if ($meeting->status !== 'cancelled') {
-                // Refund pantry stock
-                $inventoryService->refundStockForMeeting($meeting);
+        $bookingService->cancelMeeting($meeting);
 
-                // Update meeting status
-                $meeting->status = 'cancelled';
-                $meeting->save();
-            }
-        });
-
-        return back()->with('success', 'Meeting cancelled successfully and pantry stock restored.');
+        return back()->with('success', 'Meeting cancelled successfully and participants notified.');
     }
 
     public function exportAttendance(Meeting $meeting)

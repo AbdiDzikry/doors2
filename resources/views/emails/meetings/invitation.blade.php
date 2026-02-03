@@ -159,8 +159,20 @@
         <table class="main-table">
             <!-- Header -->
             <tr>
-                <td class="header">
-                    <h1>Meeting Invitation</h1>
+                @php
+                    $headerBg = match ($type ?? 'invitation') {
+                        'cancellation' => 'linear-gradient(135deg, #d32f2f 0%, #c62828 100%)', // Red
+                        'update' => 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',       // Blue
+                        default => 'linear-gradient(135deg, #089244 0%, #067236 100%)',        // Green
+                    };
+                    $headerTitle = match ($type ?? 'invitation') {
+                        'cancellation' => 'Meeting Dibatalkan',
+                        'update' => 'Update Meeting',
+                        default => 'Meeting Invitation',
+                    };
+                @endphp
+                <td class="header" style="background: {{ $headerBg }};">
+                    <h1>{{ $headerTitle }}</h1>
                 </td>
             </tr>
 
@@ -169,12 +181,19 @@
                 <td class="content">
                     <div class="greeting">Halo,</div>
                     <p class="intro-text">
-                        Anda telah diundang untuk menghadiri agenda meeting berikut melalui <strong>Doors
-                            System</strong>.
+                        @if(($type ?? 'invitation') === 'cancellation')
+                            Mohon maaf, agenda meeting berikut telah <strong>DIBATALKAN</strong> oleh penyelenggara.
+                        @elseif(($type ?? 'invitation') === 'update')
+                            Terdapat <strong>perubahan/update</strong> pada detail agenda meeting berikut.
+                        @else
+                            Anda telah diundang untuk menghadiri agenda meeting berikut melalui <strong>Doors
+                                System</strong>.
+                        @endif
                     </p>
 
                     <!-- Details Card -->
-                    <div class="details-box">
+                    <div class="details-box"
+                        style="border-left-color: {{ ($type ?? 'invitation') === 'cancellation' ? '#d32f2f' : (($type ?? 'invitation') === 'update' ? '#1976d2' : '#089244') }};">
                         <div class="detail-row">
                             <div class="detail-label">Topik</div>
                             <div class="detail-value">{{ $meeting->topic }}</div>
@@ -183,7 +202,8 @@
                             <div class="detail-label">Waktu</div>
                             <div class="detail-value">
                                 {{ \Carbon\Carbon::parse($meeting->start_time)->format('d M Y') }}<br>
-                                <span style="font-weight:600; color:#089244;">
+                                <span
+                                    style="font-weight:600; color: {{ ($type ?? 'invitation') === 'cancellation' ? '#d32f2f' : '#089244' }};">
                                     {{ \Carbon\Carbon::parse($meeting->start_time)->format('H:i') }} -
                                     {{ \Carbon\Carbon::parse($meeting->end_time)->format('H:i') }}
                                 </span>
@@ -199,42 +219,44 @@
                         </div>
                     </div>
 
-                    <div class="cta-container">
-                        @php
-                            $googleLink = \App\Helpers\IcsGenerator::generateGoogleLink($meeting);
-                            $outlookLink = \App\Helpers\IcsGenerator::generateOutlookLink($meeting);
-                        @endphp
+                    @if(($type ?? 'invitation') !== 'cancellation')
+                        <div class="cta-container">
+                            @php
+                                $googleLink = \App\Helpers\IcsGenerator::generateGoogleLink($meeting);
+                                $outlookLink = \App\Helpers\IcsGenerator::generateOutlookLink($meeting);
+                            @endphp
 
-                        <!-- Bulletproof Buttons -->
-                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                            <tr>
-                                <td align="center">
-                                    <table border="0" cellspacing="0" cellpadding="0">
-                                        <tr>
-                                            <td align="center" style="border-radius: 50px; padding-right: 10px;"
-                                                bgcolor="#089244">
-                                                <a href="{{ $googleLink }}" target="_blank"
-                                                    style="font-size: 14px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 50px; border: 1px solid #089244; display: inline-block; font-weight: bold;">
-                                                    Add to Google
-                                                </a>
-                                            </td>
-                                            <td align="center" style="border-radius: 50px; padding-left: 10px;"
-                                                bgcolor="#0078d4">
-                                                <a href="{{ $outlookLink }}" target="_blank"
-                                                    style="font-size: 14px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 50px; border: 1px solid #0078d4; display: inline-block; font-weight: bold;">
-                                                    Add to Outlook
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
+                            <!-- Bulletproof Buttons -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center">
+                                        <table border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td align="center" style="border-radius: 50px; padding-right: 10px;"
+                                                    bgcolor="#089244">
+                                                    <a href="{{ $googleLink }}" target="_blank"
+                                                        style="font-size: 14px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 50px; border: 1px solid #089244; display: inline-block; font-weight: bold;">
+                                                        Add to Google
+                                                    </a>
+                                                </td>
+                                                <td align="center" style="border-radius: 50px; padding-left: 10px;"
+                                                    bgcolor="#0078d4">
+                                                    <a href="{{ $outlookLink }}" target="_blank"
+                                                        style="font-size: 14px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 50px; border: 1px solid #0078d4; display: inline-block; font-weight: bold;">
+                                                        Add to Outlook
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
 
-                        <p style="font-size: 13px; color: #666; margin-top: 15px; margin-bottom: 10px;">
-                            (Untuk Outlook Desktop: Buka file lampiran <strong>invite.ics</strong>)
-                        </p>
-                    </div>
+                            <p style="font-size: 13px; color: #666; margin-top: 15px; margin-bottom: 10px;">
+                                (Untuk Outlook Desktop: Buka file lampiran <strong>invite.ics</strong>)
+                            </p>
+                        </div>
+                    @endif
                 </td>
             </tr>
 
