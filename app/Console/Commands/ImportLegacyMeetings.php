@@ -54,14 +54,16 @@ class ImportLegacyMeetings extends Command
             // Normalize: "Room Name" -> "room_name", "Start time" -> "start_time"
             $normalized = strtolower(trim($col));
             $normalized = str_replace(' ', '_', $normalized);
-            
+
             $colMap[$normalized] = $index;
-            
+
             // Add Aliases for Indonesian headers
-            if ($normalized === 'jenis_meeting') $colMap['kind_meeting'] = $index;
-            if ($normalized === 'topik_meeting') $colMap['topic_meeting'] = $index;
+            if ($normalized === 'jenis_meeting')
+                $colMap['kind_meeting'] = $index;
+            if ($normalized === 'topik_meeting')
+                $colMap['topic_meeting'] = $index;
         }
-        
+
         $countImported = 0;
         $countSkipped = 0;
         $countFailed = 0;
@@ -95,26 +97,26 @@ class ImportLegacyMeetings extends Command
 
                 // 1. Map User (Organizer)
                 $npk = $val('npk');
-                $createdBy = $val('created_by'); 
-                $picName = $val('pic_name'); 
+                $createdBy = $val('created_by');
+                $picName = $val('pic_name');
 
                 // Manual Fix: M. Ridwan -> Muhammad Ridwan
                 if ($picName === 'M. Ridwan Hadiwinata') {
                     $picName = 'Muhammad Ridwan Hadiwinata';
                 }
                 if (stripos($picName, 'ALFONSINE') !== false) {
-                     $picName = 'ALFONSINE CLAUDIA TETILAKSITA EKARISTI';
+                    $picName = 'ALFONSINE CLAUDIA TETILAKSITA EKARISTI';
                 }
-                
+
                 $user = null;
 
                 // Try finding by NPK first
                 if ($npk) {
                     $user = User::where('npk', $npk)->first();
                 }
-                
+
                 if (!$user && is_numeric($createdBy)) {
-                     $user = User::where('npk', $createdBy)->first();
+                    $user = User::where('npk', $createdBy)->first();
                 }
 
                 // Fallback: Find by Name (for Phase 2 data which lacks NPK)
@@ -122,12 +124,12 @@ class ImportLegacyMeetings extends Command
                     $cleanName = trim($picName);
                     // 1. Try Exact Match (Case Insensitive via LIKE)
                     $user = User::where('name', 'LIKE', $cleanName)->first();
-                    
+
                     // 2. Try First Name Match (Safe Fallback for slightly different spellings)
                     if (!$user) {
                         $firstName = explode(' ', $cleanName)[0];
                         if (strlen($firstName) > 3) {
-                             $user = User::where('name', 'LIKE', "{$firstName}%")->first();
+                            $user = User::where('name', 'LIKE', "{$firstName}%")->first();
                         }
                     }
                 }
@@ -144,11 +146,11 @@ class ImportLegacyMeetings extends Command
 
                 // Manual Fix: Arjuna -> Arjuno
                 if (stripos($roomNameClean, 'Arjuna') !== false) {
-                     $roomNameClean = str_ireplace('Arjuna', 'Arjuno', $roomNameClean);
+                    $roomNameClean = str_ireplace('Arjuna', 'Arjuno', $roomNameClean);
                 }
-                
-                $room = Room::where('name', 'LIKE', $roomNameClean)->first(); 
-                
+
+                $room = Room::where('name', 'LIKE', $roomNameClean)->first();
+
                 if (!$room) {
                     $this->error("Room not found: $roomName. Skipping.");
                     $countFailed++;
@@ -160,7 +162,7 @@ class ImportLegacyMeetings extends Command
                 try {
                     $startTime = Carbon::parse($val('start_time'))->setTimezone('Asia/Jakarta');
                     $endTime = Carbon::parse($val('end_time'))->setTimezone('Asia/Jakarta');
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->error("Invalid time format. Skipping.");
                     $countFailed++;
                     continue;
@@ -170,24 +172,24 @@ class ImportLegacyMeetings extends Command
                 $existingMeeting = Meeting::where('room_id', $room->id)
                     ->where(function ($query) use ($startTime, $endTime) {
                         $query->whereBetween('start_time', [$startTime, $endTime])
-                              ->orWhereBetween('end_time', [$startTime, $endTime])
-                              ->orWhere(function ($q) use ($startTime, $endTime) {
-                                  $q->where('start_time', '<', $startTime)
+                            ->orWhereBetween('end_time', [$startTime, $endTime])
+                            ->orWhere(function ($q) use ($startTime, $endTime) {
+                                $q->where('start_time', '<', $startTime)
                                     ->where('end_time', '>', $endTime);
-                              });
+                            });
                     })
                     ->first();
 
                 if ($existingMeeting) {
                     // Check if it's an exact duplicate (safely repeatable)
                     if ($existingMeeting->start_time->eq($startTime) && $existingMeeting->end_time->eq($endTime)) {
-                         $this->line("  - Duplicate found (Skipping): " . $val('name'));
-                         $countSkipped++; 
+                        $this->line("  - Duplicate found (Skipping): " . $val('name'));
+                        $countSkipped++;
                     } else {
-                         // Real Collision
-                         $this->error("  ! COLLISION detected with existing meeting ID {$existingMeeting->id} in {$room->name}. Skipping.");
-                         
-                         $logMessage = sprintf(
+                        // Real Collision
+                        $this->error("  ! COLLISION detected with existing meeting ID {$existingMeeting->id} in {$room->name}. Skipping.");
+
+                        $logMessage = sprintf(
                             "[%s] COLLISION DETECTED\n" .
                             "   CSV (New): Topic='%s', User='%s' (%s), Time=%s - %s\n" .
                             "   DB (Existing): ID=%d, Topic='%s', User='%s', Time=%s - %s\n" .
@@ -195,20 +197,22 @@ class ImportLegacyMeetings extends Command
                             "--------------------------------------------------\n",
                             now(),
                             $val('topic_meeting') ?: $val('kind_meeting'),
-                            $user->name, $npk,
-                            $startTime->toDateTimeString(), $endTime->toDateTimeString(),
+                            $user->name,
+                            $npk,
+                            $startTime->toDateTimeString(),
+                            $endTime->toDateTimeString(),
                             $existingMeeting->id,
                             $existingMeeting->topic,
                             $existingMeeting->user->name ?? 'Unknown',
                             $existingMeeting->start_time->toDateTimeString(),
                             $existingMeeting->end_time->toDateTimeString(),
                             $room->name
-                         );
-                         
-                         // Append to a specific log file for easy reading
-                         file_put_contents(storage_path('logs/import_collisions.log'), $logMessage, FILE_APPEND);
-                         
-                         $countFailed++;
+                        );
+
+                        // Append to a specific log file for easy reading
+                        file_put_contents(storage_path('logs/import_collisions.log'), $logMessage, FILE_APPEND);
+
+                        $countFailed++;
                     }
                     continue; // Skip insertion
                 }
@@ -218,20 +222,20 @@ class ImportLegacyMeetings extends Command
                     $meeting = Meeting::create([
                         'user_id' => $user->id,
                         'room_id' => $room->id,
-                        'topic' => $val('topic_meeting') ?: ($val('kind_meeting') ?: 'Meeting Import'), 
+                        'topic' => $val('topic_meeting') ?: ($val('kind_meeting') ?: 'Meeting Import'),
                         'start_time' => $startTime,
                         'end_time' => $endTime,
-                        'description' => $val('topic_meeting'), 
+                        'description' => $val('topic_meeting'),
                         'status' => $endTime->isPast() ? 'completed' : 'scheduled', // Auto-complete past meetings to prevent auto-cancellation
-                        'meeting_type' => 'non-recurring', 
-                        'confirmation_status' => 'confirmed', 
+                        'meeting_type' => 'non-recurring',
+                        'confirmation_status' => 'confirmed',
                     ]);
 
                     // 4b. Add Organizer as Participant (CRITICAL FIX)
                     \App\Models\MeetingParticipant::create([
                         'meeting_id' => $meeting->id,
                         'participant_id' => $user->id,
-                        'participant_type' => \App\Models\User::class,
+                        'participant_type' => User::class,
                         'is_pic' => true,
                         'status' => $meeting->status === 'completed' ? 'attended' : 'confirmed',
                         'checked_in_at' => $meeting->status === 'completed' ? $startTime : null,
@@ -242,7 +246,7 @@ class ImportLegacyMeetings extends Command
                     // Column 'pantries' seems empty in samples, but 'pantry_ids' or just JSON string in a column?
                     // Sample: "[{""id"":""6189fbb9ff1aef0eee4201a6"",""name"":""Air Mineral"",""qty"":""7"",""description"":""air mineral"",""status"":0}]"
                     // It seems the column 'pantries' contains the JSON execution details.
-                    
+
                     $pantryJson = $val('pantries');
                     if (!empty($pantryJson) && $pantryJson !== '[]') {
                         $pantryData = json_decode($pantryJson, true);
@@ -251,11 +255,12 @@ class ImportLegacyMeetings extends Command
                                 // Find Pantry Item by Name
                                 $itemName = $itemData['name'] ?? '';
                                 $qty = $itemData['qty'] ?? 0;
-                                
-                                if (!$itemName || $qty <= 0) continue;
+
+                                if (!$itemName || $qty <= 0)
+                                    continue;
 
                                 $pantryItem = PantryItem::where('name', 'LIKE', $itemName)->first();
-                                
+
                                 if ($pantryItem) {
                                     PantryOrder::create([
                                         'meeting_id' => $meeting->id,
@@ -272,7 +277,7 @@ class ImportLegacyMeetings extends Command
                         }
                     }
                 }
-                
+
                 $countImported++;
             }
 

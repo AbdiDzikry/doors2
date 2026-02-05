@@ -6,9 +6,41 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class LegacyMeetingsJanMar2026Seeder extends Seeder
 {
+    private $npkMapping = [
+        1004 => '11230531',
+        681 => '11220019',
+        705 => '11220079',
+        1179 => '11240175',
+        352 => '11164043',
+        1255 => '11250355',
+        479 => '11185354',
+        993 => '11230499',
+        1610 => '31125379',
+        517 => '11206120',
+        344 => '11153962',
+        1305 => '11940472',
+        518 => '11206122',
+        682 => '11220022',
+        471 => '11185297',
+        365 => '11164138',
+        672 => '11210580',
+        1016 => '11230580',
+        786 => '11220821',
+        488 => '11195585',
+        531 => '11210090',
+        1121 => '11240076',
+        1335 => '99143739',
+        976 => '11230399',
+        1186 => '11240195',
+        1871 => '31125576',
+        743 => '11220177',
+        373 => '11164217',
+        494 => '11195719',
+    ];
     /**
      * Run the database seeds.
      */
@@ -1201,5 +1233,21 @@ class LegacyMeetingsJanMar2026Seeder extends Seeder
         if (!empty($participants)) {
             DB::table('meeting_participants')->insert($participants);
         }
+    }
+
+    private function getUserIdFromOldId($oldId)
+    {
+        if (isset($this->npkMapping[$oldId])) {
+            $npk = $this->npkMapping[$oldId];
+            $user = User::where('npk', $npk)->first();
+            if ($user) {
+                return $user->id;
+            }
+            Log::warning("LegacySeeder: User with NPK $npk (Old ID $oldId) found in mapping but NOT in DB.");
+        } else {
+            Log::warning("LegacySeeder: No NPK mapping for Old ID $oldId. Defaulting to SuperAdmin.");
+        }
+
+        return 1;
     }
 }

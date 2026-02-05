@@ -52,6 +52,7 @@ class CancelUnattendedMeetings extends Command
         $countCompleted = 0;
 
         foreach ($meetings as $meeting) {
+            /** @var \App\Models\Meeting $meeting */
             $hasAttendance = $meeting->meetingParticipants()
                 ->whereNotNull('attended_at')
                 ->exists();
