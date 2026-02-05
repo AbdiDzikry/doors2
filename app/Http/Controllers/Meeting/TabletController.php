@@ -16,15 +16,15 @@ class TabletController extends Controller
     public function showRoom(Room $room)
     {
         $currentMeeting = $room->meetings()
-                               ->where('start_time', '<=', Carbon::now())
-                               ->where('end_time', '>=', Carbon::now())
-                               ->with('organizer', 'meetingParticipants.participant') // Eager load the organizer and participants
-                               ->first();
+            ->where('start_time', '<=', Carbon::now())
+            ->where('end_time', '>=', Carbon::now())
+            ->with('organizer', 'meetingParticipants.participant') // Eager load the organizer and participants
+            ->first();
 
         return view('tablet.room-display', compact('room', 'currentMeeting'));
     }
 
-    public function bookNow(Request $request, Room $room)
+    public function bookNow(Request $request, Room $room, \App\Services\BookingService $bookingService)
     {
         $request->validate([
             'topic' => 'required|string|max:255',
@@ -36,15 +36,16 @@ class TabletController extends Controller
         $endTime = $startTime->copy()->addMinutes($request->duration);
 
         $overlappingMeeting = $room->meetings()
-                                   ->where(function ($query) use ($startTime, $endTime) {
-                                       $query->whereBetween('start_time', [$startTime, $endTime])
-                                             ->orWhereBetween('end_time', [$startTime, $endTime])
-                                             ->orWhere(function ($query) use ($startTime, $endTime) {
-                                                 $query->where('start_time', '<', $startTime)
-                                                       ->where('end_time', '>', $endTime);
-                                             });
-                                   })
-                                   ->first();
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->whereBetween('start_time', [$startTime, $endTime])
+                    ->orWhereBetween('end_time', [$startTime, $endTime])
+                    ->orWhere(function ($query) use ($startTime, $endTime) {
+                        $query->where('start_time', '<', $startTime)
+                            ->where('end_time', '>', $endTime);
+                    });
+            })
+            ->where('status', '!=', 'cancelled') // Ensure we don't block for cancelled meetings
+            ->first();
 
         if ($overlappingMeeting) {
             return response()->json(['message' => 'Room is already booked for this time slot.'], 409);
@@ -58,10 +59,31 @@ class TabletController extends Controller
             'end_time' => $endTime,
             'status' => 'scheduled', // Or 'active' if it starts immediately
             'meeting_type' => 'on-the-spot',
+            'confirmation_status' => 'confirmed',
         ]);
+
+        // Add Organizer as Participant (Consistent with Web Booking)
+        MeetingParticipant::create([
+            'meeting_id' => $meeting->id,
+            'participant_id' => $meeting->user_id,
+            'participant_type' => \App\Models\User::class,
+            'is_pic' => true,
+            'status' => 'confirmed',
+            'checked_in_at' => Carbon::now(),
+            'attended_at' => Carbon::now(), // Auto-attend for on-the-spot
+        ]);
+
+        // Trigger Email Notification
+        try {
+            $bookingService->sendMeetingInvitation($meeting, 'invitation');
+        } catch (\Exception $e) {
+            \Log::error("Tablet Booking Email Failed: " . $e->getMessage());
+            // Don't fail the booking if email fails
+        }
 
         // Dispatch event to update tablet display
         MeetingStatusUpdated::dispatch($room, $meeting->load('organizer'));
+        \App\Events\RoomStatusUpdated::dispatch($meeting->room_id);
 
         return response()->json(['message' => 'Meeting booked successfully!', 'meeting' => $meeting->load('organizer')], 201);
     }
@@ -74,9 +96,9 @@ class TabletController extends Controller
         ]);
 
         $meetingParticipant = MeetingParticipant::where('meeting_id', $meeting->id)
-                                                ->where('participant_id', $request->participant_id)
-                                                ->where('participant_type', $request->participant_type)
-                                                ->first();
+            ->where('participant_id', $request->participant_id)
+            ->where('participant_type', $request->participant_type)
+            ->first();
 
         if (!$meetingParticipant) {
             return response()->json(['message' => 'Participant not found for this meeting.'], 404);
